@@ -93,7 +93,7 @@ export default function RegisterPage() {
             </div>
 
             {/* Left Side - Form */}
-            <div className="w-full lg:w-1/2 flex items-center justify-center p-4 sm:p-8 md:p-12 lg:p-16 order-1">
+            <div className="w-full lg:w-1/2 flex items-center justify-center p-5 sm:p-8 md:p-12 lg:p-16 order-1">
                 <div className="w-full max-w-md space-y-6 sm:space-y-8 bg-white p-6 sm:p-8 md:p-10 rounded-2xl shadow-xl">
                     <div className="text-center">
                         <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">
@@ -202,8 +202,8 @@ export default function RegisterPage() {
 
                             <div className="text-center text-sm text-gray-600">
                                 Already have an account?{' '}
-                                <Link href="/login" className="font-medium text-green-700 hover:text-green-600 transition">
-                                    Sign in
+                                <Link href="/login" className="font-medium text-green-600 hover:text-green-700 transition">
+                                    &nbsp; Sign in
                                 </Link>
                             </div>
                         </form>

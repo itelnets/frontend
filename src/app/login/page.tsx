@@ -86,7 +86,7 @@ export default function LoginPage() {
             </div>
 
             {/* Right Side - Form */}
-            <div className="w-full lg:w-1/2 flex items-center justify-center py-4 px-8 sm:p-8 md:p-12 lg:p-16">
+            <div className="w-full lg:w-1/2 flex items-center justify-center py-4 px-5 sm:p-8 md:p-12 lg:p-16">
                 <div className="w-full max-w-md space-y-6 sm:space-y-8 bg-white p-6 sm:p-8 md:p-10 rounded-2xl shadow-xl">
                     <div className="text-center">
                         <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">
@@ -162,7 +162,7 @@ export default function LoginPage() {
                                     <button
                                         type="button"
                                         onClick={() => setIsForgotPassword(true)}
-                                        className="font-medium text-green-600 hover:text-green-500 cursor-pointer"
+                                        className="font-medium text-green-600 hover:text-green-700 cursor-pointer"
                                     >
                                         Forgot password?
                                     </button>
@@ -185,18 +185,20 @@ export default function LoginPage() {
                                 <button
                                     type="button"
                                     onClick={() => setIsForgotPassword(false)}
-                                    className="text-sm text-gray-500 hover:text-gray-700 cursor-pointer"
+                                    className="font-medium text-green-600 hover:text-green-700 cursor-pointer"
                                 >
                                     Back to Login
                                 </button>
                             </div>
                         )}
-                        <div className="text-center text-sm text-gray-600">
-                            Not a member?{' '}
-                            <Link href="/register" className="font-medium text-green-700 hover:text-green-600 transition">
-                                Create an account
-                            </Link>
-                        </div>
+                        {!isForgotPassword && (
+                            <div className="text-center text-sm text-gray-600">
+                                Not a registered?{' '}
+                                <Link href="/register" className="font-medium text-green-600 hover:text-green-700 transition">
+                                    &nbsp;  Create an account
+                                </Link>
+                            </div>
+                        )}
                     </form>
                 </div>
             </div>
