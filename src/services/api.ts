@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-    baseURL: 'http://localhost:4000/api',
+    baseURL: process.env.NEXT_PUBLIC_API_URL,
     withCredentials: true, // Important for HttpOnly cookies
     headers: {
         'Content-Type': 'application/json',
@@ -32,6 +32,11 @@ api.interceptors.response.use(
 
 
         if (error.response?.status === 401) {
+            // Do not force a redirect if the user is already trying to log in
+            if (originalRequest.url === '/auth/login') {
+                return Promise.reject(error);
+            }
+
             localStorage.removeItem('userInfo');
             if (typeof window !== 'undefined') {
                 window.location.href = '/login';
@@ -45,18 +50,6 @@ api.interceptors.response.use(
 
             try {
                 const { data } = await api.post('/auth/refresh');
-                // If successful, the new access token typically needs to be used.
-                // If we simply rely on the cookie for the next request, that's fine?
-                // No, the Access Token is usually a Bearer token in the header.
-                // User needs to update their state with the new token.
-                // This interceptor logic is complex without a state store reference.
-                // For now, just return the failure so the UI can redirect to login.
-
-                // BETTER: Just return a specific error or let the context handle it.
-                // But if we want auto-refresh:
-
-                // 1. Call refresh endpoint (which uses the cookie)
-                // 2. Get new access token
                 // 3. Update default headers or original request headers
                 axios.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
                 originalRequest.headers['Authorization'] = `Bearer ${data.token}`;

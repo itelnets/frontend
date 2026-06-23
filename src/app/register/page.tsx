@@ -5,13 +5,13 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import api from '@/services/api';
 import toast from 'react-hot-toast';
+import Spinner from '@/components/Spinner';
 
 export default function RegisterPage() {
-    const [name, setName] = useState('');
+    const [email, setEmail] = useState('');
     const [mobileNumber, setMobileNumber] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
-    const [role, setRole] = useState('customer');
     const [otp, setOtp] = useState('');
     const [step, setStep] = useState<'register' | 'verify'>('register');
     const [isLoading, setIsLoading] = useState(false);
@@ -21,15 +21,35 @@ export default function RegisterPage() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (!name || !mobileNumber || !password) {
+        if (!email || !mobileNumber || !password) {
             toast.error('Please fill out all required fields');
             return;
         }
 
+        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.(com|in|org|net|co\.in|edu|gov|io|co)$/i;
+        if (!emailRegex.test(email)) {
+            toast.error('Invalid email format');
+            return;
+        }
+
+        // Frontend validation: prevent API call if OTP was sent within the last 2 minutes
+        const lastOtpSentStr = localStorage.getItem(`otp_sent_${email}`);
+        if (lastOtpSentStr) {
+            const lastOtpSent = parseInt(lastOtpSentStr, 10);
+            if (Date.now() - lastOtpSent < 2 * 60 * 1000) {
+                toast.error('OTP already sent. Please try after 2 minutes');
+                return;
+            }
+        }
+
         setIsLoading(true);
         try {
-            const { data } = await api.post('/auth/register', { name, mobileNumber: fullMobileNumber, password, role });
-            toast.success(data.message || 'OTP sent to your mobile number!');
+            const { data } = await api.post('/auth/register', { email, mobileNumber: fullMobileNumber, password });
+
+            // Store the timestamp when the OTP was successfully sent
+            localStorage.setItem(`otp_sent_${email}`, Date.now().toString());
+
+            toast.success(data.message);
             setStep('verify');
         } catch (err: any) {
             const errorMessage = err.response?.data?.message || 'Registration failed';
@@ -49,23 +69,10 @@ export default function RegisterPage() {
 
         setIsLoading(true);
         try {
-            const { data } = await api.post('/auth/verify-otp', { mobileNumber: fullMobileNumber, otp });
+            const { data } = await api.post('/auth/verify-otp', { email, otp });
 
-            // Store user info and token
-            localStorage.setItem('userInfo', JSON.stringify(data));
-
-            if (data.token) {
-                api.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
-            }
-
-            toast.success('Registration successful! You are now logged in.');
-
-            // Redirect based on role
-            if (data.role === 'admin') {
-                router.push('/admin');
-            } else {
-                router.push('/dashboard');
-            }
+            toast.success(data.message);
+            router.push('/login');
         } catch (err: any) {
             const errorMessage = err.response?.data?.message || 'Verification failed';
             toast.error(errorMessage);
@@ -90,12 +97,12 @@ export default function RegisterPage() {
                 <div className="w-full max-w-md space-y-6 sm:space-y-8 bg-white p-6 sm:p-8 md:p-10 rounded-2xl shadow-xl">
                     <div className="text-center">
                         <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">
-                            {step === 'register' ? 'Create Account' : 'Verify Mobile'}
+                            {step === 'register' ? 'Create Account' : 'Verify Email'}
                         </h2>
                         <p className="mt-2 text-sm text-gray-600">
                             {step === 'register'
                                 ? 'Fill in your details to get started'
-                                : `Enter the OTP sent to ${mobileNumber}`
+                                : `Enter the OTP sent to ${email}`
                             }
                         </p>
                     </div>
@@ -104,20 +111,20 @@ export default function RegisterPage() {
                         <form className="mt-6 sm:mt-8 space-y-5 sm:space-y-6" onSubmit={handleSubmit} noValidate>
                             <div className="space-y-4">
                                 <div>
-                                    <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                                        Full Name
+                                    <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                                        Email Address
                                     </label>
                                     <div className="mt-1">
                                         <input
-                                            id="name"
-                                            name="name"
-                                            type="text"
-                                            autoComplete="name"
+                                            id="email"
+                                            name="email"
+                                            type="email"
+                                            autoComplete="email"
                                             required
-                                            value={name}
-                                            onChange={(e) => setName(e.target.value)}
+                                            value={email}
+                                            onChange={(e) => setEmail(e.target.value)}
                                             className="block w-full px-3 py-2 sm:px-4 sm:py-3 rounded-lg border border-gray-300 placeholder-gray-400 focus:border-green-500 focus:ring-green-500 transition duration-200 outline-none text-sm"
-                                            placeholder="John Doe"
+                                            placeholder="you@example.com"
                                         />
                                     </div>
                                 </div>
@@ -186,9 +193,10 @@ export default function RegisterPage() {
                             <div>
                                 <button
                                     type="submit"
-                                    className="w-full flex justify-center py-2.5 sm:py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-green-700 hover:bg-green-800 focus:outline-none cursor-pointer transition duration-300 transform"
+                                    disabled={isLoading}
+                                    className="w-full flex justify-center items-center py-2.5 sm:py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-green-700 hover:bg-green-800 focus:outline-none cursor-pointer transition duration-300 transform disabled:opacity-70 disabled:cursor-not-allowed"
                                 >
-                                    {isLoading ? 'Sending OTP...' : 'Register'}
+                                    {isLoading ? <Spinner /> : 'Register'}
                                 </button>
                             </div>
 
@@ -225,9 +233,10 @@ export default function RegisterPage() {
                             <div>
                                 <button
                                     type="submit"
-                                    className="w-full flex justify-center py-2.5 sm:py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-green-700 hover:bg-green-800 focus:outline-none cursor-pointer transition duration-300 transform"
+                                    disabled={isLoading}
+                                    className="w-full flex justify-center items-center py-2.5 sm:py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-green-700 hover:bg-green-800 focus:outline-none cursor-pointer transition duration-300 transform disabled:opacity-70 disabled:cursor-not-allowed"
                                 >
-                                    {isLoading ? 'Verifying...' : 'Verify & Register'}
+                                    {isLoading ? <Spinner /> : 'Verify & Register'}
                                 </button>
                             </div>
 

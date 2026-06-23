@@ -10,7 +10,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Ayurvedic Store",
+  title: "Itelents",
   description: "Premium Ayurvedic Products",
 };
 
@@ -24,8 +24,8 @@ export default function RootLayout({
       <body
         className={`${inter.variable} font-sans antialiased bg-gray-50`}
       >
-        <Toaster 
-          position="top-center" 
+        <Toaster
+          position="top-center"
           toastOptions={{
             className: 'text-sm sm:text-base px-3 py-2 sm:px-4 sm:py-3',
             style: {
