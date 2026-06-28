@@ -6,16 +6,16 @@ import { useRouter, usePathname } from 'next/navigation';
 
 const Navbar = () => {
     const router = useRouter();
-    const pathname = usePathname(); // To re-render on route change if needed
+    const pathname = usePathname();
     const [user, setUser] = useState<any>(null);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [isAuthOpen, setIsAuthOpen] = useState(false);
 
     useEffect(() => {
         setIsMobileMenuOpen(false);
     }, [pathname]);
 
     useEffect(() => {
-        // Check auth state on mount and update
         const checkAuth = () => {
             const userInfo = localStorage.getItem('userInfo');
             if (userInfo) {
@@ -24,123 +24,226 @@ const Navbar = () => {
                 setUser(null);
             }
         };
-
         checkAuth();
-
-        // Listen for custom event or storage event if multiple tabs
         window.addEventListener('storage', checkAuth);
-
-        // Also check occasionally or on specific events if needed
         return () => window.removeEventListener('storage', checkAuth);
-    }, [pathname]); // Re-check on route change (e.g. after login redirect)
+    }, [pathname]);
 
     const handleLogout = () => {
         localStorage.removeItem('userInfo');
-        // Clear cookie if needed via API, but for now client-side clear
-        // Ideally call API /auth/logout
         setUser(null);
         router.push('/login');
     };
 
     return (
-        <nav className="relative bg-green-800 text-white shadow-md z-50">
-            <div className="max-w-[90vw] mx-auto">
-                <div className="flex items-center justify-between h-[70px]">
-                    <div className="flex items-center">
-                        <Link href="/" className="font-bold text-[25px] sm:text-[35px]">
+        <header className="w-full sticky top-0 z-[100]">
+            {/* Top Promo Bar (Hidden on very small screens) */}
+            <div className="hidden md:flex bg-[#f5f5f5] border-b border-gray-200 text-xs text-gray-700 items-center justify-between px-4 py-1.5">
+                <div className="flex items-center space-x-6">
+                    <span className="cursor-pointer hover:underline bg-[#dca8b9] text-[#78233f] px-2 py-0.5 rounded-full font-medium">Buy One, Get One 80% Off &gt;</span>
+                    <span className="cursor-pointer hover:underline flex items-center gap-1">
+                        Shop Travel Essentials &gt;
+                    </span>
+                    <span className="cursor-pointer hover:underline flex items-center gap-1">
+                        Sunscreen: Buy One, Get One 50% Off &gt;
+                    </span>
+                </div>
+                <div className="flex items-center space-x-4">
+                    <span className="cursor-pointer hover:underline flex items-center gap-1">
+                        IN | EN | INR
+                    </span>
+                </div>
+            </div>
+
+            {/* Main Green Header */}
+            <div className="bg-[#458500] text-white">
+                <div className="max-w-[1400px] mx-auto px-4 py-3 flex items-center justify-between gap-6">
+                    {/* Logo & Mobile Menu */}
+                    <div className="flex items-center gap-3">
+                        <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="md:hidden">
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
+                        </button>
+                        <Link href="/" className="font-extrabold text-2xl tracking-tighter shrink-0">
                             Itelents
                         </Link>
-
                     </div>
-                    <div>
-                        <div className="ml-4 flex items-center md:ml-6 space-x-4">
-                            {!user ? (
-                                <>
-                                    {pathname === '/register' ? (
-                                        <Link
-                                            href="/login"
-                                            className="bg-white text-green-800 hover:bg-gray-100 w-24 py-2 rounded-md text-sm font-medium flex justify-center"
-                                        >
-                                            Login
-                                        </Link>
-                                    ) : (
-                                        <Link
-                                            href="/register"
-                                            className="bg-white text-green-800 hover:bg-gray-100 w-24 py-2 rounded-md text-sm font-medium flex justify-center"
-                                        >
-                                            Register
-                                        </Link>
-                                    )}
-                                </>
-                            ) : (
-                                <>
-                                    <div className="hidden md:block">
-                                        <div className="mr-6 flex items-baseline space-x-4">
-                                            <Link href="/" className="hover:bg-green-700 px-3 py-2 rounded-md text-sm font-medium">
-                                                Home
+
+                    {/* Search Bar */}
+                    <div className="flex-1 max-w-4xl hidden sm:block relative">
+                        <input
+                            type="text"
+                            placeholder="Search all of Itelents"
+                            className="w-full rounded-md py-2.5 px-4 text-black outline-none text-sm shadow-inner bg-white"
+                        />
+                        <button className="absolute right-0 top-0 bottom-0 px-4 text-gray-500 hover:text-black">
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                        </button>
+                    </div>
+
+                    {/* Auth & Cart */}
+                    <div className="flex items-center gap-3 sm:gap-6 shrink-0 relative z-50">
+                        {!user ? (
+                            <div
+                                className="flex items-center gap-2 cursor-pointer group bg-[#2d5700] px-4 py-3 rounded-full hover:bg-[#234300] transition-colors relative"
+                                onMouseEnter={() => setIsAuthOpen(true)}
+                                onMouseLeave={() => setIsAuthOpen(false)}
+                                onClick={() => setIsAuthOpen(!isAuthOpen)}
+                            >
+                                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                                <div className="flex items-center gap-1 text-white">
+                                    <span className="text-sm font-medium">Sign in</span>
+                                    <svg className={`w-3 h-3 transition-transform duration-200 ${isAuthOpen ? '-rotate-180' : 'group-hover:-rotate-180'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                                </div>
+
+                                {/* Unauthenticated Dropdown Wrapper with top padding for gap */}
+                                <div className={`absolute top-full right-[-10px] sm:right-0 pt-1 transition-all z-50 ${isAuthOpen ? 'opacity-100 visible' : 'opacity-0 invisible group-hover:opacity-100 group-hover:visible'}`}>
+                                    <div className="w-[300px] sm:w-[380px] bg-white text-gray-800 rounded-md shadow-[0_4px_20px_-4px_rgba(0,0,0,0.2)] border border-gray-100 flex flex-col sm:flex-row overflow-hidden" onClick={(e) => e.stopPropagation()}>
+
+                                        {/* Left Side: Rewards Info */}
+                                        <div className="hidden sm:flex w-[170px] bg-gray-50 p-4 border-r border-gray-100 flex-col items-center text-center">
+                                            <div className="text-sm font-bold text-gray-800 mb-1">
+                                                Itelents <span className="text-gray-400 font-normal">| REWARDS</span>
+                                            </div>
+                                            <div className="mt-4">
+                                                <div className="text-lg font-extrabold text-gray-900">$98.2M+</div>
+                                                <div className="text-[10px] text-gray-500 mt-1">Credits rewarded in 2025</div>
+                                            </div>
+                                            <div className="mt-4">
+                                                <div className="text-lg font-extrabold text-gray-900">3.9M+</div>
+                                                <div className="text-[10px] text-gray-500 mt-1">Orders using rewards in 2025</div>
+                                            </div>
+                                            <Link href="#" className="text-xs text-blue-600 font-medium hover:underline mt-6">
+                                                Learn More &gt;
                                             </Link>
-                                            <Link href="/about" className="hover:bg-green-700 px-3 py-2 rounded-md text-sm font-medium">
-                                                About
-                                            </Link>
-                                            <Link href="/products" className="hover:bg-green-700 px-3 py-2 rounded-md text-sm font-medium">
-                                                Products
+                                        </div>
+
+                                        {/* Right Side: Navigation */}
+                                        <div className="flex-1 p-4 flex flex-col min-w-[200px]">
+                                            <div className="text-sm font-bold text-[#458500] mb-3">Welcome!</div>
+
+                                            <div className="space-y-3 mb-6">
+                                                <Link href="/login" className="flex items-center gap-3 text-sm text-gray-700 hover:text-[#458500]">
+                                                    <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                                                    My Account
+                                                </Link>
+                                                <Link href="/login" className="flex items-center gap-3 text-sm text-gray-700 hover:text-[#458500]">
+                                                    <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
+                                                    Orders
+                                                </Link>
+                                                <Link href="/login" className="flex items-center gap-3 text-sm text-gray-700 hover:text-[#458500]">
+                                                    <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
+                                                    My Lists
+                                                </Link>
+                                                <Link href="/login" className="flex items-center gap-3 text-sm text-gray-700 hover:text-[#458500]">
+                                                    <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                                    Rewards Credit
+                                                </Link>
+                                                <Link href="/login" className="flex items-center gap-3 text-sm text-gray-700 hover:text-[#458500]">
+                                                    <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                                                    My Reviews
+                                                </Link>
+                                                <Link href="/login" className="flex items-center gap-3 text-sm text-gray-700 hover:text-[#458500]">
+                                                    <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" /></svg>
+                                                    Messages
+                                                </Link>
+                                            </div>
+
+                                            <Link href="/login" className="w-full text-center py-2.5 bg-[#458500] hover:bg-[#3b7100] text-white font-bold rounded-md shadow-sm transition-colors text-sm mt-auto">
+                                                Sign in/Register
                                             </Link>
                                         </div>
                                     </div>
-                                    <span className="hidden sm:block text-sm mr-2">Welcome, {user.name || 'User'}</span>
-                                    <button
-                                        onClick={handleLogout}
-                                        className="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-md text-sm font-medium"
-                                    >
-                                        Logout
-                                    </button>
-                                </>
-                            )}
-                            {!['/login', '/register'].includes(pathname) && (
-                                <Link href="/cart" className="hover:bg-green-700 px-3 py-2 rounded-md text-sm font-medium">
-                                    Cart (0)
-                                </Link>
-                            )}
-
-                            {/* Mobile menu button */}
-                            {user && (
-                                <div className="md:hidden flex items-center ml-2">
-                                    <button
-                                        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                                        className="inline-flex items-center justify-center p-2 rounded-md text-white hover:bg-green-700 focus:outline-none"
-                                    >
-                                        <svg className="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
-                                            {isMobileMenuOpen ? (
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                                            ) : (
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
-                                            )}
-                                        </svg>
-                                    </button>
                                 </div>
-                            )}
+                            </div>
+                        ) : (
+                            <button
+                                onClick={handleLogout}
+                                className="flex items-center gap-2 cursor-pointer group bg-[#2d5700] px-4 py-2.5 rounded-full hover:bg-red-600 transition-colors relative"
+                            >
+                                <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+                                <span className="text-sm font-medium text-white">Logout</span>
+                            </button>
+                        )}
+                        <Link href="/cart" className="flex items-center gap-1 hover:opacity-80 relative">
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+                            <span className="absolute -top-1 -right-2 bg-orange-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">0</span>
+                        </Link>
+                    </div>
+                </div>
+            </div>
+
+            {/* Sub-navigation categories */}
+            <div className="bg-white border-b border-gray-200">
+                <div className="max-w-[1400px] mx-auto px-4">
+                    <div className="flex items-center justify-between h-12 overflow-x-auto whitespace-nowrap text-sm font-semibold text-gray-700 hide-scrollbar">
+                        <div className="flex items-center gap-6">
+                            <Link href="/products" className="hover:text-[#458500]">Supplements</Link>
+                            <Link href="/products" className="hover:text-[#458500]">Sports</Link>
+                            <Link href="/products" className="hover:text-[#458500]">Bath</Link>
+                            <Link href="/products" className="hover:text-[#458500]">Beauty</Link>
+                            <Link href="/products" className="hover:text-[#458500]">Grocery</Link>
+                            <Link href="/products" className="hover:text-[#458500]">Home</Link>
+                            <Link href="/products" className="hover:text-[#458500]">Baby</Link>
+                            <Link href="/products" className="hover:text-[#458500]">Pets</Link>
+                            <Link href="/products" className="hover:text-[#458500] ml-4 text-gray-400">Brands A-Z</Link>
+                            <Link href="/products" className="hover:text-[#458500] text-gray-400">Health Topics</Link>
+                        </div>
+                        <div className="flex items-center gap-6 ml-8 pr-4">
+                            <Link href="/products" className="text-red-600 hover:text-red-700">Deals</Link>
+                            <Link href="/products" className="hover:text-[#458500]">Best Sellers</Link>
+                            <Link href="/products" className="hover:text-[#458500]">BOGO</Link>
+                            <Link href="/products" className="hover:text-[#458500]">New</Link>
+                            <Link href="/products" className="text-[#458500] hover:text-[#3b7100]">Wellness Hub</Link>
                         </div>
                     </div>
                 </div>
             </div>
 
-            {/* Mobile menu dropdown */}
-            {isMobileMenuOpen && user && (
-                <div className="md:hidden absolute w-full left-0 z-50 bg-green-800 border-t border-green-700 shadow-xl">
-                    <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-                        <Link href="/" className="block hover:bg-green-700 px-3 py-2 rounded-md text-base font-medium">
-                            Home
-                        </Link>
-                        <Link href="/about" className="block hover:bg-green-700 px-3 py-2 rounded-md text-base font-medium">
-                            About
-                        </Link>
-                        <Link href="/products" className="block hover:bg-green-700 px-3 py-2 rounded-md text-base font-medium">
-                            Products
-                        </Link>
+            {/* Mobile Search (Shows only on mobile below header) */}
+            <div className="sm:hidden bg-[#458500] p-3 border-t border-[#3b7100]">
+                <div className="relative">
+                    <input type="text" placeholder="Search all of Itelents" className="w-full rounded-md py-2 px-4 text-black outline-none text-sm shadow-inner bg-white" />
+                </div>
+            </div>
+
+            {/* Mobile Menu Drawer */}
+            {isMobileMenuOpen && (
+                <div className="md:hidden fixed inset-0 z-[200] flex">
+                    {/* Backdrop */}
+                    <div className="fixed inset-0 bg-black/50 transition-opacity" onClick={() => setIsMobileMenuOpen(false)}></div>
+
+                    {/* Sidebar */}
+                    <div className="relative w-[55vw] max-w-[220px] h-full bg-white shadow-xl flex flex-col overflow-y-auto animate-fade-in-left">
+                        {/* Sidebar Header */}
+                        <div className="p-4 bg-[#458500] text-white flex justify-between items-center shrink-0">
+                            <Link href="/" className="font-extrabold text-2xl tracking-tighter" onClick={() => setIsMobileMenuOpen(false)}>
+                                Itelents
+                            </Link>
+                            <button onClick={() => setIsMobileMenuOpen(false)} className="p-1 hover:bg-[#3b7100] rounded">
+                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                            </button>
+                        </div>
+
+                        <div className="flex-1 px-4 py-2 overflow-y-auto">
+                            <Link href="/" onClick={() => setIsMobileMenuOpen(false)} className="block hover:text-[#458500] py-3 text-base font-medium border-b border-gray-100">Home</Link>
+                            <Link href="/products" onClick={() => setIsMobileMenuOpen(false)} className="block hover:text-[#458500] py-3 text-base font-medium border-b border-gray-100">Products</Link>
+                            <Link href="/about" onClick={() => setIsMobileMenuOpen(false)} className="block hover:text-[#458500] py-3 text-base font-medium border-b border-gray-100">About</Link>
+
+                            {/* Mobile Auth Links */}
+                            {!user ? (
+                                <Link href="/login" onClick={() => setIsMobileMenuOpen(false)} className="block hover:text-[#458500] py-3 text-base font-bold text-[#458500]">
+                                    Sign In / Sign Up
+                                </Link>
+                            ) : (
+                                <button onClick={() => { handleLogout(); setIsMobileMenuOpen(false); }} className="w-full text-left py-3 text-base font-medium text-red-600 border-t border-gray-100 mt-2">
+                                    Logout
+                                </button>
+                            )}
+                        </div>
                     </div>
                 </div>
             )}
-        </nav>
+        </header>
     );
 };
 

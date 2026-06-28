@@ -15,6 +15,7 @@ export default function RegisterPage() {
     const [otp, setOtp] = useState('');
     const [step, setStep] = useState<'register' | 'verify'>('register');
     const [isLoading, setIsLoading] = useState(false);
+    const showPasswordErrors = password.length > 0;
     const router = useRouter();
     const fullMobileNumber = `+91${mobileNumber}`;
 
@@ -82,34 +83,35 @@ export default function RegisterPage() {
     };
 
     return (
-        <div className="flex flex-1 h-full bg-gray-50">
-            {/* Right Side - Image/Branding (Swapped for variety) */}
-            <div className="hidden lg:flex lg:w-1/2 bg-green-800 relative items-center justify-center order-2">
-                <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
-                <div className="z-10 text-center px-10">
-                    <h1 className="text-5xl font-serif text-white mb-4">Join Our Community</h1>
-                    <p className="text-green-100 text-xl font-light">Start your journey to holistic wellness today.</p>
+        <div className="flex flex-1 bg-[#f4f5f6] items-center justify-center py-6 px-4 sm:px-6 lg:px-8">
+            <div className="w-full max-w-md space-y-6 bg-white p-6 sm:p-8 rounded-xl shadow-md border border-gray-100">
+                <div className="flex border-b border-gray-200 mb-6">
+                    <Link
+                        href="/login"
+                        className="flex-1 py-4 text-center text-lg font-medium text-gray-500 hover:text-gray-700 transition-colors"
+                    >
+                        Sign In
+                    </Link>
+                    <button
+                        type="button"
+                        className="flex-1 py-4 text-center text-lg font-bold text-[#458500] border-b-2 border-[#458500]"
+                    >
+                        Create Account
+                    </button>
                 </div>
-            </div>
 
-            {/* Left Side - Form */}
-            <div className="w-full lg:w-1/2 flex items-center justify-center p-5 sm:p-8 md:p-12 lg:p-16 order-1">
-                <div className="w-full max-w-md space-y-6 sm:space-y-8 bg-white p-6 sm:p-8 md:p-10 rounded-2xl shadow-xl">
-                    <div className="text-center">
-                        <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">
-                            {step === 'register' ? 'Create Account' : 'Verify Email'}
-                        </h2>
-                        <p className="mt-2 text-sm text-gray-600">
-                            {step === 'register'
-                                ? 'Fill in your details to get started'
-                                : `Enter the OTP sent to ${email}`
-                            }
-                        </p>
-                    </div>
+                <div className="text-center mb-4">
+                    <p className="text-sm text-gray-600">
+                        {step === 'register'
+                            ? 'Fill in your details to get started'
+                            : `Enter the OTP sent to ${email}`
+                        }
+                    </p>
+                </div>
 
-                    {step === 'register' ? (
-                        <form className="mt-6 sm:mt-8 space-y-5 sm:space-y-6" onSubmit={handleSubmit} noValidate>
-                            <div className="space-y-4">
+                {step === 'register' ? (
+                    <form className="mt-4 space-y-4" onSubmit={handleSubmit} noValidate>
+                            <div className="space-y-3">
                                 <div>
                                     <label htmlFor="email" className="block text-sm font-medium text-gray-700">
                                         Email Address
@@ -123,7 +125,7 @@ export default function RegisterPage() {
                                             required
                                             value={email}
                                             onChange={(e) => setEmail(e.target.value)}
-                                            className="block w-full px-3 py-2 sm:px-4 sm:py-3 rounded-lg border border-gray-300 placeholder-gray-400 focus:border-green-500 focus:ring-green-500 transition duration-200 outline-none text-sm"
+                                            className="block w-full px-3 py-2 sm:px-4 sm:py-3 rounded-md border border-gray-300 placeholder-gray-400 focus:border-[#458500] focus:ring-[#458500] transition duration-200 outline-none text-sm"
                                             placeholder="you@example.com"
                                         />
                                     </div>
@@ -133,7 +135,7 @@ export default function RegisterPage() {
                                     <label htmlFor="mobileNumber" className="block text-sm font-medium text-gray-700">
                                         Mobile Number
                                     </label>
-                                    <div className="mt-1 flex rounded-lg border border-gray-300 focus-within:border-green-500 overflow-hidden transition duration-200">
+                                    <div className="mt-1 flex rounded-md border border-gray-300 focus-within:border-[#458500] focus-within:ring-1 focus-within:ring-[#458500] overflow-hidden transition duration-200">
                                         <span className="inline-flex items-center px-3 bg-gray-100 text-gray-600 text-sm font-medium border-r border-gray-300 select-none whitespace-nowrap">
                                             +91
                                         </span>
@@ -165,7 +167,7 @@ export default function RegisterPage() {
                                             required
                                             value={password}
                                             onChange={(e) => setPassword(e.target.value)}
-                                            className="block w-full px-3 py-2 sm:px-4 sm:py-3 rounded-lg border border-gray-300 placeholder-gray-400 focus:border-green-500 focus:ring-green-500 transition duration-200 outline-none text-sm pr-10"
+                                            className="block w-full px-3 py-2 sm:px-4 sm:py-3 rounded-md border border-gray-300 placeholder-gray-400 focus:border-[#458500] focus:ring-[#458500] transition duration-200 outline-none text-sm pr-10"
                                             placeholder="••••••••"
                                         />
                                         <button
@@ -185,27 +187,26 @@ export default function RegisterPage() {
                                             )}
                                         </button>
                                     </div>
+                                    <div className="mt-2 flex flex-wrap gap-2 text-xs">
+                                        <span className={`transition-all duration-300 px-2 py-1 rounded-md border ${/[A-Z]/.test(password) ? 'opacity-100 border-[#458500] text-[#458500] bg-[#eef3ea]' : (showPasswordErrors && !/[A-Z]/.test(password) ? 'opacity-100 border-red-500 text-red-700 bg-red-50' : 'opacity-40 border-gray-300 text-gray-500 bg-gray-50')}`}>Capital</span>
+                                        <span className={`transition-all duration-300 px-2 py-1 rounded-md border ${/[a-z]/.test(password) ? 'opacity-100 border-[#458500] text-[#458500] bg-[#eef3ea]' : (showPasswordErrors && !/[a-z]/.test(password) ? 'opacity-100 border-red-500 text-red-700 bg-red-50' : 'opacity-40 border-gray-300 text-gray-500 bg-gray-50')}`}>Lowercase</span>
+                                        <span className={`transition-all duration-300 px-2 py-1 rounded-md border ${/[0-9]/.test(password) ? 'opacity-100 border-[#458500] text-[#458500] bg-[#eef3ea]' : (showPasswordErrors && !/[0-9]/.test(password) ? 'opacity-100 border-red-500 text-red-700 bg-red-50' : 'opacity-40 border-gray-300 text-gray-500 bg-gray-50')}`}>Numeric</span>
+                                        <span className={`transition-all duration-300 px-2 py-1 rounded-md border ${/[^A-Za-z0-9]/.test(password) && password.length > 0 ? 'opacity-100 border-[#458500] text-[#458500] bg-[#eef3ea]' : (showPasswordErrors && (!/[^A-Za-z0-9]/.test(password) || password.length === 0) ? 'opacity-100 border-red-500 text-red-700 bg-red-50' : 'opacity-40 border-gray-300 text-gray-500 bg-gray-50')}`}>Special</span>
+                                    </div>
                                 </div>
-
-
                             </div>
 
                             <div>
                                 <button
                                     type="submit"
                                     disabled={isLoading}
-                                    className="w-full flex justify-center items-center py-2.5 sm:py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-green-700 hover:bg-green-800 focus:outline-none cursor-pointer transition duration-300 transform disabled:opacity-70 disabled:cursor-not-allowed"
+                                    className="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-bold text-white bg-[#458500] hover:bg-[#3b7100] focus:outline-none cursor-pointer transition duration-300 disabled:opacity-70 disabled:cursor-not-allowed"
                                 >
                                     {isLoading ? <Spinner /> : 'Register'}
                                 </button>
                             </div>
 
-                            <div className="text-center text-sm text-gray-600">
-                                Already have an account?{' '}
-                                <Link href="/login" className="font-medium text-green-600 hover:text-green-700 transition">
-                                    &nbsp; Sign in
-                                </Link>
-                            </div>
+
                         </form>
                     ) : (
                         <form className="mt-6 sm:mt-8 space-y-5 sm:space-y-6" onSubmit={handleVerify} noValidate>
@@ -222,7 +223,7 @@ export default function RegisterPage() {
                                             required
                                             value={otp}
                                             onChange={(e) => setOtp(e.target.value)}
-                                            className="block w-full px-3 py-2 sm:px-4 sm:py-3 rounded-lg border border-gray-300 placeholder-gray-400 focus:border-green-500 focus:ring-green-500 transition duration-200 outline-none text-lg sm:text-xl tracking-widest text-center"
+                                            className="block w-full px-3 py-2 sm:px-4 sm:py-3 rounded-md border border-gray-300 placeholder-gray-400 focus:border-[#458500] focus:ring-[#458500] transition duration-200 outline-none text-lg sm:text-xl tracking-widest text-center"
                                             placeholder="XXXXXX"
                                             maxLength={6}
                                         />
@@ -234,7 +235,7 @@ export default function RegisterPage() {
                                 <button
                                     type="submit"
                                     disabled={isLoading}
-                                    className="w-full flex justify-center items-center py-2.5 sm:py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-green-700 hover:bg-green-800 focus:outline-none cursor-pointer transition duration-300 transform disabled:opacity-70 disabled:cursor-not-allowed"
+                                    className="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-bold text-white bg-[#458500] hover:bg-[#3b7100] focus:outline-none cursor-pointer transition duration-300 disabled:opacity-70 disabled:cursor-not-allowed"
                                 >
                                     {isLoading ? <Spinner /> : 'Verify & Register'}
                                 </button>
@@ -243,8 +244,11 @@ export default function RegisterPage() {
                             <div className="text-center">
                                 <button
                                     type="button"
-                                    onClick={() => setStep('register')}
-                                    className="text-sm text-gray-500 hover:text-gray-700 cursor-pointer"
+                                    onClick={() => {
+                                        setStep('register');
+                                        setOtp('');
+                                    }}
+                                    className="text-sm font-medium text-[#458500] hover:text-[#3b7100] cursor-pointer transition-colors"
                                 >
                                     Back to Registration
                                 </button>
@@ -253,6 +257,5 @@ export default function RegisterPage() {
                     )}
                 </div>
             </div>
-        </div>
     );
 }
