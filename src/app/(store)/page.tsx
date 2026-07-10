@@ -1,7 +1,22 @@
 import Link from 'next/link';
 import HeroCarousel from '@/components/HeroCarousel';
 
-export default function Home() {
+export const dynamic = 'force-dynamic';
+
+async function getProducts() {
+    try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/products`, { cache: 'no-store' });
+        if (!res.ok) throw new Error('Failed to fetch products');
+        return await res.json();
+    } catch (error) {
+        console.error('Error fetching products:', error);
+        return [];
+    }
+}
+
+export default async function Home() {
+    const allProducts = await getProducts();
+    const products = allProducts.filter((p: any) => p.isActive !== false);
     return (
         <div className="flex flex-col min-h-screen bg-white">
             <main className="w-full flex-1 mb-20">
@@ -43,17 +58,6 @@ export default function Home() {
                     </div>
                 </div>
 
-                {/* Login Prompt Section */}
-                <div className="max-w-[1400px] mx-auto px-4 mt-16 mb-12">
-                    <div className="flex flex-col sm:flex-row items-center justify-between border-t border-b border-gray-200 py-6">
-                        <div className="text-lg font-bold text-gray-800 mb-4 sm:mb-0">
-                            Get a more personalized
-                        </div>
-                        <Link href="/login" className="px-8 py-3 bg-[#458500] hover:bg-[#3b7100] text-white font-bold rounded-md shadow-sm transition-colors cursor-pointer text-sm">
-                            Sign In or Create Account
-                        </Link>
-                    </div>
-                </div>
 
                 {/* Deals Section */}
                 <div className="max-w-[1400px] mx-auto px-4 mt-8">
@@ -63,34 +67,49 @@ export default function Home() {
 
                     <div className="relative">
                         <div className="flex overflow-x-auto gap-4 pb-4 hide-scrollbar">
-                            {[
-                                { title: "California Gold Nutrition, Omega 800 Ultra-Concentrated Omega-3", reviews: "133,754", price: "₹2,621.96" },
-                                { title: "California Gold Nutrition, Omega-3 Premium Fish Oil, 100 Fish Gelatin Softgels", reviews: "486,581", price: "₹1,190.91" },
-                                { title: "NOW Foods, Vitamin D-3, High Potency, 125 mcg (5,000 IU), 120 Softgels", reviews: "274,467", price: "₹742.00" },
-                                { title: "NOW Foods, Omega-3 Fish Oil, 1,000 mg, 180 EPA - 120 DHA, 100 Softgels", reviews: "173,433", price: "₹923.37" },
-                                { title: "NOW Foods, Vitamin D3 & K2, 120 Capsules", reviews: "77,565", price: "₹1,003.80" },
-                                { title: "California Gold Nutrition, Vitamin D3, 125 mcg (5,000 IU), 90 Fish Gelatin", reviews: "321,051", price: "₹561.10" }
-                            ].map((product, idx) => (
-                                <Link href="/products/1" key={idx} className="min-w-[200px] w-[220px] bg-white rounded-xl p-3 flex flex-col cursor-pointer hover:shadow-lg transition-shadow group">
-                                    <div className="w-full aspect-square rounded-xl mb-3 flex items-center justify-center overflow-hidden relative">
-                                        <img src="/supplement_bottle.png" alt={product.title} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                            {products.length > 0 ? products.map((product: any) => (
+                                <Link href={`/products/${product._id}`} key={product._id} className="min-w-[200px] w-[220px] bg-white rounded-md flex flex-col cursor-pointer hover:shadow-lg transition-shadow group border border-gray-300 overflow-hidden">
+                                    <div className="w-full aspect-square flex items-center justify-center relative bg-gray-50 border-b border-gray-100">
+                                        {product.images && product.images.length > 0 ? (
+                                            <img src={`${process.env.NEXT_PUBLIC_API_URL}/upload/file/${product.images[0]}`} alt={product.name} className="w-full h-full object-cover" />
+                                        ) : (
+                                            <svg className="w-12 h-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                        )}
+                                        {product.discount > 0 && (
+                                            <div className="absolute top-2 left-2 bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow-sm">
+                                                {product.discount}% OFF
+                                            </div>
+                                        )}
                                     </div>
-                                    <div className="text-[13px] text-gray-800 line-clamp-3 leading-snug mb-2 flex-1">
-                                        {product.title}
-                                    </div>
-                                    <div className="flex items-center gap-1.5 mb-1.5">
-                                        <div className="flex text-yellow-400">
-                                            {[...Array(5)].map((_, i) => (
-                                                <svg key={i} className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
-                                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                                </svg>
-                                            ))}
+                                    <div className="p-3 flex-1 flex flex-col">
+                                        <div className="text-[13px] text-gray-800 line-clamp-3 leading-snug mb-2 flex-1 font-medium group-hover:text-blue-700 transition-colors">
+                                            {product.name}
                                         </div>
-                                        <span className="text-[11px] text-blue-600 hover:underline cursor-pointer">{product.reviews}</span>
+                                        <div className="flex items-center gap-1.5 mb-2">
+                                            <div className="flex text-yellow-400">
+                                                {[...Array(5)].map((_, i) => (
+                                                    <svg key={i} className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                                    </svg>
+                                                ))}
+                                            </div>
+                                            <span className="text-[11px] text-blue-600 hover:underline cursor-pointer">0 reviews</span>
+                                        </div>
+                                        <div className="flex items-center gap-2 mt-auto">
+                                            <div className="text-lg font-bold text-gray-900">
+                                                <span className="text-sm font-medium relative -top-0.5 pr-0.5">₹</span>{product.price}
+                                            </div>
+                                            {product.discount > 0 && (
+                                                <div className="text-xs text-gray-500 line-through">
+                                                    ₹{Math.round(product.price / (1 - product.discount / 100))}
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
-                                    <div className="text-lg font-bold text-gray-900 mt-auto">{product.price}</div>
                                 </Link>
-                            ))}
+                            )) : (
+                                <div className="text-gray-500 py-8 text-sm">No recommended products available at the moment. Add some products in the admin panel.</div>
+                            )}
                         </div>
 
                         {/* Carousel Arrows */}

@@ -54,8 +54,8 @@ export default function HeroCarousel() {
     const slide = slides[currentSlide];
 
     return (
-        <div className={`relative w-full rounded-2xl overflow-hidden shadow-sm flex flex-col md:flex-row items-center justify-between p-6 md:p-12 min-h-[280px] transition-all duration-700 bg-gradient-to-r ${slide.gradient}`}>
-            
+        <div className={`relative w-full rounded-2xl overflow-hidden shadow-sm flex flex-col md:flex-row items-center justify-between p-6 md:p-8 min-h-[200px] md:min-h-[240px] transition-all duration-700 bg-gradient-to-r ${slide.gradient}`}>
+
             {/* Text Content */}
             <div className="z-10 max-w-lg mb-4 md:mb-0 transition-opacity duration-500">
                 <h1 className="text-3xl md:text-4xl font-extrabold text-[#1f2937] tracking-tight mb-2 leading-tight">
@@ -66,26 +66,21 @@ export default function HeroCarousel() {
                 </p>
             </div>
 
-            {/* Images mimicking product bottles */}
-            <div className="z-10 flex space-x-3 md:space-x-5">
-                {slide.items.map((item, idx) => (
-                    <div key={idx} className={`w-28 h-36 bg-white rounded-xl shadow-lg border border-gray-100 flex items-center justify-center p-3 transition-transform cursor-pointer hover:scale-105 ${idx === 0 ? '-rotate-3' : idx === 1 ? 'rotate-2 z-10' : 'rotate-3'}`}>
-                        <img src="/supplement_bottle.png" alt={item.name} className="w-full h-full object-cover" />
-                    </div>
+            {/* Background decorative elements */}
+            <div className="absolute right-0 top-0 w-64 h-64 bg-white opacity-20 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none"></div>
+            <div className="absolute left-1/2 bottom-0 w-96 h-96 bg-white opacity-10 rounded-full blur-3xl -mb-32 pointer-events-none"></div>
+
+            {/* Pagination Dots */}
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 z-20">
+                {slides.map((_, idx) => (
+                    <button
+                        key={idx}
+                        onClick={() => setCurrentSlide(idx)}
+                        className={`w-2.5 h-2.5 rounded-full transition-colors duration-300 ${currentSlide === idx ? 'bg-gray-800' : 'bg-gray-800/30 hover:bg-gray-800/50'}`}
+                        aria-label={`Go to slide ${idx + 1}`}
+                    />
                 ))}
             </div>
-
-            {/* Background decorative elements */}
-            <div className="absolute right-0 top-0 w-64 h-64 bg-white opacity-20 rounded-full blur-3xl -mr-20 -mt-20"></div>
-            <div className="absolute left-1/2 bottom-0 w-96 h-96 bg-white opacity-10 rounded-full blur-3xl -mb-32"></div>
-
-            {/* Carousel Controls */}
-            <button onClick={prevSlide} className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/70 hover:bg-white rounded-full flex items-center justify-center shadow-md text-gray-800 transition-colors z-20">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
-            </button>
-            <button onClick={nextSlide} className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/70 hover:bg-white rounded-full flex items-center justify-center shadow-md text-gray-800 transition-colors z-20">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
-            </button>
         </div>
     );
 }
