@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { getProductById, updateProduct } from '@/services/product';
 import toast from 'react-hot-toast';
 import Spinner from '@/components/Spinner';
+import PageLoader from '@/components/PageLoader';
 
 type ImageItem =
     | { type: 'existing', id: string, url: string }
@@ -17,6 +18,12 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
 
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
+    const [isCancelling, setIsCancelling] = useState(false);
+
+    const handleCancel = () => {
+        setIsCancelling(true);
+        router.push('/admin');
+    };
 
     // Detailed state for form fields
     const [formData, setFormData] = useState({
@@ -242,12 +249,8 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
         }
     };
 
-    if (isLoading) {
-        return (
-            <div className="flex items-center justify-center h-[60vh]">
-                <Spinner className="w-8 h-8 text-green-600" />
-            </div>
-        );
+    if (isLoading || isCancelling) {
+        return <PageLoader />;
     }
 
     return (
@@ -262,7 +265,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
             )}
             <div className="w-full bg-white/80 backdrop-blur-xl border border-white/50 rounded-md shadow-[0_8px_30px_rgb(0,0,0,0.08)] p-4 sm:p-6 transition-all">
 
-                <form onSubmit={handleSubmit} noValidate className="flex flex-col lg:flex-row gap-8 items-start">
+                <form id="product-form" onSubmit={handleSubmit} noValidate className="flex flex-col lg:flex-row gap-8 items-start">
 
                     {/* Left Column - Sticky Images */}
                     <div className="w-full lg:w-5/12 space-y-4 lg:sticky top-20 self-start">
@@ -294,7 +297,8 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                                     <div className="flex flex-wrap gap-4">
                                         {images.map((img, idx) => {
                                             const isNew = img.type === 'new';
-                                            const imgSrc = isNew ? img.previewUrl : `${process.env.NEXT_PUBLIC_API_URL}/upload/file/${img.url}`;
+                                            const getImageUrl = (urlOrKey: string) => urlOrKey.startsWith('http') ? urlOrKey : `${process.env.NEXT_PUBLIC_API_URL}/upload/file/${urlOrKey}`;
+                                            const imgSrc = isNew ? img.previewUrl : getImageUrl(img.url);
                                             return (
                                                 <div
                                                     key={img.id}
@@ -425,7 +429,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                         <div className="flex flex-col sm:flex-row justify-end gap-4 pt-8 border-t border-gray-100">
                             <button
                                 type="button"
-                                onClick={() => router.back()}
+                                onClick={handleCancel}
                                 className="bg-white text-gray-700 text-sm font-medium px-8 py-1.5 border border-gray-200 rounded-md hover:bg-gray-50 transition-colors cursor-pointer order-2 sm:order-1"
                             >
                                 Cancel

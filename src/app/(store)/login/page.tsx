@@ -78,7 +78,7 @@ export default function LoginPage() {
             if (data.role === 'admin') {
                 router.push('/admin');
             } else {
-                router.push('/dashboard');
+                router.push('/');
             }
         } catch (err: any) {
             const errorMessage = err.response?.data?.message || 'Login failed';

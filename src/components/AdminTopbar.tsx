@@ -2,8 +2,10 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import CustomDropdown from './CustomDropdown';
+import Spinner from './Spinner';
+import PageLoader from './PageLoader';
 
 interface AdminTopbarProps {
     onMenuClick: () => void;
@@ -11,7 +13,14 @@ interface AdminTopbarProps {
 
 export default function AdminTopbar({ onMenuClick }: AdminTopbarProps) {
     const pathname = usePathname();
+    const router = useRouter();
     const [selectedType, setSelectedType] = useState('');
+    const [isCancelling, setIsCancelling] = useState(false);
+
+    const handleCancel = () => {
+        setIsCancelling(true);
+        router.push('/admin');
+    };
 
     const productTypes = [
         { label: 'Physical', value: 'physical' },
@@ -28,6 +37,7 @@ export default function AdminTopbar({ onMenuClick }: AdminTopbarProps) {
     }
 
     return (
+        <>
         <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 sm:px-6 z-30 shrink-0">
             <div className="flex items-center gap-4">
                 {/* Hamburger Menu (Mobile Only) */}
@@ -44,18 +54,39 @@ export default function AdminTopbar({ onMenuClick }: AdminTopbarProps) {
                 <h1 className="text-xl font-bold text-gray-900 hidden sm:block tracking-tight">{pageTitle}</h1>
             </div>
 
-            <div className="flex items-center gap-4">
-                <CustomDropdown
-                    options={productTypes}
-                    value={selectedType}
-                    onChange={setSelectedType}
-                    placeholder="Select"
-                    className="w-36"
-                />
-                <Link href="/admin/products/add" className="bg-green-600 cursor-pointer hover:bg-green-700 text-white px-4 py-1.5 border border-transparent rounded-md text-sm font-medium transition-colors">
-                    Add Product
-                </Link>
-            </div>
+            {!pathname.includes('/products/add') && !pathname.includes('/products/edit') ? (
+                <div className="flex items-center gap-4">
+                    <CustomDropdown
+                        options={productTypes}
+                        value={selectedType}
+                        onChange={setSelectedType}
+                        placeholder="Select"
+                        className="w-36"
+                    />
+                    <Link href="/admin/products/add" className="bg-green-600 cursor-pointer hover:bg-green-700 text-white px-4 py-1.5 border border-transparent rounded-md text-sm font-medium transition-colors">
+                        Add Product
+                    </Link>
+                </div>
+            ) : (
+                <div className="flex items-center gap-4">
+                    <button onClick={handleCancel} className="bg-white text-gray-700 text-sm font-medium px-4 py-1.5 border border-gray-200 rounded-md hover:bg-gray-50 transition-colors cursor-pointer shadow-sm">
+                        Cancel
+                    </button>
+                    <button
+                        type="submit"
+                        form="product-form"
+                        className="bg-green-600 hover:bg-green-700 text-white text-sm font-medium px-4 py-1.5 border border-transparent rounded-md transition-colors cursor-pointer shadow-sm"
+                    >
+                        {pathname.includes('/products/add') ? 'Create Product' : 'Save Product'}
+                    </button>
+                </div>
+            )}
         </header>
+        {isCancelling && (
+            <div className="fixed inset-0 top-16 bg-gradient-to-br from-green-50/40 via-gray-50 to-green-50/40 flex items-center justify-center z-50">
+                <PageLoader />
+            </div>
+        )}
+        </>
     );
 }

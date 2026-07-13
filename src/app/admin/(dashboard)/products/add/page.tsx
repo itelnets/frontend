@@ -6,10 +6,18 @@ import { createProduct } from '@/services/product';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
 import Spinner from '@/components/Spinner';
+import CustomDropdown from '@/components/CustomDropdown';
+import PageLoader from '@/components/PageLoader';
 
 export default function AddProductPage() {
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
+    const [isCancelling, setIsCancelling] = useState(false);
+
+    const handleCancel = () => {
+        setIsCancelling(true);
+        router.push('/admin');
+    };
 
     const generateObjectId = () => {
         const timestamp = Math.floor(new Date().getTime() / 1000).toString(16);
@@ -27,6 +35,7 @@ export default function AddProductPage() {
     // Detailed state for form fields
     const [formData, setFormData] = useState({
         name: '',
+        type: '',
         description: '',
         price: '',
         discount: '',
@@ -36,6 +45,11 @@ export default function AddProductPage() {
         warnings: '',
         disclaimer: '',
     });
+
+    const productTypes = [
+        { label: 'Physical', value: 'physical' },
+        { label: 'Digital', value: 'digital' }
+    ];
 
     // State for Selected Images
     const [selectedImages, setSelectedImages] = useState<{ file: File, previewUrl: string }[]>([]);
@@ -136,7 +150,7 @@ export default function AddProductPage() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (!formData.name.trim() || !formData.description.trim() || !formData.price.toString().trim()) {
+        if (!formData.name.trim() || !formData.type || !formData.description.trim() || !formData.price.toString().trim()) {
             toast.error('Please fill in all required fields');
             return;
         }
@@ -196,6 +210,10 @@ export default function AddProductPage() {
         }
     };
 
+    if (isCancelling) {
+        return <PageLoader />;
+    }
+
     return (
         <div className="font-sans">
             {isLoading && (
@@ -208,7 +226,7 @@ export default function AddProductPage() {
                 </div>
             )}
             <div className="w-full bg-white/80 backdrop-blur-xl border border-white/50 rounded-md shadow-[0_8px_30px_rgb(0,0,0,0.08)] p-4 sm:p-6 transition-all">
-                <form onSubmit={handleSubmit} noValidate className="flex flex-col lg:flex-row gap-8 items-start">
+                <form id="product-form" onSubmit={handleSubmit} noValidate className="flex flex-col lg:flex-row gap-8 items-start">
 
                     {/* Left Column - Sticky Images */}
                     <div className="w-full lg:w-5/12 space-y-4 lg:sticky top-20 self-start">
@@ -273,6 +291,17 @@ export default function AddProductPage() {
 
                     {/* Right Column - Form Details */}
                     <div className="w-full lg:w-7/12 space-y-4">
+                        <div>
+                            <label className="block text-sm font-semibold text-gray-700 mb-2">Product Type <span className="text-red-500">*</span></label>
+                            <CustomDropdown
+                                options={productTypes}
+                                value={formData.type}
+                                onChange={(val) => setFormData({ ...formData, type: val })}
+                                placeholder="Select Product Type"
+                                className="w-full"
+                            />
+                        </div>
+
                         <div>
                             <label className="block text-sm font-semibold text-gray-700 mb-2">Product Name <span className="text-red-500">*</span></label>
                             <input name="name" value={formData.name} required onChange={handleChange} className="w-full px-3 py-2 text-sm bg-white/50 border border-gray-200 rounded-md focus:outline-none focus:border-green-600 transition-all outline-none placeholder-gray-400" placeholder="e.g. Premium Widget" />
@@ -364,7 +393,7 @@ export default function AddProductPage() {
                         <div className="flex flex-col sm:flex-row justify-end gap-4 pt-8 border-t border-gray-100">
                             <button
                                 type="button"
-                                onClick={() => router.back()}
+                                onClick={handleCancel}
                                 className="bg-white text-gray-700 text-sm font-medium px-8 py-1.5 border border-gray-200 rounded-md hover:bg-gray-50 transition-colors cursor-pointer order-2 sm:order-1"
                             >
                                 Cancel
