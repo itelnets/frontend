@@ -28,6 +28,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
     // Detailed state for form fields
     const [formData, setFormData] = useState({
         name: '',
+        type: '',
         description: '',
         price: '',
         discount: '',
@@ -36,11 +37,61 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
         otherIngredients: '',
         warnings: '',
         disclaimer: '',
+        brand: '',
+        manufacturer: '',
+        inStock: '',
+        packageQuantity: '',
+        bestSeller: '',
     });
 
     // State for Unified Images
     const [images, setImages] = useState<ImageItem[]>([]);
     const [draggedImageIdx, setDraggedImageIdx] = useState<number | null>(null);
+    const [isDraggingOver, setIsDraggingOver] = useState(false);
+
+    const handleFileDragOver = (e: React.DragEvent) => {
+        e.preventDefault();
+        setIsDraggingOver(true);
+    };
+
+    const handleFileDragLeave = () => {
+        setIsDraggingOver(false);
+    };
+
+    const handleFileDrop = (e: React.DragEvent) => {
+        e.preventDefault();
+        setIsDraggingOver(false);
+
+        if (isLoading) return;
+
+        const files = Array.from(e.dataTransfer.files);
+        if (files.length === 0) return;
+
+        const validFiles = [];
+        for (const file of files) {
+            if (file.size > 5 * 1024 * 1024) {
+                toast.error(`Image size must be less than 5MB`);
+                continue;
+            }
+            const fileExtension = file.name.split('.').pop()?.toLowerCase() || '';
+            if (fileExtension !== 'jpg' && fileExtension !== 'jpeg') {
+                toast.error(`Only JPG/JPEG files are allowed`);
+                continue;
+            }
+            validFiles.push(file);
+        }
+
+        if (validFiles.length === 0) return;
+
+        const newImageItems: ImageItem[] = validFiles.map(file => ({
+            type: 'new',
+            id: Math.random().toString(36).substring(7),
+            file,
+            previewUrl: URL.createObjectURL(file)
+        }));
+
+        setImages(prev => [...prev, ...newImageItems]);
+    };
 
     // State for Specifications
     const [specifications, setSpecifications] = useState<{ key: string, value: string }[]>([]);
@@ -65,6 +116,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
             const { data } = await getProductById(productId);
             setFormData({
                 name: data.name || '',
+                type: data.type || '',
                 description: data.description || '',
                 price: data.price?.toString() || '',
                 discount: data.discount?.toString() || '0',
@@ -73,6 +125,11 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                 otherIngredients: data.otherIngredients || '',
                 warnings: data.warnings || '',
                 disclaimer: data.disclaimer || '',
+                brand: data.brand || '',
+                manufacturer: data.manufacturer || '',
+                inStock: data.inStock || '',
+                packageQuantity: data.packageQuantity || '',
+                bestSeller: data.bestSeller || '',
             });
             const existingMapped: ImageItem[] = (data.images || []).map((img: string) => ({
                 type: 'existing',
@@ -189,11 +246,6 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (!formData.name.trim() || !formData.description.trim() || !formData.price.toString().trim()) {
-            toast.error('Please fill in all required fields');
-            return;
-        }
-
         if (images.length === 0) {
             toast.error('Please have at least one image.');
             return;
@@ -254,7 +306,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
     }
 
     return (
-        <div className="font-sans">
+        <div className="font-sans p-0 sm:p-4 lg:h-full lg:flex lg:flex-col lg:overflow-hidden">
             {isSaving && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/60">
                     <div className="flex flex-col items-center justify-center p-8 bg-white/90 rounded-2xl shadow-2xl border border-gray-100">
@@ -263,38 +315,56 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                     </div>
                 </div>
             )}
-            <div className="w-full bg-white/80 backdrop-blur-xl border border-white/50 rounded-md shadow-[0_8px_30px_rgb(0,0,0,0.08)] p-4 sm:p-6 transition-all">
+            <div className="w-full lg:flex-1 bg-white/80 backdrop-blur-xl border border-white/50 rounded-md shadow-[0_8px_30px_rgb(0,0,0,0.08)] p-3 sm:p-6 transition-all lg:overflow-hidden lg:flex lg:flex-col">
 
-                <form id="product-form" onSubmit={handleSubmit} noValidate className="flex flex-col lg:flex-row gap-8 items-start">
+                <form id="product-form" onSubmit={handleSubmit} noValidate className="flex flex-col lg:flex-row gap-8 items-start lg:flex-1 lg:overflow-hidden">
 
-                    {/* Left Column - Sticky Images */}
-                    <div className="w-full lg:w-5/12 space-y-4 lg:sticky top-20 self-start">
+                    {/* Left Column - Images & Basic Info */}
+                    <div className="w-full lg:w-5/12 space-y-4 lg:h-full lg:overflow-y-auto lg:pr-2 scrollbar-thin scrollbar-thumb-gray-200">
                         <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-2">Product Images <span className="text-red-500">*</span></label>
-                            <div className="flex flex-col mb-3">
-                                <label className={`bg-green-600 hover:bg-green-700 text-white text-sm font-medium px-3 py-1.5 border border-transparent rounded-md transition-colors cursor-pointer w-fit flex items-center justify-center gap-2 ${isSaving ? 'opacity-50 cursor-not-allowed' : ''}`}>
-                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
-                                    Add New Image
-                                    <input
-                                        type="file"
-                                        accept="image/*"
-                                        multiple
-                                        className="hidden"
-                                        onChange={handleImageUpload}
-                                        disabled={isSaving}
-                                    />
-                                </label>
+                            <div className="flex items-center gap-4 mb-3">
+                                <label className="block text-sm font-semibold text-gray-700">Product Images</label>
                             </div>
-                            <p className="text-xs text-gray-500 mb-4 font-medium">Uplaod image under 5MB size</p>
+
+                            {/* Drag and Drop Upload Container */}
+                            <div
+                                onDragOver={handleFileDragOver}
+                                onDragLeave={handleFileDragLeave}
+                                onDrop={handleFileDrop}
+                                onClick={() => document.getElementById('product-image-input')?.click()}
+                                className={`border-2 border-dashed rounded-lg py-2 px-3 flex items-center gap-3 cursor-pointer transition-all mb-4 ${isDraggingOver
+                                    ? 'border-green-600 bg-green-50/30 scale-[0.99]'
+                                    : 'border-gray-300 hover:border-green-500 bg-gray-50/50 hover:bg-gray-50'
+                                    }`}
+                            >
+                                <svg className="w-5 h-5 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                </svg>
+                                <div>
+                                    <span className="text-xs font-semibold text-gray-600">
+                                        Drag &amp; Drop or <span className="text-green-600 hover:underline">Browse</span>
+                                    </span>
+                                    <p className="text-[10px] text-gray-400">JPG, JPEG · Max 5MB · Up to 5 images</p>
+                                </div>
+                                <input
+                                    id="product-image-input"
+                                    type="file"
+                                    accept="image/jpeg, .jpg, .jpeg"
+                                    multiple
+                                    className="hidden"
+                                    onChange={handleImageUpload}
+                                    disabled={isSaving}
+                                />
+                            </div>
 
                             {/* Unified Drag-and-Drop Image List */}
                             {images.length > 0 && (
-                                <div className="p-4 bg-gray-50/50 rounded-md border border-gray-100">
+                                <div className="p-3 sm:p-4 bg-gray-100 rounded-md border border-gray-100">
                                     <div className="w-full text-xs font-semibold text-gray-500 mb-3 uppercase tracking-wide flex justify-between items-center">
-                                        <span>Product Images (Drag to reorder)</span>
+                                        <span>Drag to reorder</span>
                                         <span className="text-[10px] text-gray-400 bg-white px-2 py-0.5 rounded border border-gray-200">{images.length} Image{images.length !== 1 ? 's' : ''}</span>
                                     </div>
-                                    <div className="flex flex-wrap gap-4">
+                                    <div className="flex flex-wrap gap-3 sm:gap-4">
                                         {images.map((img, idx) => {
                                             const isNew = img.type === 'new';
                                             const getImageUrl = (urlOrKey: string) => urlOrKey.startsWith('http') ? urlOrKey : `${process.env.NEXT_PUBLIC_API_URL}/upload/file/${urlOrKey}`;
@@ -320,7 +390,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                                                     <button
                                                         type="button"
                                                         onClick={() => handleRemoveImage(idx)}
-                                                        className="absolute top-1.5 right-1.5 bg-red-500 text-white rounded-full p-1 cursor-pointer shadow-md"
+                                                        className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-[3px] cursor-pointer shadow-md"
                                                         title="Remove Image"
                                                     >
                                                         <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -334,42 +404,60 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                                 </div>
                             )}
                         </div>
+
+                        {/* Moved Fields */}
+                        <div className="space-y-4 mt-6 pt-6 border-t-2 border-green-200">
+                            <div>
+                                <label className="block text-sm font-semibold text-gray-700 mb-2">Product Name</label>
+                                <input name="name" value={formData.name} onChange={handleChange} className="w-full px-3 py-2 text-sm bg-white/50 border border-gray-200 rounded-md focus:outline-none focus:border-green-600 transition-all outline-none placeholder-gray-400" placeholder="e.g. Premium Widget" />
+                            </div>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-semibold text-gray-700 mb-2">Brand</label>
+                                    <input name="brand" value={formData.brand} onChange={handleChange} className="w-full px-3 py-2 text-sm bg-white/50 border border-gray-200 rounded-md focus:outline-none focus:border-green-600 transition-all outline-none placeholder-gray-400" placeholder="e.g. Itelents Brands" />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-semibold text-gray-700 mb-2">Manufacturer</label>
+                                    <input name="manufacturer" value={formData.manufacturer} onChange={handleChange} className="w-full px-3 py-2 text-sm bg-white/50 border border-gray-200 rounded-md focus:outline-none focus:border-green-600 transition-all outline-none placeholder-gray-400" placeholder="e.g. Itelents Brands" />
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-semibold text-gray-700 mb-2">Price (₹)</label>
+                                    <input name="price" value={formData.price} type="number" onChange={handleChange} className="w-full px-3 py-2 text-sm bg-white/50 border border-gray-200 rounded-md focus:outline-none focus:border-green-600 transition-all outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" placeholder="0.00" />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-semibold text-gray-700 mb-2">Discount (%)</label>
+                                    <input name="discount" value={formData.discount} type="number" onChange={handleChange} className="w-full px-3 py-2 text-sm bg-white/50 border border-gray-200 rounded-md focus:outline-none focus:border-green-600 transition-all outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" placeholder="10" />
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-semibold text-gray-700 mb-2">In Stock</label>
+                                    <input name="inStock" value={formData.inStock} onChange={handleChange} className="w-full px-3 py-2 text-sm bg-white/50 border border-gray-200 rounded-md focus:outline-none focus:border-green-600 transition-all outline-none placeholder-gray-400" placeholder="e.g. Yes" />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-semibold text-gray-700 mb-2">Package Quantity</label>
+                                    <input name="packageQuantity" value={formData.packageQuantity} onChange={handleChange} className="w-full px-3 py-2 text-sm bg-white/50 border border-gray-200 rounded-md focus:outline-none focus:border-green-600 transition-all outline-none placeholder-gray-400" placeholder="e.g. 240 Tablets" />
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
-                    {/* Right Column - Form Details */}
-                    <div className="w-full lg:w-7/12 space-y-4">
+                    {/* Right Column - Overview, Details, etc */}
+                    <div className="w-full lg:w-7/12 space-y-4 lg:h-full lg:overflow-y-auto lg:pr-2 lg:pb-10 scrollbar-thin scrollbar-thumb-gray-200">
                         <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-2">Product Name <span className="text-red-500">*</span></label>
-                            <input name="name" value={formData.name} required onChange={handleChange} className="w-full px-3 py-2 text-sm bg-white/50 border border-gray-200 rounded-md focus:outline-none focus:border-green-600 transition-all outline-none placeholder-gray-400" placeholder="e.g. Premium Widget" />
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-2">Short Description <span className="text-red-500">*</span></label>
-                            <textarea name="description" value={formData.description} required rows={2} onChange={handleChange} className="w-full px-3 py-2 text-sm bg-white/50 border border-gray-200 rounded-md focus:outline-none focus:border-green-600 transition-all outline-none placeholder-gray-400" placeholder="Catchy one-liner..." />
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-2">Overview (Detailed Description)</label>
+                            <label className="block text-sm font-semibold text-gray-700 mb-2">Overview</label>
                             <textarea name="overview" value={formData.overview} rows={6} onChange={handleChange} className="w-full px-3 py-2 text-sm bg-white/50 border border-gray-200 rounded-md focus:outline-none focus:border-green-600 transition-all outline-none placeholder-gray-400" placeholder="Extensive product overview..." />
                         </div>
 
-
-
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                            <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-2">Price (₹) <span className="text-red-500">*</span></label>
-                                <input name="price" value={formData.price} type="number" required onChange={handleChange} className="w-full px-3 py-2 text-sm bg-white/50 border border-gray-200 rounded-md focus:outline-none focus:border-green-600 transition-all outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" placeholder="0.00" />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-2">Discount (%)</label>
-                                <input name="discount" value={formData.discount} type="number" onChange={handleChange} className="w-full px-3 py-2 text-sm bg-white/50 border border-gray-200 rounded-md focus:outline-none focus:border-green-600 transition-all outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" placeholder="10" />
-                            </div>
-                        </div>
-
                         <div className="bg-green-50/30 rounded-md border border-green-50/50">
-                            <label className="block text-sm font-semibold text-gray-800">Specifications</label>
+                            <label className="block text-sm font-semibold text-gray-800 mb-2">Specifications</label>
                             {specifications.map((spec, index) => (
-                                <div key={index} className="flex flex-col sm:flex-row gap-3 bg-white/60 p-2 rounded-md border border-gray-100">
+                                <div key={index} className="relative flex flex-col sm:flex-row gap-1 sm:gap-3 bg-white/60 p-2 pr-11 sm:pr-2 rounded-md border border-gray-100">
                                     <input
                                         type="text"
                                         placeholder="e.g. Weight"
@@ -384,13 +472,14 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                                         onChange={(e) => handleSpecificationChange(index, 'value', e.target.value)}
                                         className="flex-1 px-3 py-2 text-sm bg-white border border-gray-200 rounded-md focus:outline-none focus:border-green-600 outline-none transition-all"
                                     />
+                                    {/* Delete button: top-right corner on mobile, inline on sm+ */}
                                     <button
                                         type="button"
                                         onClick={() => handleRemoveSpecification(index)}
-                                        className="bg-red-50 text-red-600 px-3 py-2 rounded-md hover:bg-red-100 transition-all font-medium border border-red-100 cursor-pointer flex items-center justify-center"
+                                        className="absolute top-2 right-2 sm:static sm:flex bg-red-50 text-red-600 p-1.5 sm:px-3 sm:py-2 rounded-md hover:bg-red-100 transition-all border border-red-100 cursor-pointer flex items-center justify-center"
                                         title="Remove Specification"
                                     >
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                         </svg>
                                     </button>
@@ -399,11 +488,12 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                             <button
                                 type="button"
                                 onClick={handleAddSpecification}
-                                className="bg-green-600 hover:bg-green-700 text-white text-sm font-medium flex items-center gap-1 mt-2 px-3 py-1.5 border border-transparent rounded-md transition-colors cursor-pointer w-fit"
+                                className="w-full bg-green-50 hover:bg-green-100 text-green-700 text-xl font-medium flex items-center justify-center py-1.5 mt-2 rounded-md transition-colors cursor-pointer border border-green-200"
+                                title="Add Specification"
                             >
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4"></path></svg>
-                                Add Specification
+                                +
                             </button>
+
                         </div>
 
                         <div>
@@ -424,6 +514,25 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                         <div>
                             <label className="block text-sm font-semibold text-gray-700 mb-2">Disclaimer</label>
                             <textarea name="disclaimer" value={formData.disclaimer} rows={3} onChange={handleChange} className="w-full px-3 py-2 text-sm bg-white/50 border border-gray-200 rounded-md focus:outline-none focus:border-green-600 transition-all outline-none" />
+                        </div>
+                        <div className="flex items-center justify-between px-3 py-2.5 bg-white/50 border border-gray-200 rounded-md transition-all hover:border-green-600/30">
+                            <label className="text-sm font-semibold text-gray-700 cursor-pointer" onClick={() => setFormData(prev => ({ ...prev, bestSeller: prev.bestSeller.toLowerCase() === 'yes' ? '' : 'Yes' }))}>
+                                Best Seller
+                            </label>
+                            <button
+                                type="button"
+                                role="switch"
+                                aria-checked={formData.bestSeller.toLowerCase() === 'yes'}
+                                onClick={() => setFormData(prev => ({ ...prev, bestSeller: prev.bestSeller.toLowerCase() === 'yes' ? '' : 'Yes' }))}
+                                className={`${formData.bestSeller.toLowerCase() === 'yes' ? 'bg-green-600' : 'bg-gray-200'
+                                    } relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none`}
+                            >
+                                <span
+                                    aria-hidden="true"
+                                    className={`${formData.bestSeller.toLowerCase() === 'yes' ? 'translate-x-5' : 'translate-x-0'
+                                        } pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out`}
+                                />
+                            </button>
                         </div>
 
                         <div className="flex flex-col sm:flex-row justify-end gap-4 pt-8 border-t border-gray-100">

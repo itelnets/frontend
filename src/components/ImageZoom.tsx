@@ -16,7 +16,7 @@ export default function ImageZoom({ src, alt }: ImageZoomProps) {
         if (!imageRef.current) return;
 
         const { left, top, width, height } = imageRef.current.getBoundingClientRect();
-        
+
         // Calculate relative position (0 to 1)
         const x = (e.clientX - left) / width;
         const y = (e.clientY - top) / height;
@@ -25,26 +25,26 @@ export default function ImageZoom({ src, alt }: ImageZoomProps) {
     };
 
     return (
-        <div className="relative w-full aspect-square bg-white rounded-xl p-2 group">
+        <div className="relative w-[400px] h-[400px] bg-white rounded-xl p-2 group mx-auto">
             {/* Main Image */}
-            <div 
+            <div
                 className="w-full h-full cursor-pointer relative"
                 onMouseEnter={() => setIsZoomed(true)}
                 onMouseLeave={() => setIsZoomed(false)}
                 onMouseMove={handleMouseMove}
             >
-                <img 
+                <img
                     ref={imageRef}
-                    src={src} 
-                    alt={alt} 
+                    src={src}
+                    alt={alt}
                     className="w-full h-full object-contain"
                 />
             </div>
 
             {/* Zoomed Portal Box (Appears on the right) */}
             {isZoomed && (
-                <div 
-                    className="hidden lg:block absolute top-0 left-[calc(100%+40px)] w-[750px] h-[650px] bg-white border border-gray-200 shadow-2xl z-50 rounded-lg overflow-hidden bg-no-repeat"
+                <div
+                    className="hidden lg:block absolute top-0 left-[calc(100%+40px)] w-[900px] h-[650px] bg-white border border-gray-200 shadow-2xl z-50 rounded-lg overflow-hidden bg-no-repeat"
                     style={{
                         backgroundImage: `url(${src})`,
                         backgroundPosition: `${position.x * 100}% ${position.y * 100}%`,
@@ -52,7 +52,7 @@ export default function ImageZoom({ src, alt }: ImageZoomProps) {
                     }}
                 />
             )}
-            
+
             {/* Action Buttons Overlay (Share & Heart) */}
             <div className="absolute top-4 right-4 flex flex-col gap-3 z-10">
                 <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center border border-gray-200 shadow-sm text-gray-500 cursor-pointer hover:bg-gray-50 hover:text-gray-800 transition-colors">

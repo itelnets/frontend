@@ -4,22 +4,31 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
+import { useCart } from '@/context/CartContext';
 import ImageZoom from '@/components/ImageZoom';
 import CustomerReviews from '@/components/CustomerReviews';
 import { getProductById, getProducts } from '@/services/product';
+import AddToListsModal from '@/components/AddToListsModal';
 
 export default function ProductDetailsPage() {
     const params = useParams();
     const router = useRouter();
+    const { addToCart, myLists, moveToList, removeFromList } = useCart();
     const [isLoading, setIsLoading] = useState(true);
     const [product, setProduct] = useState<any>(null);
     const [recommendedProducts, setRecommendedProducts] = useState<any[]>([]);
-    const [selectedPackage, setSelectedPackage] = useState(90);
     const [quantity, setQuantity] = useState(1);
     const [selectedImageIdx, setSelectedImageIdx] = useState(0);
     const [showReviewsPopover, setShowReviewsPopover] = useState(false);
 
+    // Add to Lists modal state
+    const [showListsModal, setShowListsModal] = useState(false);
+
+    // Derived: check if this product is already in myLists (persisted in localStorage)
+    const addedToList = myLists.some((p: any) => p._id === product?._id);
+
     useEffect(() => {
+        window.scrollTo(0, 0);
         const fetchData = async () => {
             try {
                 if (params.id) {
@@ -45,12 +54,16 @@ export default function ProductDetailsPage() {
     };
 
     const displayProduct = {
-        name: product?.name || "Product Name",
-        brand: "Itelents Brands",
+        name: product?.name,
+        brand: product?.brand,
+        manufacturer: product?.manufacturer,
         rating: 0,
         reviews: "0",
-        price: product?.price || 0,
-        inStock: true,
+        price: product?.price,
+        discount: product?.discount,
+        inStock: product?.inStock,
+        packageQuantity: product?.packageQuantity,
+        bestSeller: product?.bestSeller,
         soldRecently: "0",
         images: product?.images?.length ? product.images.map((img: string) => getImageUrl(img)) : [
             "https://via.placeholder.com/600x600?text=No+Image+Available"
@@ -61,9 +74,13 @@ export default function ProductDetailsPage() {
         otherIngredients: product?.otherIngredients || null,
         warnings: product?.warnings || null,
         disclaimer: product?.disclaimer || null,
+        _id: product?._id,
+        weight: product?.weight,
+        weightUnit: product?.weightUnit,
     };
 
-    const currentPrice = displayProduct.price;
+    const originalPrice = displayProduct.price;
+    const currentPrice = displayProduct.discount > 0 ? Math.round(originalPrice * (1 - displayProduct.discount / 100)) : originalPrice;
 
     if (isLoading) {
         return (
@@ -151,16 +168,16 @@ export default function ProductDetailsPage() {
     const renderTitleAndRating = () => (
         <div className="mb-4 lg:mb-6">
             <div className="flex items-center gap-2 mb-2">
-                <span className="bg-blue-100 text-blue-800 text-[10px] font-bold px-2 py-0.5 rounded">Itelents Brands</span>
-                <span className="bg-orange-100 text-orange-800 text-[10px] font-bold px-2 py-0.5 rounded">Best seller</span>
+                <span className="bg-[#B7E6FF] text-black text-[13px] font-bold px-2 py-1 rounded">{displayProduct.brand}</span>
+                {displayProduct.bestSeller?.toLowerCase() === 'yes' && <span className="bg-orange-100 text-orange-800 text-[10px] font-bold px-2 py-0.5 rounded">Best seller</span>}
             </div>
 
-            <h1 className="text-xl md:text-2xl font-bold text-gray-900 leading-snug mb-2">
+            <h1 className="text-xl md:text-xl font-bold text-gray-900 leading-snug">
                 {displayProduct.name}
             </h1>
 
-            <div className="text-sm text-gray-600 mb-2">
-                By <Link href="#" className="text-blue-600 hover:underline">{displayProduct.brand}</Link>
+            <div className="text-sm text-gray-600">
+                By <Link href="#" className="text-[#0052A5]">{displayProduct.manufacturer}</Link>
             </div>
 
             <div className="flex flex-wrap items-center gap-2 lg:gap-4 text-xs lg:text-sm lg:border-b lg:border-gray-100 lg:pb-4">
@@ -181,12 +198,6 @@ export default function ProductDetailsPage() {
                     <svg className="w-3.5 h-3.5 text-gray-500 hover:text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
 
                     {showReviewsPopover && renderReviewsPopover()}
-                </div>
-
-                <span className="text-gray-300 hidden lg:inline">|</span>
-                <div className="flex items-center gap-1 text-blue-600 cursor-pointer hover:underline">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
-                    <span>204 Q&A</span>
                 </div>
             </div>
         </div>
@@ -212,6 +223,12 @@ export default function ProductDetailsPage() {
             <div className="border border-gray-200 rounded-xl p-3 lg:p-5 shadow-sm bg-white">
                 <div className="flex flex-col lg:flex-row lg:items-baseline gap-1 lg:gap-2 mb-4 lg:mb-6">
                     <span className="text-xl lg:text-2xl font-extrabold text-gray-900">₹{(currentPrice * quantity).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                    {displayProduct.discount > 0 && (
+                        <>
+                            <span className="text-sm lg:text-base text-gray-500 line-through">₹{(originalPrice * quantity).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                            <span className="bg-[#ff3344] text-white text-[10px] lg:text-xs font-bold px-1.5 py-0.5 rounded shadow-sm">{displayProduct.discount}% OFF</span>
+                        </>
+                    )}
                 </div>
 
                 <div className="flex items-center justify-between border border-gray-300 rounded-md p-1.5 lg:p-2 mb-3 lg:mb-4">
@@ -224,15 +241,27 @@ export default function ProductDetailsPage() {
                     </button>
                 </div>
 
-                <button onClick={() => toast.success('Added to cart successfully!')} className="w-full bg-[#f38700] hover:bg-[#e07b00] text-white font-bold py-2.5 lg:py-3.5 rounded-md transition-colors shadow-sm mb-3 lg:mb-4 text-sm lg:text-base">
+                <button onClick={() => addToCart(displayProduct, quantity)} className="w-full bg-[#f38700] hover:bg-[#e07b00] cursor-pointer text-white font-bold py-2.5 lg:py-3.5 rounded-md transition-colors shadow-sm mb-3 lg:mb-4 text-sm lg:text-base">
                     Add to Cart
                 </button>
 
-                <button className="w-full flex items-center justify-center gap-2 border border-gray-300 hover:bg-gray-50 text-gray-700 font-bold py-2 lg:py-2.5 rounded-md transition-colors text-[11px] lg:text-sm">
-                    <svg className="w-3.5 h-3.5 lg:w-4 lg:h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
-                    Add to Lists
+                <button
+                    onClick={() => setShowListsModal(true)}
+                    className={`w-full flex items-center justify-center gap-2 border ${addedToList ? 'border-green-600 bg-[#f0f7f4] text-green-700' : 'border-gray-300 hover:bg-gray-50 text-gray-700'} font-bold py-2 lg:py-2.5 rounded-md transition-colors text-[11px] lg:text-sm cursor-pointer`}
+                >
+                    <svg className="w-5 h-5 lg:w-6 lg:h-6 text-green-600" fill={addedToList ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
+                    {addedToList ? 'Added to Lists' : 'Add to Lists'}
                 </button>
             </div>
+
+            <AddToListsModal
+                product={displayProduct}
+                isOpen={showListsModal}
+                isAlreadyAdded={addedToList}
+                onClose={() => setShowListsModal(false)}
+                onAdded={() => {}}
+                onRemoved={() => {}}
+            />
 
             <div className="bg-[#f0f7f4] border border-[#e2efe9] rounded-xl p-3 lg:p-5">
                 <div className="flex items-center gap-1.5 lg:gap-2 mb-1 lg:mb-2 font-bold text-green-800 text-xs lg:text-sm">
@@ -261,8 +290,8 @@ export default function ProductDetailsPage() {
                         <a href={`/products/${recommendedProducts[0]?._id}`} className="text-[10px] text-blue-600 hover:underline leading-tight block mb-2 line-clamp-2">{recommendedProducts[0]?.name}</a>
                         <p className="text-[9px] text-gray-500 mb-3 bg-gray-50 p-1.5 rounded line-clamp-2">{recommendedProducts[0]?.description || 'A great addition to your health routine.'}</p>
 
-                        <div className="text-center font-bold text-sm text-gray-900 mb-2">Combo price: ₹{(currentPrice + (recommendedProducts[0]?.price || 0)).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
-                        <button className="w-full bg-[#f38700] hover:bg-[#e07b00] text-white font-bold py-1.5 rounded-md text-[11px] transition-colors">
+                        <div className="text-center font-bold text-sm text-gray-900 mb-2">Combo price: ₹{(currentPrice + (recommendedProducts[0]?.discount > 0 ? Math.round(recommendedProducts[0]?.price * (1 - recommendedProducts[0]?.discount / 100)) : recommendedProducts[0]?.price || 0)).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+                        <button className="w-full bg-[#f38700] hover:bg-[#e07b00] text-white font-bold py-2 lg:py-2.5 rounded-md transition-colors text-sm">
                             Add Both to Cart
                         </button>
                     </>
@@ -275,13 +304,18 @@ export default function ProductDetailsPage() {
 
     const renderProductDetailsBottom = () => (
         <div className="w-full flex flex-col pt-4 lg:pt-0">
-            <div className="flex items-center justify-between mb-4">
-                <span className="text-xs lg:text-sm font-bold text-green-700">In stock</span>
+            <div className="flex items-center justify-between mb-2">
+                <span className="text-xs lg:text-sm font-bold text-green-700">In Stock: {displayProduct.inStock}</span>
                 <span className="text-[10px] lg:text-xs font-medium text-red-600 flex items-center gap-1">
                     <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>
                     {displayProduct.soldRecently} sold in 30 days
                 </span>
             </div>
+            {displayProduct.packageQuantity && (
+                <div className="text-xs lg:text-sm text-gray-700 mb-4 font-medium">
+                    Package Quantity: {displayProduct.packageQuantity}
+                </div>
+            )}
 
             <div className="space-y-6 lg:space-y-8 mt-6 lg:mt-8 text-sm lg:text-base">
                 <div>
@@ -320,7 +354,21 @@ export default function ProductDetailsPage() {
                                 </div>
                                 <span className="text-[9px] lg:text-[10px] text-gray-500">10k+</span>
                             </div>
-                            <div className="font-bold text-gray-900 text-xs lg:text-sm">₹{prod.price}</div>
+                            <div className="flex items-center gap-2 mt-auto">
+                                <div className="font-bold text-gray-900 text-xs lg:text-sm">
+                                    ₹{prod.discount > 0 ? Math.round(prod.price * (1 - prod.discount / 100)) : prod.price}
+                                </div>
+                                {prod.discount > 0 && (
+                                    <>
+                                        <div className="text-[10px] text-gray-500 line-through">
+                                            ₹{prod.price}
+                                        </div>
+                                        <div className="bg-[#ff3344] text-white text-[9px] font-bold px-1 py-0.5 rounded shadow-sm">
+                                            {prod.discount}% OFF
+                                        </div>
+                                    </>
+                                )}
+                            </div>
                         </div>
                     )) : (
                         <div className="text-gray-500 text-sm">No recommendations available at this time.</div>
@@ -427,7 +475,7 @@ export default function ProductDetailsPage() {
                 </div>
 
                 {/* --- DESKTOP LAYOUT (hidden on mobile) --- */}
-                <div className="hidden lg:flex flex-row gap-8">
+                <div className="hidden lg:flex flex-row gap-10">
                     <div className="w-[35%] relative z-50">
                         <div className="sticky top-32 z-50">
                             {renderImageGallery()}

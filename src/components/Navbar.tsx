@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
+import { useCart } from '@/context/CartContext';
 
 const Navbar = () => {
     const router = useRouter();
@@ -10,6 +11,7 @@ const Navbar = () => {
     const [user, setUser] = useState<any>(null);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isAuthOpen, setIsAuthOpen] = useState(false);
+    const { cartCount } = useCart();
 
     useEffect(() => {
         setIsMobileMenuOpen(false);
@@ -63,7 +65,7 @@ const Navbar = () => {
                         <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="md:hidden">
                             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
                         </button>
-                        <Link href="/" className="font-bold text-[30px] tracking-normal shrink-0">
+                        <Link href="/" className="font-bold text-[25px] sm:text-[30px] tracking-normal shrink-0">
                             Itelents
                         </Link>
                     </div>
@@ -97,7 +99,7 @@ const Navbar = () => {
 
                                 {/* Unauthenticated Dropdown Wrapper with top padding for gap */}
                                 <div className={`absolute top-full right-[-10px] sm:right-0 pt-1 transition-all z-50 ${isAuthOpen ? 'opacity-100 visible' : 'opacity-0 invisible group-hover:opacity-100 group-hover:visible'}`}>
-                                    <div className="w-[300px] sm:w-[380px] bg-white text-gray-800 rounded-md shadow-[0_4px_20px_-4px_rgba(0,0,0,0.2)] border border-gray-100 flex flex-col sm:flex-row overflow-hidden" onClick={(e) => e.stopPropagation()}>
+                                    <div className="w-[300px] sm:w-[450px] bg-white text-gray-800 rounded-md shadow-[0_4px_20px_-4px_rgba(0,0,0,0.2)] border border-gray-100 flex flex-col sm:flex-row overflow-hidden" onClick={(e) => e.stopPropagation()}>
 
                                         {/* Left Side: Rewards Info */}
                                         <div className="hidden sm:flex w-[170px] bg-gray-50 p-4 border-r border-gray-100 flex-col items-center text-center">
@@ -119,31 +121,31 @@ const Navbar = () => {
 
                                         {/* Right Side: Navigation */}
                                         <div className="flex-1 p-4 flex flex-col min-w-[200px]">
-                                            <div className="text-sm font-bold text-[#458500] mb-3">Welcome!</div>
+                                            <div className="text-[15px] font-bold text-[#458500] mb-3">Welcome!</div>
 
-                                            <div className="space-y-3 mb-6">
-                                                <Link href="/login" className="flex items-center gap-3 text-sm text-gray-700 hover:text-[#458500]">
-                                                    <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                                            <div className="flex flex-col mb-6 flex-1">
+                                                <Link href="#" className="flex items-center gap-3 text-[15px] text-gray-800 hover:bg-[#eef6e6] px-3 py-2.5 rounded-md transition-colors">
+                                                    <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
                                                     My Account
                                                 </Link>
-                                                <Link href="/login" className="flex items-center gap-3 text-sm text-gray-700 hover:text-[#458500]">
-                                                    <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
+                                                <Link href="#" className="flex items-center gap-3 text-[15px] text-gray-800 hover:bg-[#eef6e6] px-3 py-2.5 rounded-md transition-colors">
+                                                    <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
                                                     Orders
                                                 </Link>
-                                                <Link href="/login" className="flex items-center gap-3 text-sm text-gray-700 hover:text-[#458500]">
-                                                    <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
+                                                <Link href="#" className="flex items-center gap-3 text-[15px] text-gray-800 hover:bg-[#eef6e6] px-3 py-2.5 rounded-md transition-colors">
+                                                    <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
                                                     My Lists
                                                 </Link>
-                                                <Link href="/login" className="flex items-center gap-3 text-sm text-gray-700 hover:text-[#458500]">
-                                                    <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                                <Link href="#" className="flex items-center gap-3 text-[15px] text-gray-800 hover:bg-[#eef6e6] px-3 py-2.5 rounded-md transition-colors">
+                                                    <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                                                     Rewards Credit
                                                 </Link>
-                                                <Link href="/login" className="flex items-center gap-3 text-sm text-gray-700 hover:text-[#458500]">
-                                                    <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                                                <Link href="#" className="flex items-center gap-3 text-[15px] text-gray-800 hover:bg-[#eef6e6] px-3 py-2.5 rounded-md transition-colors">
+                                                    <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
                                                     My Reviews
                                                 </Link>
-                                                <Link href="/login" className="flex items-center gap-3 text-sm text-gray-700 hover:text-[#458500]">
-                                                    <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" /></svg>
+                                                <Link href="#" className="flex items-center gap-3 text-[15px] text-gray-800 hover:bg-[#eef6e6] px-3 py-2.5 rounded-md transition-colors">
+                                                    <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" /></svg>
                                                     Messages
                                                 </Link>
                                             </div>
@@ -156,17 +158,81 @@ const Navbar = () => {
                                 </div>
                             </div>
                         ) : (
-                            <button
-                                onClick={handleLogout}
-                                className="flex items-center gap-2 cursor-pointer group bg-[#2d5700] px-4 py-2.5 rounded-full hover:bg-red-600 transition-colors relative"
+                            <div
+                                className="flex items-center gap-2 cursor-pointer group bg-[#2d5700] px-4 py-2 rounded-full hover:bg-[#234300] transition-colors relative"
+                                onMouseEnter={() => setIsAuthOpen(true)}
+                                onMouseLeave={() => setIsAuthOpen(false)}
+                                onClick={() => setIsAuthOpen(!isAuthOpen)}
                             >
-                                <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
-                                <span className="text-sm font-medium text-white">Logout</span>
-                            </button>
+                                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                                <div className="flex items-center gap-1 text-white">
+                                    <div className="flex flex-col text-left">
+                                        <span className="text-[10px] text-gray-200 leading-[10px] mb-0.5">Hi, {user.email?.split('@')[0] || 'User'}</span>
+                                        <span className="text-[13px] font-bold leading-[13px]">My Account</span>
+                                    </div>
+                                    <svg className={`w-3 h-3 ml-1 transition-transform duration-200 ${isAuthOpen ? '-rotate-180' : 'group-hover:-rotate-180'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                                </div>
+
+                                {/* Authenticated Dropdown Wrapper */}
+                                <div className={`absolute top-full right-[-10px] sm:right-0 pt-1 transition-all z-50 ${isAuthOpen ? 'opacity-100 visible' : 'opacity-0 invisible group-hover:opacity-100 group-hover:visible'}`}>
+                                    <div className="w-[300px] sm:w-[500px] bg-white text-gray-800 rounded-md shadow-[0_4px_20px_-4px_rgba(0,0,0,0.2)] border border-gray-100 flex flex-col sm:flex-row overflow-hidden" onClick={(e) => e.stopPropagation()}>
+
+                                        {/* Left Side: Rewards Info */}
+                                        <div className="hidden sm:flex w-[170px] bg-gray-50 p-4 border-r border-gray-100 flex-col items-center text-center">
+                                            <div className="text-sm font-bold text-[#458500] mb-1 flex items-center gap-1">
+                                                Itelents <span className="text-gray-400 font-normal text-xs">| REWARDS</span>
+                                            </div>
+                                            <div className="text-[10px] text-gray-500 mt-2">Total Rewards Available</div>
+                                            <div className="text-xl font-extrabold text-[#458500] my-1">₹0.00</div>
+                                            <div className="text-[10px] text-[#458500] font-medium">Converted from <span className="font-bold">0.00 USD</span></div>
+                                            <Link href="#" className="text-xs text-blue-600 font-medium hover:underline mt-6">
+                                                View all Rewards &gt;
+                                            </Link>
+                                        </div>
+
+                                        {/* Right Side: Navigation */}
+                                        <div className="flex-1 p-4 flex flex-col min-w-[200px]">
+                                            <div className="text-[15px] font-bold text-[#458500] mb-1">Welcome!</div>
+                                            <div className="text-sm font-bold text-[#458500] mb-4 truncate">{user.email}</div>
+
+                                            <div className="flex flex-col mb-6 flex-1">
+                                                <Link href="#" className="flex items-center gap-3 text-[15px] text-gray-800 hover:bg-[#eef6e6] px-3 py-2.5 rounded-md transition-colors">
+                                                    <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                                                    My Account
+                                                </Link>
+                                                <Link href="#" className="flex items-center gap-3 text-[15px] text-gray-800 hover:bg-[#eef6e6] px-3 py-2.5 rounded-md transition-colors">
+                                                    <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
+                                                    Orders
+                                                </Link>
+                                                <Link href="#" className="flex items-center gap-3 text-[15px] text-gray-800 hover:bg-[#eef6e6] px-3 py-2.5 rounded-md transition-colors">
+                                                    <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
+                                                    My Lists
+                                                </Link>
+                                                <Link href="#" className="flex items-center gap-3 text-[15px] text-gray-800 hover:bg-[#eef6e6] px-3 py-2.5 rounded-md transition-colors">
+                                                    <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                                    Rewards Credit
+                                                </Link>
+                                                <Link href="#" className="flex items-center gap-3 text-[15px] text-gray-800 hover:bg-[#eef6e6] px-3 py-2.5 rounded-md transition-colors">
+                                                    <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                                                    My Reviews
+                                                </Link>
+                                                <Link href="#" className="flex items-center gap-3 text-[15px] text-gray-800 hover:bg-[#eef6e6] px-3 py-2.5 rounded-md transition-colors">
+                                                    <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" /></svg>
+                                                    Messages
+                                                </Link>
+                                            </div>
+
+                                            <button onClick={handleLogout} className="w-full text-center py-2.5 bg-white border border-[#458500] text-[#458500] hover:bg-gray-50 font-bold rounded-md shadow-sm transition-colors text-sm mt-auto">
+                                                Sign out
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         )}
                         <Link href="/cart" className="flex items-center gap-1 hover:opacity-80 relative">
                             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
-                            <span className="absolute -top-1 -right-2 bg-orange-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">0</span>
+                            <span className="absolute -top-1 -right-2 bg-orange-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">{cartCount}</span>
                         </Link>
                     </div>
                 </div>

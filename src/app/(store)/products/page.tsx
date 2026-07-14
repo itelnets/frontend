@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { getProducts } from '@/services/product';
 import toast from 'react-hot-toast';
+import AddToCartButton from '@/components/AddToCartButton';
+import { useCart } from '@/context/CartContext';
 
 interface Product {
     _id: string;
@@ -17,10 +19,12 @@ interface Product {
 
 export default function ProductsPage() {
     const router = useRouter();
+    const { myLists, moveToList, removeFromList } = useCart();
     const [products, setProducts] = useState<Product[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
+        window.scrollTo(0, 0);
         const fetchProducts = async () => {
             try {
                 const { data } = await getProducts();
@@ -35,6 +39,17 @@ export default function ProductsPage() {
 
         fetchProducts();
     }, []);
+
+    const isInList = (productId: string) => myLists.some((p: any) => p._id === productId);
+
+    const toggleList = (e: React.MouseEvent, product: Product) => {
+        e.stopPropagation();
+        if (isInList(product._id)) {
+            removeFromList(product._id);
+        } else {
+            moveToList(product);
+        }
+    };
 
     if (isLoading) {
         return (
@@ -99,20 +114,37 @@ export default function ProductsPage() {
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-5 gap-2 sm:gap-3">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-6 gap-2 sm:gap-3">
                         {products.map((product) => (
                             <div
                                 onClick={() => router.push(`/products/${product._id}`)}
                                 key={product._id}
                                 className="bg-white rounded-md flex flex-col cursor-pointer shadow-sm hover:shadow-lg transition-shadow group border border-gray-300 overflow-hidden"
                             >
-                                <div className="w-full aspect-square flex items-center justify-center relative bg-gray-50 border-b border-gray-100">
+                                <div className="w-full aspect-[6/5] flex items-center justify-center relative bg-white border-b border-gray-100 p-2.5 sm:p-4">
                                     {product.images && product.images.length > 0 ? (
-                                        <img src={product.images[0].startsWith('http') ? product.images[0] : `${process.env.NEXT_PUBLIC_API_URL}/upload/file/${product.images[0]}`} alt={product.name} className="w-full h-full object-cover" />
+                                        <img src={product.images[0].startsWith('http') ? product.images[0] : `${process.env.NEXT_PUBLIC_API_URL}/upload/file/${product.images[0]}`} alt={product.name} className="w-full h-full object-contain mix-blend-multiply" />
                                     ) : (
                                         <svg className="w-12 h-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                                     )}
+                                    {/* Add to Cart button on hover */}
+                                    <AddToCartButton product={product} />
 
+                                    {/* Heart / Wishlist button */}
+                                    <button
+                                        onClick={(e) => toggleList(e, product)}
+                                        className="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-white rounded-full shadow-sm border border-gray-200 hover:scale-110 transition-transform cursor-pointer z-10"
+                                        title={isInList(product._id) ? 'Remove from list' : 'Add to list'}
+                                    >
+                                        <svg
+                                            className="w-4 h-4 text-green-600"
+                                            fill={isInList(product._id) ? 'currentColor' : 'none'}
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                                        </svg>
+                                    </button>
                                 </div>
 
                                 <div className="p-3 flex-1 flex flex-col">
@@ -133,12 +165,12 @@ export default function ProductsPage() {
 
                                     <div className="flex items-center gap-2 mt-auto">
                                         <div className="text-lg font-bold text-gray-900">
-                                            <span className="text-sm font-medium relative -top-0.5 pr-0.5">₹</span>{product.price}
+                                            <span className="text-sm font-medium relative -top-0.5 pr-0.5">₹</span>{product.discount > 0 ? Math.round(product.price * (1 - product.discount / 100)) : product.price}
                                         </div>
                                         {product.discount > 0 && (
                                             <>
                                                 <div className="text-xs text-gray-500 line-through">
-                                                    ₹{Math.round(product.price / (1 - product.discount / 100))}
+                                                    ₹{product.price}
                                                 </div>
                                                 <div className="bg-[#ff3344] text-white text-[10px] font-bold px-1.5 py-0.5 rounded shadow-sm">
                                                     {product.discount}% OFF

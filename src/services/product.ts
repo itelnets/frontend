@@ -19,3 +19,7 @@ export const updateProduct = async (id: string, productData: any) => {
 export const deleteProduct = async (id: string) => {
     return api.delete(`/products/${id}`);
 };
+
+export const reorderProducts = async (orderedIds: string[]) => {
+    return api.post('/products/reorder', { orderedIds });
+};

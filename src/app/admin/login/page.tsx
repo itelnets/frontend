@@ -26,7 +26,7 @@ export default function AdminLoginPage() {
             const { data } = await api.post('/auth/login', { email, password });
 
             if (data.role !== 'admin') {
-                toast.error('Access denied. Administrator privileges required.');
+                toast.error('Access denied. Only admin can access.');
                 return;
             }
 

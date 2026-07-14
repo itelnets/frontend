@@ -1,85 +1,233 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { getBanners, BannerItem } from '../services/banner';
 
 const slides = [
     {
         id: 1,
-        title: "Vitamins",
-        subtitle: "Everything from Vitamin A, B-Complex, D, K2 and more",
-        gradient: "from-[#ffeeb8] via-[#ffd680] to-[#f4c45b]",
-        items: [
-            { name: "Vitamin D3+K2", color: "bg-yellow-100 text-yellow-600" },
-            { name: "Liposomal Vitamin C", color: "bg-orange-100 text-orange-600" },
-            { name: "B-Complex", color: "bg-red-100 text-red-600" }
-        ]
+        tabTitle: "Up to 70% Off Deals",
+        tabSubtitle: "Shop Now",
+        title: "Up to 70% Off Deals",
+        subtitle: "Hundreds of picks across every aisle",
+        bgClass: "from-[#fae6e9] via-[#f7d9dc] to-[#fce4e6]"
     },
     {
         id: 2,
-        title: "Sports Nutrition",
-        subtitle: "Fuel your performance and recovery",
-        gradient: "from-[#e0f2fe] via-[#bae6fd] to-[#7dd3fc]",
-        items: [
-            { name: "Whey Protein", color: "bg-blue-100 text-blue-600" },
-            { name: "Creatine", color: "bg-indigo-100 text-indigo-600" },
-            { name: "Pre-Workout", color: "bg-purple-100 text-purple-600" }
-        ]
+        tabTitle: "Free Gift With Purchase",
+        tabSubtitle: "Ultima Electrolyte Packets",
+        title: "Free Gift With Purchase",
+        subtitle: "Get free Ultima Electrolyte Packets with selected products",
+        bgClass: "from-[#eef9f0] via-[#def2e3] to-[#e8f7ec]"
     },
     {
         id: 3,
-        title: "Beauty & Wellness",
-        subtitle: "Glow from the inside out with premium supplements",
-        gradient: "from-[#fce7f3] via-[#fbcfe8] to-[#f9a8d4]",
-        items: [
-            { name: "Collagen", color: "bg-pink-100 text-pink-600" },
-            { name: "Biotin", color: "bg-rose-100 text-rose-600" },
-            { name: "Hyaluronic Acid", color: "bg-fuchsia-100 text-fuchsia-600" }
-        ]
+        tabTitle: "Sports & Fitness",
+        tabSubtitle: "Shop Now",
+        title: "Sports & Fitness",
+        subtitle: "Fuel your performance, endurance and recovery",
+        bgClass: "from-[#e0f2fe] via-[#bae6fd] to-[#e0f2fe]"
+    },
+    {
+        id: 4,
+        tabTitle: "NAD+",
+        tabSubtitle: "15% Off",
+        title: "NAD+ Longevity Support",
+        subtitle: "Unlock your body's cellular energy and longevity potential",
+        bgClass: "from-[#fef3c7] via-[#fde68a] to-[#fef3c7]"
+    },
+    {
+        id: 5,
+        tabTitle: "Natural Pre-Workout Alternative",
+        tabSubtitle: "Learn More",
+        title: "Natural Pre-Workout Alternative",
+        subtitle: "Clean energy boost without the artificial crash",
+        bgClass: "from-[#f5f3ff] via-[#ede9fe] to-[#f5f3ff]"
     }
 ];
 
 export default function HeroCarousel() {
+    const [banners, setBanners] = useState<BannerItem[]>([]);
     const [currentSlide, setCurrentSlide] = useState(0);
+    const [isHovered, setIsHovered] = useState(false);
+    const [isPlaying, setIsPlaying] = useState(true);
+    const autoPlayRef = useRef<NodeJS.Timeout | null>(null);
 
+    // Fetch uploaded banners from the database
     useEffect(() => {
-        const timer = setInterval(() => {
-            setCurrentSlide((prev) => (prev + 1) % slides.length);
-        }, 5000);
-        return () => clearInterval(timer);
+        const fetchBanners = async () => {
+            try {
+                const data = await getBanners();
+                // Map banners sorted by createdAt
+                setBanners(data);
+            } catch (error) {
+                console.error('Failed to load banners:', error);
+            }
+        };
+        fetchBanners();
     }, []);
 
-    const nextSlide = () => setCurrentSlide((prev) => (prev + 1) % slides.length);
-    const prevSlide = () => setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
+    // Start auto scroll
+    const startAutoPlay = () => {
+        stopAutoPlay();
+        if (!isPlaying) return;
+        autoPlayRef.current = setInterval(() => {
+            setCurrentSlide((prev) => (prev + 1) % slides.length);
+        }, 5000);
+    };
+
+    // Stop auto scroll
+    const stopAutoPlay = () => {
+        if (autoPlayRef.current) {
+            clearInterval(autoPlayRef.current);
+            autoPlayRef.current = null;
+        }
+    };
+
+    // Control auto scroll based on hover and play/pause state
+    useEffect(() => {
+        if (!isHovered && isPlaying) {
+            startAutoPlay();
+        } else {
+            stopAutoPlay();
+        }
+        return () => stopAutoPlay();
+    }, [isHovered, isPlaying]);
+
+    const handleTabHover = (index: number) => {
+        setCurrentSlide(index);
+        setIsHovered(true);
+    };
+
+    const nextSlide = () => {
+        setCurrentSlide((prev) => (prev + 1) % slides.length);
+    };
+
+    const prevSlide = () => {
+        setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
+    };
 
     const slide = slides[currentSlide];
 
-    return (
-        <div className={`relative w-full rounded-2xl overflow-hidden shadow-sm flex flex-col md:flex-row items-center justify-between p-6 md:p-8 min-h-[200px] md:min-h-[240px] transition-all duration-700 bg-gradient-to-r ${slide.gradient}`}>
+    // Check if there is an uploaded banner for this slide index
+    const uploadedBanner = banners[currentSlide];
 
-            {/* Text Content */}
-            <div className="z-10 max-w-lg mb-4 md:mb-0 transition-opacity duration-500">
-                <h1 className="text-3xl md:text-4xl font-extrabold text-[#1f2937] tracking-tight mb-2 leading-tight">
-                    {slide.title}
-                </h1>
-                <p className="text-base md:text-xl font-bold text-[#1f2937] leading-snug">
-                    {slide.subtitle}
-                </p>
+    // Touch swipe support for mobile
+    const touchStartX = useRef<number>(0);
+    const touchEndX = useRef<number>(0);
+
+    const handleTouchStart = (e: React.TouchEvent) => {
+        touchStartX.current = e.changedTouches[0].screenX;
+    };
+
+    const handleTouchEnd = (e: React.TouchEvent) => {
+        touchEndX.current = e.changedTouches[0].screenX;
+        const diff = touchStartX.current - touchEndX.current;
+        if (Math.abs(diff) > 40) {
+            if (diff > 0) nextSlide();
+            else prevSlide();
+        }
+    };
+
+    // Don't show the carousel at all if no banners are uploaded
+    if (banners.length === 0) return null;
+
+    return (
+        <div
+            className="w-full relative select-none mb-2 sm:mb-10 md:mb-16"
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+        >
+            {/* Banner Main Body - true aspect ratio so it looks identical on all screen sizes */}
+            <div
+                className="w-full aspect-[1368/260] rounded-none overflow-hidden transition-all duration-500 relative"
+                onTouchStart={handleTouchStart}
+                onTouchEnd={handleTouchEnd}
+            >
+
+                {/* Background: uploaded S3 image only */}
+                {uploadedBanner && (
+                    <img
+                        src={uploadedBanner.imageUrl}
+                        alt="Promotion Background"
+                        className="absolute inset-0 w-full h-full object-cover z-0"
+                    />
+                )}
+
+                {/* Navigation Arrows — hidden on mobile, visible on sm+ */}
+                <button
+                    onClick={prevSlide}
+                    className="hidden sm:flex absolute left-3 top-1/2 -translate-y-1/2 w-12 h-12 items-center justify-center text-white active:scale-95 transition-all z-20 cursor-pointer group drop-shadow-[0_0_8px_rgba(0,0,0,0.5)]"
+                    aria-label="Previous slide"
+                >
+                    <svg className="w-8 h-8 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} className="group-hover:[stroke-width:4]" d="M15 19l-7-7 7-7" />
+                    </svg>
+                </button>
+                <button
+                    onClick={nextSlide}
+                    className="hidden sm:flex absolute right-3 top-1/2 -translate-y-1/2 w-12 h-12 items-center justify-center text-white active:scale-95 transition-all z-20 cursor-pointer group drop-shadow-[0_0_8px_rgba(0,0,0,0.5)]"
+                    aria-label="Next slide"
+                >
+                    <svg className="w-8 h-8 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} className="group-hover:[stroke-width:4]" d="M9 5l7 7-7 7" />
+                    </svg>
+                </button>
+
+                {/* Play/Pause Toggle — smaller on mobile */}
+                <button
+                    onClick={() => setIsPlaying(!isPlaying)}
+                    className="absolute bottom-1 right-1 sm:bottom-3 sm:right-3 w-5 h-5 sm:w-10 sm:h-10 flex items-center justify-center text-white active:scale-95 transition-all z-20 cursor-pointer md:bottom-8 lg:bottom-10 group drop-shadow-[0_0_8px_rgba(0,0,0,0.5)]"
+                    title={isPlaying ? "Pause autoplay" : "Start autoplay"}
+                >
+                    {isPlaying ? (
+                        <svg className="w-3 h-3 sm:w-6 sm:h-6 transition-all group-hover:scale-125" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
+                        </svg>
+                    ) : (
+                        <svg className="w-3 h-3 sm:w-6 sm:h-6 transition-all group-hover:scale-125" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M8 5v14l11-7z" />
+                        </svg>
+                    )}
+                </button>
+
+                {/* Mobile dot indicators */}
+                <div className="flex sm:hidden absolute bottom-1 left-1/2 -translate-x-1/2 gap-1 z-20">
+                    {slides.map((_, idx) => (
+                        <button
+                            key={idx}
+                            onClick={() => setCurrentSlide(idx)}
+                            className={`h-1 rounded-full transition-all drop-shadow-sm cursor-pointer ${idx === currentSlide ? 'bg-white w-2' : 'bg-white/60 w-1'}`}
+                            aria-label={`Go to slide ${idx + 1}`}
+                        />
+                    ))}
+                </div>
             </div>
 
-            {/* Background decorative elements */}
-            <div className="absolute right-0 top-0 w-64 h-64 bg-white opacity-20 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none"></div>
-            <div className="absolute left-1/2 bottom-0 w-96 h-96 bg-white opacity-10 rounded-full blur-3xl -mb-32 pointer-events-none"></div>
-
-            {/* Pagination Dots */}
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 z-20">
-                {slides.map((_, idx) => (
-                    <button
-                        key={idx}
-                        onClick={() => setCurrentSlide(idx)}
-                        className={`w-2.5 h-2.5 rounded-full transition-colors duration-300 ${currentSlide === idx ? 'bg-gray-800' : 'bg-gray-800/30 hover:bg-gray-800/50'}`}
-                        aria-label={`Go to slide ${idx + 1}`}
-                    />
-                ))}
+            {/* Bottom Overlay Tabs - Centered, half on banner and half off banner */}
+            <div className="hidden md:flex absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 bg-[#f5f5f5] rounded-2xl shadow-lg border border-gray-200/80 p-1 z-30 items-stretch gap-1">
+                {slides.map((item, idx) => {
+                    const isActive = idx === currentSlide;
+                    return (
+                        <div
+                            key={item.id}
+                            onMouseEnter={() => handleTabHover(idx)}
+                            className={`flex flex-col justify-center py-2.5 px-5 text-center cursor-pointer transition-all duration-300 rounded-xl whitespace-nowrap ${isActive
+                                ? 'bg-white border border-gray-300 shadow-xs'
+                                : 'bg-transparent border border-transparent hover:bg-white/40'
+                                }`}
+                        >
+                            <div className={`text-[11px] lg:text-[12px] font-semibold leading-snug whitespace-nowrap ${isActive ? 'text-gray-900 font-bold' : 'text-gray-600'
+                                }`}>
+                                {item.tabTitle}
+                            </div>
+                            <div className={`text-[9px] lg:text-[10px] mt-0.5 font-bold ${isActive ? 'text-[#458500]' : 'text-gray-500'
+                                }`}>
+                                {item.tabSubtitle}
+                            </div>
+                        </div>
+                    );
+                })}
             </div>
         </div>
     );
