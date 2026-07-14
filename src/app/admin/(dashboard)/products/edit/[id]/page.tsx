@@ -539,9 +539,14 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                             <button
                                 type="button"
                                 onClick={handleCancel}
-                                className="bg-white text-gray-700 text-sm font-medium px-8 py-1.5 border border-gray-200 rounded-md hover:bg-gray-50 transition-colors cursor-pointer order-2 sm:order-1"
+                                disabled={isCancelling || isSaving}
+                                className="bg-white text-gray-700 text-sm font-medium px-8 py-1.5 border border-gray-200 rounded-md hover:bg-gray-50 transition-colors cursor-pointer order-2 sm:order-1 disabled:opacity-50 flex items-center justify-center"
                             >
-                                Cancel
+                                {isCancelling ? (
+                                    <>
+                                        <Spinner className="w-4 h-4 mr-2 border-gray-600" />
+                                    </>
+                                ) : 'Cancel'}
                             </button>
                             <button
                                 type="submit"

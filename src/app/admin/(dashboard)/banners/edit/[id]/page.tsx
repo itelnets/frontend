@@ -186,21 +186,21 @@ export default function EditBannerPage({ params }: { params: Promise<{ id: strin
                         <label className="block text-sm font-semibold text-gray-700 mb-2">
                             Banner Image <span className="text-gray-400 font-normal text-xs ml-2">(Size must be 1368 x 260)</span>
                         </label>
-                        <div 
+                        <div
                             className={`border-2 border-dashed rounded-xl p-8 text-center transition-all duration-200 ease-in-out cursor-pointer group flex flex-col items-center justify-center relative overflow-hidden ${isDragging ? 'border-green-500 bg-green-50' : 'border-gray-300 hover:border-green-400 hover:bg-gray-50'}`}
                             onDragOver={handleDragOver}
                             onDragLeave={handleDragLeave}
                             onDrop={handleDrop}
                             onClick={() => document.getElementById('banner-upload')?.click()}
                         >
-                            <input 
+                            <input
                                 id="banner-upload"
                                 type="file"
                                 accept=".jpg,.jpeg,.png"
                                 onChange={handleFileChange}
                                 className="hidden"
                             />
-                            
+
                             {previewUrl ? (
                                 <div className="w-full relative rounded-lg overflow-hidden border border-gray-200 bg-gray-50">
                                     <div className="aspect-[1368/260] w-full relative group/preview">
@@ -235,7 +235,6 @@ export default function EditBannerPage({ params }: { params: Promise<{ id: strin
                         {isCancelling ? (
                             <>
                                 <Spinner className="w-4 h-4 mr-2 border-gray-600" />
-                                Cancelling...
                             </>
                         ) : 'Cancel'}
                     </button>

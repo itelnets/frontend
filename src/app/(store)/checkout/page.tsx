@@ -135,7 +135,7 @@ function CheckoutContent() {
                 <div className="relative pt-2">
                     <input type="text" id="fullName" value={formData.fullName} onChange={(e) => setFormData({ ...formData, fullName: e.target.value })} className={`peer w-full border ${showErrors && !formData.fullName ? 'border-red-500' : 'border-gray-300'} rounded-md p-3 text-sm focus:outline-none ${showErrors && !formData.fullName ? '' : 'focus:border-green-600 focus:ring-1 focus:ring-green-600'}`} placeholder=" " />
                     <label htmlFor="fullName" className={`absolute left-2 -top-1 bg-white px-1 text-xs transition-all peer-placeholder-shown:top-5 peer-placeholder-shown:text-sm peer-placeholder-shown:text-gray-400 peer-focus:-top-1 peer-focus:text-xs z-10 pointer-events-none ${showErrors && !formData.fullName ? 'text-red-500 peer-focus:text-red-500' : 'text-gray-500 peer-focus:text-green-600'}`}>
-                        Full Name (No business or company name)*
+                        Full Name*
                     </label>
                     {showErrors && !formData.fullName && (
                         <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none top-2">
