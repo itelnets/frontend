@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import Spinner from './Spinner';
 import { getBanners, BannerItem } from '../services/banner';
 
 const slides = [
@@ -47,7 +48,7 @@ const slides = [
 ];
 
 export default function HeroCarousel() {
-    const [banners, setBanners] = useState<BannerItem[]>([]);
+    const [banners, setBanners] = useState<BannerItem[] | null>(null);
     const [currentSlide, setCurrentSlide] = useState(0);
     const [isHovered, setIsHovered] = useState(false);
     const [isPlaying, setIsPlaying] = useState(true);
@@ -109,8 +110,12 @@ export default function HeroCarousel() {
 
     const slide = slides[currentSlide];
 
-    // Check if there is an uploaded banner for this slide index
-    const uploadedBanner = banners[currentSlide];
+    // Show a fallback slide while banners are loading or unavailable
+    const hasBanners = Array.isArray(banners) && banners.length > 0;
+    const currentBanner = hasBanners && currentSlide < banners.length ? banners[currentSlide] : undefined;
+    const activeSlide = currentBanner ?? slide;
+    const uploadedBanner = currentBanner;
+    const isBannerLoading = banners === null;
 
     // Touch swipe support for mobile
     const touchStartX = useRef<number>(0);
@@ -129,9 +134,6 @@ export default function HeroCarousel() {
         }
     };
 
-    // Don't show the carousel at all if no banners are uploaded
-    if (banners.length === 0) return null;
-
     return (
         <div
             className="w-full relative select-none mb-2 sm:mb-10 md:mb-16"
@@ -145,13 +147,21 @@ export default function HeroCarousel() {
                 onTouchEnd={handleTouchEnd}
             >
 
-                {/* Background: uploaded S3 image only */}
-                {uploadedBanner && (
+                {/* Background: uploaded S3 image or loading overlay */}
+                {uploadedBanner ? (
                     <img
                         src={uploadedBanner.imageUrl}
                         alt="Promotion Background"
                         className="absolute inset-0 w-full h-full object-cover z-0"
                     />
+                ) : (
+                    <div className="absolute inset-0 w-full h-full bg-white z-0" />
+                )}
+
+                {isBannerLoading && (
+                    <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/80">
+                        <Spinner className="w-10 h-10 text-[#458500]" />
+                    </div>
                 )}
 
                 {/* Navigation Arrows — hidden on mobile, visible on sm+ */}

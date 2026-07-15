@@ -22,7 +22,7 @@ export default async function Home() {
         <div className="flex flex-col min-h-screen bg-white">
             <main className="w-full flex-1 mb-20">
                 {/* Hero Banner Section */}
-                <div className="max-w-[1400px] mx-auto px-0 sm:px-2 mt-0 sm:mt-2">
+                <div className="max-w-[1400px] mx-auto mt-0 sm:mt-2">
                     <HeroCarousel />
                 </div>
 

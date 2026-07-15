@@ -213,17 +213,17 @@ export default function AddProductPage() {
                     throw new Error(errData?.message || `Failed to upload image: ${item.file.name}`);
                 }
                 const data = await res.json();
-                return data.imageKey;
+                return data.imageUrl;
             });
 
-            const uploadedImageKeys = await Promise.all(uploadPromises);
+            const uploadedImageUrls = await Promise.all(uploadPromises);
 
             const productData = {
                 _id: newProductId,
                 ...formData,
                 price: Number(formData.price),
                 discount: Number(formData.discount),
-                images: uploadedImageKeys, // Send array of keys
+                images: uploadedImageUrls, // Send array of full S3 URLs
                 specifications: specifications.filter(s => s.key.trim() !== '' && s.value.trim() !== ''),
             };
 

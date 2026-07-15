@@ -5,14 +5,16 @@ import Link from 'next/link';
 import { useCart } from '@/context/CartContext';
 import { getProducts } from '@/services/product';
 import AddToCartButton from '@/components/AddToCartButton';
+import ConfirmModal from '@/components/ConfirmModal';
 import QuantityDropdown from '@/components/QuantityDropdown';
 
 export default function CartPage() {
-    const { cartItems, cartCount, removeFromCart, addToCart, myLists, moveToCartFromList, moveToList, clearCart, removeFromList } = useCart();
+    const { cartItems, cartCount, removeFromCart, addToCart, myLists, moveToCartFromList, moveToList, clearCart, removeFromList, savedForLater, saveForLater, moveToCartFromSaved, removeFromSaved } = useCart();
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [recommended, setRecommended] = useState<any[]>([]);
     const [activeTab, setActiveTab] = useState<'saved' | 'myLists'>('myLists');
     const [isRemoveAllModalOpen, setIsRemoveAllModalOpen] = useState(false);
+    const [deleteTarget, setDeleteTarget] = useState<{ type: 'cart' | 'saved' | 'myList'; item: any } | null>(null);
 
     // Estimated delivery date: 7-12 days from today
     const getDeliveryDateRange = () => {
@@ -179,8 +181,8 @@ export default function CartPage() {
                                 {/* Cart Items List */}
                                 <div className="space-y-6">
                                     {cartItems.map((item, index) => (
-                                        <div key={item.product?._id ? item.product._id : `cart-item-${index}`} className="flex gap-3 sm:gap-4 border-b border-gray-100 pb-6">
-                                            <div className="w-20 h-20 sm:w-24 sm:h-24 shrink-0 bg-gray-50 border border-gray-200 rounded p-1">
+                                        <div key={item.product?._id ? item.product._id : `cart-item-${index}`} className="flex gap-2 sm:gap-4 border-b border-gray-100 pb-6">
+                                            <div className="w-16 h-16 sm:w-24 sm:h-24 shrink-0 bg-gray-50 border border-gray-200 rounded p-1">
                                                 {item.product.images && item.product.images.length > 0 ? (
                                                     <img src={item.product.images[0].startsWith('http') ? item.product.images[0] : `${process.env.NEXT_PUBLIC_API_URL}/upload/file/${item.product.images[0]}`} alt={item.product.name} className="w-full h-full object-contain mix-blend-multiply" />
                                                 ) : (
@@ -190,11 +192,11 @@ export default function CartPage() {
                                                 )}
                                             </div>
                                             <div className="flex-1 flex flex-col min-w-0">
-                                                <div className="flex flex-col sm:flex-row justify-between gap-1 sm:gap-4 mb-1">
-                                                    <Link href={`/products/${item.product._id}`} className="text-sm sm:text-[15px] text-[#333] leading-snug flex-1 break-words font-medium">
+                                                <div className="flex flex-col gap-0.5 mb-1">
+                                                    <Link href={`/products/${item.product._id}`} className="text-[11px] sm:text-[15px] text-[#333] leading-snug break-words font-medium">
                                                         {item.product.name}
                                                     </Link>
-                                                    <div className="text-base sm:text-lg font-bold text-gray-900 shrink-0">
+                                                    <div className="text-[11px] sm:text-base font-bold text-gray-900">
                                                         ₹{((item.product.discount > 0 ? Math.round(item.product.price * (1 - item.product.discount / 100)) : item.product.price) * item.quantity).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                                                     </div>
                                                 </div>
@@ -204,18 +206,18 @@ export default function CartPage() {
                                                     Product code: {item.product?._id ? item.product._id.substring(0, 8).toUpperCase() : 'N/A'}
                                                 </div>
 
-                                                <div className="flex flex-wrap items-center gap-2 sm:gap-3 mt-auto">
+                                                <div className="flex flex-wrap items-center gap-1.5 sm:gap-3 mt-auto">
                                                     {/* Quantity Dropdown */}
                                                     <QuantityDropdown
                                                         value={item.quantity}
                                                         onChange={(qty) => updateQuantity(item.product, qty, item.quantity)}
                                                     />
 
-                                                    <button onClick={() => removeFromCart(item.product._id)} className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center border border-gray-300 rounded-full hover:bg-gray-50 text-gray-500 hover:text-black transition-colors cursor-pointer" title="Remove">
-                                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                                    <button onClick={() => setDeleteTarget({ type: 'cart', item })} className="w-7 h-7 sm:w-9 sm:h-9 flex items-center justify-center border border-gray-300 rounded-full hover:bg-gray-50 text-gray-500 hover:text-black transition-colors cursor-pointer" title="Remove">
+                                                        <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                                                     </button>
 
-                                                    <button onClick={() => moveToList(item.product)} className="px-3 sm:px-4 py-1.5 border border-gray-300 rounded-full text-[12px] sm:text-[13px] font-bold text-[#333] hover:bg-gray-50 transition-colors cursor-pointer">
+                                                    <button onClick={() => saveForLater(item.product)} className="px-2 sm:px-4 py-1 sm:py-1.5 border border-gray-300 rounded-full text-[10px] sm:text-[13px] font-bold text-[#333] hover:bg-gray-50 transition-colors cursor-pointer">
                                                         Save for later
                                                     </button>
                                                 </div>
@@ -326,11 +328,11 @@ export default function CartPage() {
                     </div>
 
                     <div className="mt-6 flex flex-wrap gap-6">
-                        {myLists.length === 0 ? (
-                            <p className="text-gray-500 text-sm py-4">No items saved.</p>
+                        {(activeTab === 'saved' ? savedForLater : myLists).length === 0 ? (
+                            <p className="text-gray-500 text-sm py-4">No items {activeTab === 'saved' ? 'saved for later' : 'in your lists'}.</p>
                         ) : (
-                            myLists.map((product, index) => (
-                                <div key={product?._id ? product._id : `mylist-item-${index}`} className="w-[200px] group flex flex-col">
+                            (activeTab === 'saved' ? savedForLater : myLists).map((product, index) => (
+                                <div key={product?._id ? product._id : `list-item-${index}`} className="w-[200px] group flex flex-col">
                                     <Link href={`/products/${product._id}`} className="block border border-gray-200 rounded p-4 mb-2 hover:shadow-sm">
                                         <div className="w-full aspect-square flex items-center justify-center relative bg-white">
                                             {product.images && product.images.length > 0 ? (
@@ -357,10 +359,10 @@ export default function CartPage() {
                                         ₹{product.discount > 0 ? Math.round(product.price * (1 - product.discount / 100)) : product.price}
                                     </div>
                                     <div className="flex gap-2">
-                                        <button onClick={() => moveToCartFromList(product)} className="flex-1 bg-[#f89500] hover:bg-[#e08600] text-white text-[11px] sm:text-[13px] font-bold py-1 sm:py-1.5 rounded transition-colors shadow-sm cursor-pointer">
+                                        <button onClick={() => activeTab === 'saved' ? moveToCartFromSaved(product) : moveToCartFromList(product)} className="flex-1 bg-[#f89500] hover:bg-[#e08600] text-white text-[11px] sm:text-[13px] font-bold py-1 sm:py-1.5 rounded transition-colors shadow-sm cursor-pointer">
                                             Add to Cart
                                         </button>
-                                        <button onClick={() => removeFromList(product._id)} className="w-8 h-8 flex items-center justify-center border border-gray-300 rounded hover:bg-gray-50 text-gray-500 hover:text-black transition-colors cursor-pointer" title="Remove">
+                                        <button onClick={() => setDeleteTarget({ type: activeTab === 'saved' ? 'saved' : 'myList', item: product })} className="w-8 h-8 flex items-center justify-center border border-gray-300 rounded hover:bg-gray-50 text-gray-500 hover:text-black transition-colors cursor-pointer" title="Remove">
                                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                                         </button>
                                     </div>
@@ -372,27 +374,41 @@ export default function CartPage() {
 
             </div>
 
-            {isRemoveAllModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-                    <div className="bg-white rounded p-6 w-[90%] max-w-[400px] shadow-xl">
-                        <div className="flex justify-between items-center mb-4">
-                            <h3 className="font-bold text-gray-900 text-lg">Remove all items</h3>
-                            <button onClick={() => setIsRemoveAllModalOpen(false)} className="text-gray-500 hover:text-gray-900">
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
-                            </button>
-                        </div>
-                        <p className="text-sm text-gray-700 mb-6">Do you want to remove all items from your cart?</p>
-                        <div className="flex gap-4">
-                            <button onClick={() => setIsRemoveAllModalOpen(false)} className="flex-1 py-2 border border-gray-300 rounded font-bold text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer text-sm">
-                                Cancel
-                            </button>
-                            <button onClick={() => { clearCart(); setIsRemoveAllModalOpen(false); }} className="flex-1 py-2 bg-[#d14b45] hover:bg-[#b03f39] text-white font-bold rounded transition-colors cursor-pointer text-sm">
-                                Remove
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+            <ConfirmModal
+                isOpen={isRemoveAllModalOpen}
+                title="Remove all items"
+                description="Do you want to remove all items from your cart?"
+                onCancel={() => setIsRemoveAllModalOpen(false)}
+                onConfirm={() => {
+                    clearCart();
+                    setIsRemoveAllModalOpen(false);
+                }}
+                cancelText="Cancel"
+                confirmText="Remove"
+                isLoading={false}
+            />
+
+            <ConfirmModal
+                isOpen={deleteTarget !== null}
+                title="Remove item"
+                description="Are you sure you want to remove this item?"
+                onCancel={() => setDeleteTarget(null)}
+                onConfirm={() => {
+                    if (deleteTarget) {
+                        if (deleteTarget.type === 'cart') {
+                            removeFromCart(deleteTarget.item.product._id);
+                        } else if (deleteTarget.type === 'saved') {
+                            removeFromSaved(deleteTarget.item);
+                        } else if (deleteTarget.type === 'myList') {
+                            removeFromList(deleteTarget.item._id);
+                        }
+                    }
+                    setDeleteTarget(null);
+                }}
+                cancelText="Cancel"
+                confirmText="Remove"
+                isLoading={false}
+            />
         </div>
     );
 }

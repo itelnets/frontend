@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import toast from 'react-hot-toast';
 import { useCart } from '@/context/CartContext';
 import ImageZoom from '@/components/ImageZoom';
 import CustomerReviews from '@/components/CustomerReviews';
@@ -35,9 +34,7 @@ export default function ProductDetailsPage() {
                     const { data } = await getProductById(params.id as string);
                     setProduct(data);
                 }
-                const { data: recs } = await getProducts();
-                // Exclude current product and inactive products
-                setRecommendedProducts(recs.filter((p: any) => p._id !== params.id && p.isActive !== false).slice(0, 5));
+
             } catch (error) {
                 console.error("Failed to fetch product data:", error);
             } finally {
@@ -172,7 +169,7 @@ export default function ProductDetailsPage() {
                 {displayProduct.bestSeller?.toLowerCase() === 'yes' && <span className="bg-orange-100 text-orange-800 text-[10px] font-bold px-2 py-0.5 rounded">Best seller</span>}
             </div>
 
-            <h1 className="text-xl md:text-xl font-bold text-gray-900 leading-snug">
+            <h1 className="text-lg sm:text-xl md:text-xl font-bold text-gray-900 leading-snug">
                 {displayProduct.name}
             </h1>
 
@@ -206,7 +203,7 @@ export default function ProductDetailsPage() {
     const renderImageGallery = () => (
         <div className="w-full flex flex-col">
             <div className="mb-2 lg:mb-4">
-                <ImageZoom src={displayProduct.images[selectedImageIdx]} alt={displayProduct.name} />
+                <ImageZoom src={displayProduct.images[selectedImageIdx]} alt={displayProduct.name} onHeartClick={() => setShowListsModal(true)} isHeartFilled={addedToList} />
             </div>
             <div className="grid grid-cols-4 gap-1.5 lg:gap-2">
                 {displayProduct.images.map((img: string, idx: number) => (
@@ -259,8 +256,8 @@ export default function ProductDetailsPage() {
                 isOpen={showListsModal}
                 isAlreadyAdded={addedToList}
                 onClose={() => setShowListsModal(false)}
-                onAdded={() => {}}
-                onRemoved={() => {}}
+                onAdded={() => { }}
+                onRemoved={() => { }}
             />
 
             <div className="bg-[#f0f7f4] border border-[#e2efe9] rounded-xl p-3 lg:p-5">

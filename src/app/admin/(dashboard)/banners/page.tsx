@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { getBanners, createBanner, deleteBanner, BannerItem, updateBanner, reorderBanners } from '../../../../services/banner';
 import toast from 'react-hot-toast';
+import ConfirmModal from '@/components/ConfirmModal';
 import Spinner from '@/components/Spinner';
 
 import { formatDate } from '@/utils/formatDate';
@@ -274,13 +275,10 @@ export default function BannersPage() {
                     <button
                         type="submit"
                         disabled={isUploading || !selectedFile}
-                        className="bg-green-600 hover:bg-green-700 disabled:bg-gray-200 disabled:text-gray-400 text-white font-bold py-2.5 px-6 rounded-lg flex items-center justify-center gap-2 cursor-pointer shadow-xs disabled:cursor-not-allowed transition-colors text-xs shrink-0"
+                        className={`rounded-lg flex items-center justify-center gap-2 cursor-pointer shadow-xs transition-colors text-xs shrink-0 min-w-[140px] py-2.5 px-6 ${isUploading ? 'bg-green-600 text-white hover:bg-green-600' : selectedFile ? 'bg-green-600 text-white hover:bg-green-700' : 'bg-gray-200 text-gray-400 cursor-not-allowed'}`}
                     >
                         {isUploading ? (
-                            <>
-                                <Spinner className="w-4 h-4 text-white animate-spin" />
-                                <span>Saving...</span>
-                            </>
+                            <Spinner className="w-4 h-4 text-white animate-spin" />
                         ) : (
                             <span>Upload Banner</span>
                         )}
@@ -431,42 +429,16 @@ export default function BannersPage() {
                 </div>
             )}
 
-            {/* Premium Delete Confirmation Modal */}
-            {bannerToDelete && (
-                <div className="fixed inset-0 bg-slate-900/40 flex items-center justify-center z-[150] p-4 backdrop-blur-md transition-all duration-300">
-                    <div className="bg-white/90 backdrop-blur-xl border border-white/50 rounded-md shadow-[0_20px_50px_rgb(0,0,0,0.15)] max-w-sm sm:max-w-sm w-[95%] sm:w-full p-4 sm:p-5 animate-in fade-in zoom-in duration-300">
-                        <div className="flex items-center justify-center w-8 h-8 sm:w-12 sm:h-12 mx-auto bg-red-100 rounded-full mb-3 sm:mb-4">
-                            <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                            </svg>
-                        </div>
-                        <h3 className="text-xl sm:text-2xl font-bold text-center text-gray-900 mb-2 sm:mb-3 tracking-tight">Delete Banner?</h3>
-                        <p className="text-sm sm:text-[14px] text-center text-gray-500 mb-4 sm:mb-6 font-normal">
-                            Are you absolutely sure you want to delete this banner? This action cannot be undone.
-                        </p>
-                        <div className="flex justify-center gap-3 sm:gap-4">
-                            <button
-                                onClick={() => setBannerToDelete(null)}
-                                className="w-24 sm:w-28 px-3 py-1.5 text-sm font-medium rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50 transition-all focus:outline-none cursor-pointer"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                onClick={confirmDelete}
-                                disabled={isDeleting}
-                                className="relative w-24 sm:w-28 px-4 py-1.5 text-sm font-medium rounded-md bg-gradient-to-r from-red-500 to-red-500 text-white hover:from-red-600 hover:to-red-600 transition-all shadow-lg shadow-red-500/30 focus:outline-none focus:ring-red-200 cursor-pointer disabled:opacity-80 disabled:cursor-not-allowed flex justify-center items-center"
-                            >
-                                <span className={`transition-opacity ${isDeleting ? 'opacity-0' : 'opacity-100'}`}>Delete</span>
-                                {isDeleting && (
-                                    <div className="absolute inset-0 flex items-center justify-center">
-                                        <Spinner className="w-5 h-5 text-white" />
-                                    </div>
-                                )}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+            <ConfirmModal
+                isOpen={!!bannerToDelete}
+                title="Delete banner?"
+                description="Are you absolutely sure you want to delete this banner? This action cannot be undone."
+                onCancel={() => setBannerToDelete(null)}
+                onConfirm={confirmDelete}
+                cancelText="Cancel"
+                confirmText="Delete"
+                isLoading={isDeleting}
+            />
         </div>
     );
 }

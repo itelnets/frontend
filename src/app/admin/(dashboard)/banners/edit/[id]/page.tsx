@@ -6,7 +6,6 @@ import { updateBanner, BannerItem } from '../../../../../../services/banner';
 import toast from 'react-hot-toast';
 import Spinner from '@/components/Spinner';
 import PageLoader from '@/components/PageLoader';
-import Link from 'next/link';
 
 export default function EditBannerPage({ params }: { params: Promise<{ id: string }> }) {
     const router = useRouter();
@@ -138,7 +137,7 @@ export default function EditBannerPage({ params }: { params: Promise<{ id: strin
                 }
 
                 const uploadData = await uploadRes.json();
-                newImageKey = uploadData.imageKey;
+                newImageKey = uploadData.imageUrl;
                 newFileSize = selectedFile.size;
                 newWidth = imageDimensions.width;
                 newHeight = imageDimensions.height;

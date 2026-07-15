@@ -277,16 +277,16 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
 
                 if (!res.ok) throw new Error('Image upload failed');
                 const data = await res.json();
-                return data.imageKey;
+                return data.imageUrl;
             });
 
-            const finalImageKeys = await Promise.all(uploadPromises);
+            const finalImageUrls = await Promise.all(uploadPromises);
 
             const productData = {
                 ...formData,
                 price: Number(formData.price),
                 discount: Number(formData.discount),
-                images: finalImageKeys, // Send total combined array of keys
+                images: finalImageUrls, // Send total combined array of full S3 URLs
                 specifications: specifications.filter(s => s.key.trim() !== '' && s.value.trim() !== ''),
             };
 

@@ -19,13 +19,13 @@ export const getBanners = async (): Promise<BannerItem[]> => {
 };
 
 export const createBanner = async (
-    imageKey: string,
+    imageUrl: string,
     fileSize: number,
     width: number,
     height: number
 ): Promise<BannerItem> => {
     const { data } = await api.post<{ message: string, banner: BannerItem }>('/banners', {
-        imageKey,
+        imageKey: imageUrl,
         fileSize,
         width,
         height
