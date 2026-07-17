@@ -33,7 +33,7 @@ api.interceptors.response.use(
 
         if (error.response?.status === 401) {
             // Do not force a redirect if the user is already trying to log in
-            if (originalRequest.url === '/auth/login') {
+            if (originalRequest.url === '/auth/login' || originalRequest.url === '/auth/admin-login') {
                 return Promise.reject(error);
             }
 

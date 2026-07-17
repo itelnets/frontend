@@ -184,7 +184,7 @@ export default function AddProductPage() {
         e.preventDefault();
 
         if (selectedImages.length === 0) {
-            toast.error('Please add at least one image.');
+            toast.error('Please add at least one image');
             return;
         }
 
@@ -238,21 +238,12 @@ export default function AddProductPage() {
         }
     };
 
-    if (isCancelling) {
+    if (isCancelling || isLoading) {
         return <PageLoader />;
     }
 
     return (
         <div className="font-sans p-0 sm:p-4 lg:h-full lg:flex lg:flex-col lg:overflow-hidden">
-            {isLoading && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/40 backdrop-blur-sm">
-                    <div className="flex flex-col items-center justify-center p-8 bg-white/90 rounded-2xl shadow-2xl border border-gray-100">
-                        <Spinner className="w-12 h-12 text-green-600 mb-4 animate-spin" />
-                        <p className="text-base font-bold text-gray-800 tracking-wide">Creating Product...</p>
-                        <p className="text-xs text-gray-500 mt-2">Please wait while we set up your product</p>
-                    </div>
-                </div>
-            )}
             <div className="w-full lg:flex-1 bg-white/80 backdrop-blur-xl border border-white/50 rounded-md shadow-[0_8px_30px_rgb(0,0,0,0.08)] p-3 sm:p-6 transition-all lg:overflow-hidden lg:flex lg:flex-col">
                 <form id="product-form" onSubmit={handleSubmit} noValidate className="flex flex-col lg:flex-row gap-8 items-start lg:flex-1 lg:overflow-hidden">
 

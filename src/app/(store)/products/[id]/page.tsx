@@ -163,17 +163,22 @@ export default function ProductDetailsPage() {
     );
 
     const renderTitleAndRating = () => (
-        <div className="mb-4 lg:mb-6">
+        <div className="mb-2 lg:mb-6">
             <div className="flex items-center gap-2 mb-2">
-                <span className="bg-[#B7E6FF] text-black text-[13px] font-bold px-2 py-1 rounded">{displayProduct.brand}</span>
+                <span
+                    className={`text-black text-[13px] font-bold px-2 py-1 rounded ${displayProduct.brand ? "bg-[#B7E6FF]" : ""
+                        }`}
+                >
+                    {displayProduct.brand}
+                </span>
                 {displayProduct.bestSeller?.toLowerCase() === 'yes' && <span className="bg-orange-100 text-orange-800 text-[10px] font-bold px-2 py-0.5 rounded">Best seller</span>}
             </div>
 
-            <h1 className="text-lg sm:text-xl md:text-xl font-bold text-gray-900 leading-snug">
+            <h1 className="text-[14px] sm:text-xl font-bold text-gray-900 leading-snug">
                 {displayProduct.name}
             </h1>
 
-            <div className="text-sm text-gray-600">
+            <div className="text-[12px] sm:text-sm text-gray-600">
                 By <Link href="#" className="text-[#0052A5]">{displayProduct.manufacturer}</Link>
             </div>
 
@@ -217,13 +222,13 @@ export default function ProductDetailsPage() {
 
     const renderCartBox = () => (
         <div className="w-full space-y-4">
-            <div className="border border-gray-200 rounded-xl p-3 lg:p-5 shadow-sm bg-white">
-                <div className="flex flex-col lg:flex-row lg:items-baseline gap-1 lg:gap-2 mb-4 lg:mb-6">
+            <div className="border border-gray-200 rounded-xl p-3 lg:p-5 bg-white">
+                <div className="flex flex-row lg:items-baseline gap-1 lg:gap-2 mb-4 lg:mb-6">
                     <span className="text-xl lg:text-2xl font-extrabold text-gray-900">₹{(currentPrice * quantity).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                     {displayProduct.discount > 0 && (
                         <>
                             <span className="text-sm lg:text-base text-gray-500 line-through">₹{(originalPrice * quantity).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                            <span className="bg-[#ff3344] text-white text-[10px] lg:text-xs font-bold px-1.5 py-0.5 rounded shadow-sm">{displayProduct.discount}% OFF</span>
+                            <span className="bg-[#ff3344] text-white text-[10px] lg:text-xs font-bold px-1.5 py-1 rounded h-fit shadow-sm">{displayProduct.discount}% OFF</span>
                         </>
                     )}
                 </div>
@@ -244,7 +249,7 @@ export default function ProductDetailsPage() {
 
                 <button
                     onClick={() => setShowListsModal(true)}
-                    className={`w-full flex items-center justify-center gap-2 border ${addedToList ? 'border-green-600 bg-[#f0f7f4] text-green-700' : 'border-gray-300 hover:bg-gray-50 text-gray-700'} font-bold py-2 lg:py-2.5 rounded-md transition-colors text-[11px] lg:text-sm cursor-pointer`}
+                    className={`w-full flex items-center justify-center gap-2 border ${addedToList ? 'border-green-600 bg-[#f0f7f4] text-green-700' : 'border-gray-300 hover:bg-gray-50 text-gray-700'} font-bold py-2 lg:py-2.5 rounded-md transition-colors text-[13px] lg:text-sm cursor-pointer`}
                 >
                     <svg className="w-5 h-5 lg:w-6 lg:h-6 text-green-600" fill={addedToList ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
                     {addedToList ? 'Added to Lists' : 'Add to Lists'}
@@ -265,13 +270,12 @@ export default function ProductDetailsPage() {
                     <svg className="w-4 h-4 lg:w-5 lg:h-5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" /></svg>
                     Quality Promise
                 </div>
-                <p className="text-[10px] lg:text-xs text-gray-700 mb-1 leading-tight">
+                <p className="text-[12px] lg:text-xs text-gray-700 mb-1 leading-tight">
                     This product is guaranteed authentic and backed by our easy returns & refunds policy.
                 </p>
-                <a href="#" className="text-[10px] lg:text-xs text-blue-600 hover:underline">Details</a>
             </div>
 
-            <div className="border border-gray-200 rounded-xl p-3 lg:p-5 shadow-sm bg-white">
+            <div className="border border-gray-200 rounded-xl p-3 lg:p-5 bg-white">
                 {recommendedProducts.length > 0 ? (
                     <>
                         <div className="flex justify-center gap-2 mb-2">
@@ -332,8 +336,8 @@ export default function ProductDetailsPage() {
 
     const renderFrequentlyPurchased = () => {
         return (
-            <div className="w-full mt-10 lg:mt-16 mb-8 border-t border-gray-200 pt-8 lg:pt-12">
-                <h2 className="text-lg lg:text-xl font-bold text-gray-900 mb-4 lg:mb-6 px-2 lg:px-0">Frequently purchased together</h2>
+            <div className="w-full pt-6 lg:pt-8">
+                <h2 className="text-lg lg:text-xl font-bold text-gray-900 mb-1 px-2 lg:px-0">Frequently purchased together</h2>
                 <div className="flex gap-4 overflow-x-auto pb-4 px-2 lg:px-0 hide-scrollbar" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
                     {recommendedProducts.length > 0 ? recommendedProducts.map((prod, i) => (
                         <div key={i} onClick={() => router.push(`/products/${prod._id}`)} className="min-w-[140px] max-w-[140px] lg:min-w-[160px] lg:max-w-[160px] flex flex-col cursor-pointer group">
@@ -376,23 +380,23 @@ export default function ProductDetailsPage() {
     };
 
     const renderProductInformation = () => (
-        <div className="w-full mb-12">
-            <h2 className="text-lg lg:text-xl font-bold text-gray-900 mb-6 bg-gray-50 p-3 lg:p-4 rounded-md">Product information</h2>
+        <div className="w-full mb-4">
+            <h2 className="text-lg lg:text-xl font-bold text-gray-900 mb-4 bg-gray-50 py-3 lg:py-4 px-0 sm:px-1 rounded-md">Product information</h2>
 
-            <div className="flex flex-col lg:flex-row gap-8 lg:gap-16 px-2 lg:px-4">
+            <div className="flex flex-col lg:flex-row gap-8 lg:gap-16 px-0 sm:px-2 lg:px-4">
                 {/* Left Col: Overview */}
                 <div className="w-full">
                     {displayProduct.overview && (
                         <>
                             <h3 className="font-bold text-gray-900 mb-3 lg:mb-4 text-sm lg:text-base">Overview</h3>
-                            <div className="text-xs lg:text-sm text-gray-700 leading-relaxed mb-6 lg:mb-8 whitespace-pre-wrap" dangerouslySetInnerHTML={{ __html: displayProduct.overview }} />
+                            <div className="text-xs lg:text-sm text-gray-700 leading-relaxed mb-4 lg:mb-6 whitespace-pre-wrap" dangerouslySetInnerHTML={{ __html: displayProduct.overview }} />
                         </>
                     )}
 
                     {displayProduct.specifications?.length > 0 && (
                         <>
                             <h3 className="font-bold text-gray-900 mb-3 lg:mb-4 text-sm lg:text-base">Specifications</h3>
-                            <ul className="list-disc pl-4 lg:pl-5 space-y-1.5 text-xs lg:text-sm text-gray-800 mb-6 lg:mb-8">
+                            <ul className="list-disc pl-4 lg:pl-5 space-y-1.5 text-xs lg:text-sm text-gray-800 mb-4 lg:mb-6">
                                 {displayProduct.specifications.map((spec: any, idx: number) => (
                                     <li key={idx}>{spec.key}: {spec.value}</li>
                                 ))}
@@ -403,7 +407,7 @@ export default function ProductDetailsPage() {
                     {displayProduct.suggestedUse && (
                         <>
                             <h3 className="font-bold text-gray-900 mb-3 lg:mb-4 text-sm lg:text-base">Suggested use</h3>
-                            <p className="text-xs lg:text-sm text-gray-800 leading-relaxed mb-6 lg:mb-8 whitespace-pre-wrap">
+                            <p className="text-xs lg:text-sm text-gray-800 leading-relaxed mb-4 lg:mb-6 whitespace-pre-wrap">
                                 {displayProduct.suggestedUse}
                             </p>
                         </>
@@ -412,7 +416,7 @@ export default function ProductDetailsPage() {
                     {displayProduct.otherIngredients && (
                         <>
                             <h3 className="font-bold text-gray-900 mb-3 lg:mb-4 text-sm lg:text-base">Other ingredients</h3>
-                            <div className="text-xs lg:text-sm text-gray-800 space-y-4 mb-6 lg:mb-8 whitespace-pre-wrap">
+                            <div className="text-xs lg:text-sm text-gray-800 space-y-4 mb-4 lg:mb-6 whitespace-pre-wrap">
                                 {displayProduct.otherIngredients}
                             </div>
                         </>
@@ -421,7 +425,7 @@ export default function ProductDetailsPage() {
                     {displayProduct.warnings && (
                         <>
                             <h3 className="font-bold text-gray-900 mb-3 lg:mb-4 text-sm lg:text-base">Warnings</h3>
-                            <div className="text-xs lg:text-sm text-gray-800 space-y-4 mb-6 lg:mb-8 leading-relaxed whitespace-pre-wrap">
+                            <div className="text-xs lg:text-sm text-gray-800 space-y-4 mb-4 lg:mb-6 leading-relaxed whitespace-pre-wrap">
                                 {displayProduct.warnings}
                             </div>
                         </>
@@ -430,7 +434,7 @@ export default function ProductDetailsPage() {
                     {displayProduct.disclaimer && (
                         <>
                             <h3 className="font-bold text-gray-900 mb-3 lg:mb-4 text-sm lg:text-base">Disclaimer</h3>
-                            <div className="text-xs lg:text-sm text-gray-800 space-y-4 mb-6 lg:mb-8 leading-relaxed whitespace-pre-wrap">
+                            <div className="text-xs lg:text-sm text-gray-800 space-y-4 mb-4 lg:mb-6 leading-relaxed whitespace-pre-wrap">
                                 {displayProduct.disclaimer}
                             </div>
                         </>
@@ -461,10 +465,10 @@ export default function ProductDetailsPage() {
                 </div>
             </div>
 
-            <div className="max-w-[1400px] mx-auto px-4 py-4 lg:py-8">
+            <div className="max-w-[1400px] mx-auto p-3 sm:p-4">
 
                 {/* --- MOBILE LAYOUT (hidden on desktop) --- */}
-                <div className="flex flex-col lg:hidden gap-6">
+                <div className="flex flex-col lg:hidden gap-2 sm:gap-6">
                     {renderTitleAndRating()}
                     {renderImageGallery()}
                     {renderProductDetailsBottom()}

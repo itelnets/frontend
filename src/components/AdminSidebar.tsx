@@ -43,15 +43,14 @@ export default function AdminSidebar({ isOpen, setIsOpen }: AdminSidebarProps) {
                     }`}
             >
                 {/* Logo Area */}
-                <div className="h-16 flex items-center px-6 border-b border-gray-100 shrink-0 bg-gradient-to-r from-green-50 to-white">
-                    <span className="text-2xl font-extrabold text-gray-900 tracking-tight flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-md bg-gradient-to-br from-green-500 to-green-500 flex items-center justify-center text-white text-lg">S</div>
+                <div className="h-14 sm:h-16 flex items-center px-6 border-b border-gray-100 shrink-0 bg-gradient-to-r from-green-50 to-white">
+                    <span className="text-[20px] sm:text-xl font-extrabold text-gray-900 tracking-tight flex items-center gap-2">
                         Admin
                     </span>
                 </div>
 
                 {/* Navigation Links */}
-                <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-1">
+                <nav className="flex-1 overflow-y-auto pt-2 sm:pt-3 pb-3 px-3 space-y-1">
 
                     {menuItems.map((item) => {
                         const isActive = pathname === item.path || (item.path !== '/admin' && item.path !== '/' && pathname?.startsWith(item.path));
@@ -62,13 +61,13 @@ export default function AdminSidebar({ isOpen, setIsOpen }: AdminSidebarProps) {
                                 draggable={false}
                                 onContextMenu={(e) => e.preventDefault()}
                                 onClick={() => setIsOpen(false)}
-                                className={`flex items-center gap-3 px-3 py-2.5 rounded-md font-medium text-sm group select-none cursor-pointer ${isActive
+                                className={`flex items-center gap-2 sm:gap-3 px-1.5 sm:px-3 py-2 sm:py-2.5 rounded-md font-medium text-sm group select-none cursor-pointer ${isActive
                                     ? 'bg-green-600 text-white shadow-sm'
                                     : 'text-gray-600 hover:bg-green-50 hover:text-green-700'
                                     }`}
                             >
                                 <svg
-                                    className={`w-5 h-5 ${isActive ? 'text-white' : 'text-gray-400 group-hover:text-green-600'}`}
+                                    className={`w-4.5 h-4.5 sm:w-5 sm:h-5 ${isActive ? 'text-white' : 'text-gray-400 group-hover:text-green-600'}`}
                                     fill="none"
                                     stroke="currentColor"
                                     viewBox="0 0 24 24"
@@ -76,7 +75,6 @@ export default function AdminSidebar({ isOpen, setIsOpen }: AdminSidebarProps) {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={isActive ? "2.5" : "2"} d={item.icon} />
                                 </svg>
                                 {item.name}
-                                {isActive && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-white/80"></div>}
                             </Link>
                         );
                     })}
@@ -84,7 +82,7 @@ export default function AdminSidebar({ isOpen, setIsOpen }: AdminSidebarProps) {
 
                 <div className="p-4 border-t border-gray-100">
                     <button onClick={handleLogout} className="flex items-center gap-3 px-3 py-2.5 rounded-md w-full cursor-pointer text-left text-sm font-medium text-red-600 hover:bg-red-50 transition-colors">
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                        <svg className="w-4.5 h-4.5 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
                         Logout
                     </button>
                 </div>

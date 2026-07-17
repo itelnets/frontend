@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import api from '@/services/api';
@@ -15,6 +15,13 @@ export default function LoginPage() {
     const [isLoading, setIsLoading] = useState(false);
     const [showPasswordErrors, setShowPasswordErrors] = useState(false);
     const router = useRouter();
+
+    useEffect(() => {
+        const userInfo = localStorage.getItem('userInfo');
+        if (userInfo) {
+            router.push('/');
+        }
+    }, [router]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -90,17 +97,17 @@ export default function LoginPage() {
 
     return (
         <div className="flex flex-1 bg-[#f4f5f6] items-center justify-center py-6 px-4 sm:px-6 lg:px-8">
-            <div className="w-full max-w-md space-y-6 bg-white p-6 sm:p-8 rounded-xl shadow-md border border-gray-100">
-                <div className="flex border-b border-gray-200 mb-6">
+            <div className="w-full max-w-md space-y-6 bg-white p-5 sm:p-8 rounded-xl shadow-md border border-gray-100">
+                <div className="flex border-b border-gray-200 mb-4">
                     <button
                         type="button"
-                        className="flex-1 py-4 text-center text-lg font-bold text-[#458500] border-b-2 border-[#458500]"
+                        className="flex-1 py-2.5 text-center text-[16px] sm:text-lg font-bold text-[#458500] border-b-2 border-[#458500]"
                     >
                         Sign In
                     </button>
                     <Link
                         href="/register"
-                        className="flex-1 py-4 text-center text-lg font-medium text-gray-500 hover:text-gray-700 transition-colors"
+                        className="flex-1 py-2.5 text-center text-[16px] sm:text-lg font-medium text-gray-500 hover:text-gray-700 transition-colors"
                     >
                         Create Account
                     </Link>
@@ -215,6 +222,16 @@ export default function LoginPage() {
 
                 </form>
             </div>
+
+            {isLoading && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/40 backdrop-blur-sm">
+                    <div className="flex flex-col items-center justify-center p-8 bg-white/90 rounded-2xl shadow-2xl border border-gray-100">
+                        <Spinner className="w-12 h-12 text-[#458500] mb-4 animate-spin" />
+                        <p className="text-base font-bold text-gray-800 tracking-wide">Authenticating...</p>
+                        <p className="text-xs text-gray-500 mt-2">Please wait while we verify your credentials</p>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

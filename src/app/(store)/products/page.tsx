@@ -1,12 +1,12 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { getProducts } from '@/services/product';
 import toast from 'react-hot-toast';
-import AddToCartButton from '@/components/AddToCartButton';
+import ProductCard from '@/components/ProductCard';
 import { useCart } from '@/context/CartContext';
+import Spinner from '@/components/Spinner';
 
 interface Product {
     _id: string;
@@ -53,14 +53,14 @@ export default function ProductsPage() {
 
     if (isLoading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gray-50">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-700"></div>
+            <div className="absolute min-h-auto inset-0 flex items-center justify-center">
+                <Spinner className="w-8 h-8 text-green-700" />
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 py-5 px-3 sm:px-4 lg:px-5">
+        <div className="min-h-screen bg-gray-50 py-5 px-2.5 sm:px-4 lg:px-5">
             <div className="max-w-[1500px] mx-auto flex gap-8">
                 {/* Left Sidebar (Filters - Desktop Only) */}
                 <div className="w-64 shrink-0 hidden lg:block bg-white p-5 rounded-xl border border-gray-200 h-fit sticky top-6 shadow-sm">
@@ -116,69 +116,8 @@ export default function ProductsPage() {
 
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-6 gap-2 sm:gap-3">
                         {products.map((product) => (
-                            <div
-                                onClick={() => router.push(`/products/${product._id}`)}
-                                key={product._id}
-                                className="bg-white rounded-md flex flex-col cursor-pointer shadow-sm hover:shadow-lg transition-shadow group border border-gray-300 overflow-hidden"
-                            >
-                                <div className="w-full aspect-[6/5] flex items-center justify-center relative bg-white border-b border-gray-100 p-2.5 sm:p-4">
-                                    {product.images && product.images.length > 0 ? (
-                                        <img src={product.images[0].startsWith('http') ? product.images[0] : `${process.env.NEXT_PUBLIC_API_URL}/upload/file/${product.images[0]}`} alt={product.name} className="w-full h-full object-contain mix-blend-multiply" />
-                                    ) : (
-                                        <svg className="w-12 h-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                                    )}
-                                    {/* Add to Cart button on hover */}
-                                    <AddToCartButton product={product} />
-
-                                    {/* Heart / Wishlist button */}
-                                    <button
-                                        onClick={(e) => toggleList(e, product)}
-                                        className="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-white rounded-full shadow-sm border border-gray-200 hover:scale-110 transition-transform cursor-pointer z-10"
-                                        title={isInList(product._id) ? 'Remove from list' : 'Add to list'}
-                                    >
-                                        <svg
-                                            className="w-4 h-4 text-green-600"
-                                            fill={isInList(product._id) ? 'currentColor' : 'none'}
-                                            stroke="currentColor"
-                                            viewBox="0 0 24 24"
-                                        >
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                                        </svg>
-                                    </button>
-                                </div>
-
-                                <div className="p-3 flex-1 flex flex-col">
-                                    <div className="text-[13px] text-gray-800 line-clamp-3 leading-snug mb-2 flex-1 font-medium group-hover:text-blue-600 transition-colors">
-                                        {product.name}
-                                    </div>
-
-                                    <div className="flex items-center gap-1.5 mb-2">
-                                        <div className="flex text-yellow-400">
-                                            {[...Array(5)].map((_, i) => (
-                                                <svg key={i} className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
-                                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                                </svg>
-                                            ))}
-                                        </div>
-                                        <span className="text-[11px] text-blue-600 hover:underline cursor-pointer">0 reviews</span>
-                                    </div>
-
-                                    <div className="flex items-center gap-2 mt-auto">
-                                        <div className="text-lg font-bold text-gray-900">
-                                            <span className="text-sm font-medium relative -top-0.5 pr-0.5">₹</span>{product.discount > 0 ? Math.round(product.price * (1 - product.discount / 100)) : product.price}
-                                        </div>
-                                        {product.discount > 0 && (
-                                            <>
-                                                <div className="text-xs text-gray-500 line-through">
-                                                    ₹{product.price}
-                                                </div>
-                                                <div className="bg-[#ff3344] text-white text-[10px] font-bold px-1.5 py-0.5 rounded shadow-sm">
-                                                    {product.discount}% OFF
-                                                </div>
-                                            </>
-                                        )}
-                                    </div>
-                                </div>
+                            <div key={product._id} className="h-full">
+                                <ProductCard product={product} showHeart={true} />
                             </div>
                         ))}
                     </div>

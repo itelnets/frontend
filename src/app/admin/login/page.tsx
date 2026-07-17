@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import api from '@/services/api';
 import toast from 'react-hot-toast';
+import Spinner from '@/components/Spinner';
 
 export default function AdminLoginPage() {
     const [email, setEmail] = useState('');
@@ -23,7 +24,7 @@ export default function AdminLoginPage() {
 
         setIsLoading(true);
         try {
-            const { data } = await api.post('/auth/login', { email, password });
+            const { data } = await api.post('/auth/admin-login', { email, password });
 
             if (data.role !== 'admin') {
                 toast.error('Access denied. Only admin can access.');
@@ -131,6 +132,16 @@ export default function AdminLoginPage() {
                     </div>
                 </form>
             </div>
+
+            {isLoading && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/60 backdrop-blur-sm">
+                    <div className="flex flex-col items-center justify-center p-8 bg-gray-800 rounded-2xl shadow-2xl border border-gray-700">
+                        <Spinner className="w-12 h-12 text-blue-500 mb-4 animate-spin" />
+                        <p className="text-base font-bold text-white tracking-wide">Authenticating...</p>
+                        <p className="text-xs text-gray-400 mt-2">Please wait while we verify your credentials</p>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

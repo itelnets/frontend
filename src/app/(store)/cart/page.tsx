@@ -2,19 +2,25 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import toast from 'react-hot-toast';
 import { useCart } from '@/context/CartContext';
 import { getProducts } from '@/services/product';
-import AddToCartButton from '@/components/AddToCartButton';
 import ConfirmModal from '@/components/ConfirmModal';
 import QuantityDropdown from '@/components/QuantityDropdown';
+import ProductCard from '@/components/ProductCard';
+import PageLoader from '@/components/PageLoader';
 
 export default function CartPage() {
-    const { cartItems, cartCount, removeFromCart, addToCart, myLists, moveToCartFromList, moveToList, clearCart, removeFromList, savedForLater, saveForLater, moveToCartFromSaved, removeFromSaved } = useCart();
+    const { cartItems, cartCount, removeFromCart, addToCart, myLists, moveToCartFromList, moveToList, clearCart, removeFromList, savedForLater, saveForLater, moveToCartFromSaved, removeFromSaved, isCartLoading } = useCart();
+    const router = useRouter();
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [recommended, setRecommended] = useState<any[]>([]);
-    const [activeTab, setActiveTab] = useState<'saved' | 'myLists'>('myLists');
+    const [isRecsLoading, setIsRecsLoading] = useState(true);
+    const [activeTab, setActiveTab] = useState<'saved' | 'myLists'>('saved');
     const [isRemoveAllModalOpen, setIsRemoveAllModalOpen] = useState(false);
     const [deleteTarget, setDeleteTarget] = useState<{ type: 'cart' | 'saved' | 'myList'; item: any } | null>(null);
+    const [infoModal, setInfoModal] = useState<'shipping' | 'taxes' | 'rewards' | null>(null);
 
     // Estimated delivery date: 7-12 days from today
     const getDeliveryDateRange = () => {
@@ -41,10 +47,13 @@ export default function CartPage() {
         // Fetch recommendations
         const fetchRecs = async () => {
             try {
+                setIsRecsLoading(true);
                 const { data } = await getProducts();
                 setRecommended(data.slice(0, 10)); // Take top 10 for carousel
             } catch (err) {
                 console.error(err);
+            } finally {
+                setIsRecsLoading(false);
             }
         };
         fetchRecs();
@@ -60,49 +69,18 @@ export default function CartPage() {
         addToCart(product, diff);
     };
 
+    if (isCartLoading || isRecsLoading) {
+        return <PageLoader />;
+    }
+
     const RecommendedCarousel = () => (
-        <div className="mt-8">
-            <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 mb-6">Recommended for you</h2>
+        <div className="mt-2">
+            <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-2 sm:mb-6">Recommended for you</h2>
             <div className="relative">
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 sm:gap-4 pb-4">
                     {recommended.length > 0 ? recommended.map((product: any) => (
-                        <Link href={`/products/${product._id}`} key={product._id} className="bg-white rounded-md flex flex-col cursor-pointer hover:shadow-lg transition-shadow group border border-gray-300 overflow-hidden w-full">
-                            <div className="w-full aspect-[6/5] flex items-center justify-center relative bg-white border-b border-gray-100 p-2.5 sm:p-4">
-                                {product.images && product.images.length > 0 ? (
-                                    <img src={product.images[0].startsWith('http') ? product.images[0] : `${process.env.NEXT_PUBLIC_API_URL}/upload/file/${product.images[0]}`} alt={product.name} className="w-full h-full object-contain mix-blend-multiply" />
-                                ) : (
-                                    <svg className="w-12 h-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                                )}
-                                <AddToCartButton product={product} />
-                            </div>
-                            <div className="p-2.5 sm:p-3 flex-1 flex flex-col relative">
-                                <div className="text-[13px] text-gray-800 line-clamp-3 leading-snug mb-2 flex-1 font-medium group-hover:text-blue-700 transition-colors">
-                                    {product.name}
-                                </div>
-                                <div className="flex items-center gap-1.5 mb-2">
-                                    <div className="flex text-yellow-400">
-                                        {[...Array(5)].map((_, i) => (
-                                            <svg key={i} className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
-                                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                            </svg>
-                                        ))}
-                                    </div>
-                                </div>
-                                <div className="flex items-center gap-2 mt-auto">
-                                    <div className="text-lg font-bold text-gray-900">
-                                        <span className="text-sm font-medium relative -top-0.5 pr-0.5">₹</span>{product.discount > 0 ? Math.round(product.price * (1 - product.discount / 100)) : product.price}
-                                    </div>
-                                    {product.discount > 0 && (
-                                        <>
-                                            <div className="text-xs text-gray-500 line-through">₹{product.price}</div>
-                                        </>
-                                    )}
-                                </div>
-                            </div>
-                        </Link>
-                    )) : (
-                        <div className="text-gray-500 py-8 text-sm">Loading recommendations...</div>
-                    )}
+                        <ProductCard key={product._id} product={product} />
+                    )) : null}
                 </div>
             </div>
         </div>
@@ -110,12 +88,12 @@ export default function CartPage() {
 
     return (
         <div className="font-sans min-h-screen bg-white pb-12">
-            <div className="max-w-[1400px] mx-auto px-4 pt-6">
+            <div className="max-w-[1400px] mx-auto px-2.5 sm:px-4 pt-6">
 
                 {cartItems.length === 0 ? (
                     <div>
-                        <div className="flex flex-col items-center justify-center text-center py-6 sm:py-10 md:py-12">
-                            <div className="w-16 sm:w-24 h-16 sm:h-24 bg-gray-50 rounded-full flex items-center justify-center mb-6">
+                        <div className="flex flex-col items-center justify-center text-center py-2 sm:py-8 md:py-10">
+                            <div className="w-16 sm:w-24 h-16 sm:h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4 sm:mb-6">
                                 <svg className="w-8 sm:w-12 h-8 sm:h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
                             </div>
                             <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 mb-2">Your shopping cart is empty</h1>
@@ -123,12 +101,12 @@ export default function CartPage() {
                             {!isLoggedIn && (
                                 <>
                                     <p className="text-sm text-gray-600 mb-6">Sign in to enjoy exclusive discounts and deals</p>
-                                    <div className="flex flex-col sm:flex-row gap-4 mb-8">
+                                    <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-4">
                                         <Link href="/" className="px-4 py-2 text-sm sm:text-base sm:px-6 sm:py-2.5 rounded-md border border-[#458500] text-[#458500] font-bold hover:bg-[#eef6e6] transition-colors">
                                             Start shopping
                                         </Link>
                                         <Link href="/login" className="px-4 py-2 text-sm sm:text-base sm:px-6 sm:py-2.5 rounded-md bg-[#458500] hover:bg-[#366800] text-white font-bold transition-colors">
-                                            Sign In / Create Account
+                                            Create Account
                                         </Link>
                                     </div>
                                 </>
@@ -148,14 +126,6 @@ export default function CartPage() {
                         <div className="flex flex-col lg:flex-row gap-6 lg:gap-10">
                             {/* LEFT COLUMN: Cart Items */}
                             <div className="flex-1 min-w-0">
-                                {/* Blue Info Alert */}
-                                <div className="bg-[#eef6fa] border border-[#d2eaf7] rounded-md p-4 flex gap-3 mb-6">
-                                    <svg className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
-                                    <div className="text-sm text-gray-700">
-                                        Special note: Per India Customs, all customers ordering internationally are required to complete KYC documents for customs clearance. The shipping information must be an exact match to the consignee's name and residential address on the KYC document... <span className="font-bold underline cursor-pointer">Show More</span>
-                                    </div>
-                                </div>
-
                                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4 border-b border-gray-200 pb-3">
                                     <div className="flex flex-wrap items-center gap-2">
                                         <h1 className="text-xl md:text-2xl font-bold text-gray-900 flex items-center gap-2">
@@ -206,19 +176,19 @@ export default function CartPage() {
                                                     Product code: {item.product?._id ? item.product._id.substring(0, 8).toUpperCase() : 'N/A'}
                                                 </div>
 
-                                                <div className="flex flex-wrap items-center gap-1.5 sm:gap-3 mt-auto">
+                                                <div className="flex flex-wrap items-center gap-2 sm:gap-3 mt-auto">
                                                     {/* Quantity Dropdown */}
                                                     <QuantityDropdown
                                                         value={item.quantity}
                                                         onChange={(qty) => updateQuantity(item.product, qty, item.quantity)}
                                                     />
 
-                                                    <button onClick={() => setDeleteTarget({ type: 'cart', item })} className="w-7 h-7 sm:w-9 sm:h-9 flex items-center justify-center border border-gray-300 rounded-full hover:bg-gray-50 text-gray-500 hover:text-black transition-colors cursor-pointer" title="Remove">
-                                                        <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                                    <button onClick={() => setDeleteTarget({ type: 'cart', item })} className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center border border-gray-300 rounded-full hover:bg-gray-50 text-gray-500 hover:text-black transition-colors cursor-pointer" title="Remove">
+                                                        <svg className="w-4 h-4 sm:w-4.5 sm:h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                                                     </button>
 
-                                                    <button onClick={() => saveForLater(item.product)} className="px-2 sm:px-4 py-1 sm:py-1.5 border border-gray-300 rounded-full text-[10px] sm:text-[13px] font-bold text-[#333] hover:bg-gray-50 transition-colors cursor-pointer">
-                                                        Save for later
+                                                    <button onClick={() => saveForLater(item.product)} className="px-3 sm:px-4 py-[5px] sm:py-1.5 border border-gray-300 rounded-full text-[11px] sm:text-[13px] font-bold text-[#333] hover:bg-gray-50 transition-colors cursor-pointer">
+                                                        Save for Later
                                                     </button>
                                                 </div>
                                             </div>
@@ -245,11 +215,11 @@ export default function CartPage() {
                                     </div>
 
                                     {/* Order Summary Totals */}
-                                    <div className="border border-gray-200 rounded-md p-5 bg-white shadow-sm">
-                                        <h3 className="font-bold text-gray-900 text-lg mb-4">Order summary</h3>
+                                    <div className="border border-gray-200 rounded-md p-4 sm:p-5 bg-white shadow-sm">
+                                        <h3 className="font-bold text-gray-900 text-lg mb-3 sm:mb-4">Order summary</h3>
 
-                                        <div className="space-y-3 border-b border-gray-200 pb-4 mb-4">
-                                            <div className="flex justify-between text-sm">
+                                        <div className="space-y-3 border-b border-gray-200 pb-2 sm:pb-4 mb-2 sm:mb-4">
+                                            <div className="flex justify-between text-sm sm:text-[15px]">
                                                 <span className="text-gray-600">Items total ({cartCount})</span>
                                                 <span className="font-bold text-gray-900">₹{subtotal.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
                                             </div>
@@ -257,32 +227,41 @@ export default function CartPage() {
                                         </div>
 
                                         <div className="space-y-2 border-b border-gray-200 pb-4 mb-4">
-                                            <div className="flex justify-between text-[13px]">
+                                            <div className="flex justify-between text-[13px] sm:text-[15px]">
                                                 <span className="text-gray-800 font-bold">Subtotal</span>
                                                 <span className="font-bold text-gray-900">₹{subtotal.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
                                             </div>
-                                            <div className="flex justify-between text-[13px]">
-                                                <span className="text-gray-600 flex items-center gap-1">Shipping <svg className="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></span>
-                                                <span className="text-gray-900">₹{shipping.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
-                                            </div>
-                                            <div className="flex justify-between text-[13px]">
-                                                <span className="text-gray-600 flex items-center gap-1">Duties & Taxes <svg className="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></span>
-                                                <span className="text-gray-900">₹{duties.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
-                                            </div>
-                                            <div className="flex justify-between text-[13px]">
-                                                <span className="text-gray-600 flex items-center gap-1">Rewards Credit <svg className="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></span>
-                                                <span className="text-red-500 font-medium">₹0.00</span>
+                                            <div className="flex flex-col gap-1 mb-1.5 sm:mb-2.5">
+                                                <div className="flex justify-between text-[12px] sm:text-[14px]">
+                                                    <span className="text-gray-600 flex items-center gap-1">Shipping <svg onClick={() => setInfoModal('shipping')} className="w-3.5 h-3.5 sm:w-4.5 sm:h-4.5 text-gray-500 cursor-pointer hover:text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></span>
+                                                    <span className="text-gray-900">₹{shipping.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+                                                </div>
+                                                <div className="flex justify-between text-[12px] sm:text-[14px]">
+                                                    <span className="text-gray-600 flex items-center gap-1">Taxes <svg onClick={() => setInfoModal('taxes')} className="w-3.5 h-3.5 sm:w-4.5 sm:h-4.5 text-gray-500 cursor-pointer hover:text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></span>
+                                                    <span className="text-gray-900">₹{duties.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+                                                </div>
+                                                <div className="flex justify-between text-[12px] sm:text-[14px]">
+                                                    <span className="text-gray-600 flex items-center gap-1">Rewards Credit <svg onClick={() => setInfoModal('rewards')} className="w-3.5 h-3.5 sm:w-4.5 sm:h-4.5 text-gray-500 cursor-pointer hover:text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></span>
+                                                    <span className="text-red-500 font-medium">₹0.00</span>
+                                                </div>
                                             </div>
                                         </div>
 
                                         <div className="flex justify-between items-center mb-6">
-                                            <span className="text-lg font-bold text-gray-900">Total</span>
-                                            <span className="text-xl font-extrabold text-gray-900">₹{total.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+                                            <span className="text-[17px] sm:text-lg font-bold text-gray-900">Total</span>
+                                            <span className="text-[17px] sm:text-xl font-extrabold text-gray-900">₹{total.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
                                         </div>
 
-                                        <Link href="/checkout" className="block text-center w-full bg-[#458500] hover:bg-[#366800] text-white font-normal py-3 px-6 rounded-md transition-colors font-bold mb-4 text-[16px] cursor-pointer">
+                                        <button onClick={() => {
+                                            const userInfo = localStorage.getItem('userInfo');
+                                            if (!userInfo) {
+                                                toast.error('Please login first to proceed to checkout');
+                                            } else {
+                                                router.push('/checkout');
+                                            }
+                                        }} className="block text-center w-full bg-[#458500] hover:bg-[#366800] text-white font-normal py-2 sm:py-3 px-6 rounded-md transition-colors font-bold mb-2 sm:mb-4 sm:text-[15px] sm:text-[16px] cursor-pointer">
                                             Proceed to Checkout
-                                        </Link>
+                                        </button>
 
                                         <div className="text-center text-[11px] text-gray-700 font-medium">
                                             Estimated delivery date {getDeliveryDateRange()}
@@ -311,17 +290,17 @@ export default function CartPage() {
                 )}
 
                 {/* Save for later / My Lists Section */}
-                <div className="mt-12 border-t border-gray-200 pt-8 mb-8">
+                <div className="my-4 sm:my-8 border-t border-gray-200">
                     <div className="flex border-b border-gray-200 gap-8">
                         <button
                             onClick={() => setActiveTab('saved')}
-                            className={`pb-3 font-medium text-sm ${activeTab === 'saved' ? 'border-b-2 border-green-600 text-green-700' : 'text-gray-600 hover:text-gray-900'}`}
+                            className={`py-2 sm:py-3 font-medium text-sm cursor-pointer ${activeTab === 'saved' ? 'border-b-2 border-green-600 text-green-700' : 'text-gray-600 hover:text-gray-900'}`}
                         >
-                            Save for later
+                            Save for Later
                         </button>
                         <button
                             onClick={() => setActiveTab('myLists')}
-                            className={`pb-3 font-medium text-sm ${activeTab === 'myLists' ? 'border-b-2 border-green-600 text-green-700' : 'text-gray-600 hover:text-gray-900'}`}
+                            className={`py-2 sm:py-3 font-medium text-sm cursor-pointer ${activeTab === 'myLists' ? 'border-b-2 border-green-600 text-green-700' : 'text-gray-600 hover:text-gray-900'}`}
                         >
                             My lists
                         </button>
@@ -409,6 +388,42 @@ export default function CartPage() {
                 confirmText="Remove"
                 isLoading={false}
             />
+
+            {/* Info Modal */}
+            {infoModal && (
+                <div onClick={() => setInfoModal(null)} className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 p-4">
+                    <div onClick={(e) => e.stopPropagation()} className="bg-white rounded-lg p-4 sm:p-5 max-w-md w-full relative shadow-xl">
+                        <button onClick={() => setInfoModal(null)} className="absolute top-4 right-4 text-gray-400 hover:text-gray-700">
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" /></svg>
+                        </button>
+                        <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-3 sm:mb-4 pr-6">
+                            {infoModal === 'shipping' && 'Shipping Options'}
+                            {infoModal === 'taxes' && 'Factors in Calculating Tax'}
+                            {infoModal === 'rewards' && 'Rewards Credit'}
+                        </h3>
+                        <div className="text-xs sm:text-sm text-gray-700 space-y-4">
+                            {infoModal === 'shipping' && (
+                                <p>We've selected the most cost-effective shipping option for your order. You can explore other shipping methods at checkout.</p>
+                            )}
+                            {infoModal === 'taxes' && (
+                                <>
+                                    <p>The amount of tax depends on a number of factors, such as:</p>
+                                    <ul className="list-disc pl-5 space-y-1 sm:space-y-2">
+                                        <li>The delivery address of the order and possibly the point of shipping</li>
+                                        <li>Whether the product(s) and shipping are taxable in that state</li>
+                                        <li>The combined total of state, local, and use taxes</li>
+                                    </ul>
+                                </>
+                            )}
+                            {infoModal === 'rewards' && (
+                                <>
+                                    <p>Rewards earnings from making referrals will be in pending up to 35 days before becoming available for use. Any available Rewards Credit can be used towards your next purchase. Rewards Credit expires if there are no new Rewards activity (referrals or purchase) for 90 days.</p>
+                                </>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

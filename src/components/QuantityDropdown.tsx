@@ -37,7 +37,7 @@ export default function QuantityDropdown({ value, onChange, max = 10, className 
             <button
                 type="button"
                 onClick={() => setIsOpen(!isOpen)}
-                className="flex items-center justify-between bg-white border border-gray-300 text-gray-800 py-1.5 pl-4 pr-3.5 rounded-full text-sm font-bold min-w-[72px] focus:outline-none hover:border-gray-400 transition-colors cursor-pointer select-none"
+                className="flex items-center justify-between bg-white border border-gray-300 text-gray-800 py-[5px] sm:py-1.5 pl-3.5 sm:pl-4 pr-3 sm:pr-3.5 rounded-full text-sm font-bold min-w-[64px] sm:min-w-[72px] focus:outline-none hover:border-gray-400 transition-colors cursor-pointer select-none"
             >
                 <span>{value}</span>
                 <svg
@@ -52,12 +52,12 @@ export default function QuantityDropdown({ value, onChange, max = 10, className 
 
             {/* Custom Dropdown List */}
             {isOpen && (
-                <div 
-                    className="absolute left-0 mt-1 w-[72px] bg-white border border-gray-200 rounded-[14px] shadow-lg z-50 py-1.5 flex flex-col"
+                <div
+                    className="absolute left-0 mt-1 w-[64px] sm:w-[72px] bg-white border border-gray-200 rounded-[14px] shadow-lg z-50 py-1.5 flex flex-col"
                     style={{ maxHeight: '200px' }}
                 >
                     {/* Scroll Container with thin scrollbar */}
-                    <div 
+                    <div
                         className="overflow-y-auto flex-1 px-1 custom-thin-scrollbar"
                         style={{
                             scrollbarWidth: 'thin',
@@ -87,11 +87,10 @@ export default function QuantityDropdown({ value, onChange, max = 10, className 
                                     key={option}
                                     type="button"
                                     onClick={() => handleSelect(option)}
-                                    className={`w-full text-center py-2 text-sm font-medium rounded-[10px] transition-colors cursor-pointer block mb-0.5 ${
-                                        isSelected 
-                                            ? 'bg-[#e2f0d9] text-[#458500] font-bold' 
-                                            : 'text-gray-700 hover:bg-gray-100'
-                                    }`}
+                                    className={`w-full text-center py-1.5 sm:py-2 text-sm font-medium rounded-[10px] transition-colors cursor-pointer block mb-0.5 ${isSelected
+                                        ? 'bg-[#e2f0d9] text-[#458500] font-bold'
+                                        : 'text-gray-700 hover:bg-gray-100'
+                                        }`}
                                 >
                                     {option}
                                 </button>

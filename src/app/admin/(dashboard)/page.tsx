@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { getProducts, deleteProduct, updateProduct, reorderProducts } from '@/services/product';
 import toast from 'react-hot-toast';
-import Spinner from '@/components/Spinner';
 import ConfirmModal from '@/components/ConfirmModal';
 import PageLoader from '@/components/PageLoader';
 import { formatDate } from '@/utils/formatDate';
@@ -95,10 +94,10 @@ export default function AdminDashboard() {
             setProducts(products.map(p => p._id === productId ? { ...p, isActive: !currentStatus } : p));
             await updateProduct(productId, { isActive: !currentStatus });
             toast.success(`Product is now ${!currentStatus ? 'Active' : 'Hidden'}`);
-        } catch (error) {
+        } catch (error: any) {
             setProducts(products.map(p => p._id === productId ? { ...p, isActive: currentStatus } : p));
-            console.error('Failed to update product status', error);
-            toast.error('Failed to update product status');
+            const errorMessage = error?.response?.data?.message || 'Failed to update product status';
+            toast.error(errorMessage);
         }
     };
 
@@ -302,7 +301,7 @@ export default function AdminDashboard() {
             <ConfirmModal
                 isOpen={!!productToDelete}
                 title="Delete product?"
-                description="Are you absolutely sure you want to delete this product? This action cannot be undone."
+                description="Are you sure you want to delete this product permanently?"
                 onCancel={() => setProductToDelete(null)}
                 onConfirm={confirmDelete}
                 cancelText="Cancel"

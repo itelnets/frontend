@@ -4,6 +4,7 @@ import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useCart } from '@/context/CartContext';
 import { fetchAddresses, addAddress, updateAddress, removeAddress } from '@/services/addressService';
+import PageLoader from '@/components/PageLoader';
 
 function CheckoutContent() {
     const { cartItems, cartCount, updateQuantity, removeFromCart, moveToList } = useCart();
@@ -25,7 +26,7 @@ function CheckoutContent() {
         city: '',
         state: '',
         zip: '',
-        phone: '+91 ',
+        phone: '',
         isDefault: false
     });
 
@@ -35,6 +36,12 @@ function CheckoutContent() {
 
     // Fetch addresses on mount
     useEffect(() => {
+        const userInfo = localStorage.getItem('userInfo');
+        if (!userInfo) {
+            router.push('/login');
+            return;
+        }
+
         const loadAddresses = async () => {
             try {
                 const data = await fetchAddresses();
@@ -65,7 +72,22 @@ function CheckoutContent() {
         e.stopPropagation();
         setSelectedAddressMode(addr._id);
         setEditingAddressId(addr._id);
-        setFormData({ ...addr });
+
+        let phoneVal = addr.phone || '';
+        if (phoneVal.startsWith('+91 ')) phoneVal = phoneVal.replace('+91 ', '');
+        else if (phoneVal.startsWith('+91')) phoneVal = phoneVal.replace('+91', '');
+
+        setFormData({
+            fullName: addr.fullName || '',
+            addressLine1: addr.addressLine1 || '',
+            addressLine2: addr.addressLine2 || '',
+            landmark: addr.landmark || '',
+            city: addr.city || '',
+            state: addr.state || '',
+            zip: addr.zip || '',
+            isDefault: addr.isDefault || false,
+            phone: phoneVal
+        });
     };
 
     const handleDeleteClick = async (e: React.MouseEvent, id: string) => {
@@ -80,7 +102,7 @@ function CheckoutContent() {
                 } else {
                     setSelectedAddressMode('new');
                     setEditingAddressId('new');
-                    setFormData({ fullName: '', addressLine1: '', addressLine2: '', landmark: '', city: '', state: '', zip: '', phone: '+91', isDefault: false });
+                    setFormData({ fullName: '', addressLine1: '', addressLine2: '', landmark: '', city: '', state: '', zip: '', phone: '', isDefault: false });
                 }
             }
         } catch (error) {
@@ -89,19 +111,20 @@ function CheckoutContent() {
     };
 
     const handleSaveAddress = async () => {
-        if (!formData.fullName || !formData.addressLine1 || !formData.city || !formData.state || !formData.zip || !formData.phone) {
+        if (!formData.fullName || !formData.addressLine1 || !formData.city || !formData.state || !formData.zip || formData.phone.length !== 10) {
             setShowErrors(true);
             return;
         }
         setShowErrors(false);
 
         try {
+            const dataToSave = { ...formData, phone: '+91 ' + formData.phone };
             if (editingAddressId === 'new') {
-                const newAddr = await addAddress(formData);
+                const newAddr = await addAddress(dataToSave);
                 setSavedAddresses([...savedAddresses, newAddr]);
                 setSelectedAddressMode(newAddr._id);
             } else {
-                const updatedAddr = await updateAddress(editingAddressId!, formData);
+                const updatedAddr = await updateAddress(editingAddressId!, dataToSave);
                 setSavedAddresses(prev => prev.map(a => a._id === editingAddressId ? updatedAddr : a));
             }
 
@@ -117,28 +140,21 @@ function CheckoutContent() {
 
     const addressFormUI = (
         <div className="mt-6 ml-1 sm:ml-8" onClick={(e) => e.stopPropagation()}>
-            <div className="bg-[#fff9e6] border border-[#ffecb3] rounded-md p-4 flex gap-3 mb-6">
-                <svg className="w-5 h-5 text-yellow-600 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" /></svg>
-                <div className="text-sm text-gray-800 leading-snug">
-                    <span className="font-bold">Per India Customs,</span> all customers ordering internationally are required to complete KYC documents for customs clearance. The shipping information must be an exact match to the consignee&apos;s name and residential address on the KYC documents. If the carrier does not receive KYC documents within 7 days, your order will be returned.
-                </div>
-            </div>
-
-            <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); handleSaveAddress(); }}>
+            <form className="space-y-1.5 sm:space-y-3" onSubmit={(e) => { e.preventDefault(); handleSaveAddress(); }}>
                 <div className="relative pt-2">
-                    <input type="text" id="country" value="India" readOnly className="peer w-full border border-gray-300 rounded-md px-3 py-2 sm:py-3 text-sm focus:outline-none focus:border-green-600 focus:ring-1 focus:ring-green-600 bg-white cursor-default" placeholder=" " />
-                    <label htmlFor="country" className="absolute left-2 -top-1 bg-white px-1 text-xs text-gray-500 transition-all peer-placeholder-shown:top-5 peer-placeholder-shown:text-sm peer-placeholder-shown:text-gray-400 peer-focus:-top-1 peer-focus:text-xs peer-focus:text-gray-500 z-10 pointer-events-none">
+                    <input type="text" id="country" value="India" readOnly className="peer w-full border border-gray-300 rounded-md px-2 sm:px-3 py-2 sm:py-3 text-[13.5px] sm:text-sm text-gray-700 hover:cursor-not-allowed focus:outline-none focus:border-gray-300 focus:ring-0" />
+                    <label htmlFor="country" className="absolute left-2 -top-0 bg-white px-1 text-xs text-gray-500 transition-all peer-placeholder-shown:top-5 peer-placeholder-shown:text-xs sm:peer-placeholder-shown:text-sm peer-placeholder-shown:text-gray-400 peer-focus:-top-0 sm:peer-focus:-top-0 peer-focus:text-xs peer-focus:text-gray-500 z-10 pointer-events-none">
                         Country / Region*
                     </label>
                 </div>
 
                 <div className="relative pt-2">
-                    <input type="text" id="fullName" value={formData.fullName} onChange={(e) => setFormData({ ...formData, fullName: e.target.value })} className={`peer w-full border ${showErrors && !formData.fullName ? 'border-red-500' : 'border-gray-300'} rounded-md px-3 py-2 sm:py-3 text-sm focus:outline-none ${showErrors && !formData.fullName ? '' : 'focus:border-green-600 focus:ring-1 focus:ring-green-600'}`} placeholder=" " />
-                    <label htmlFor="fullName" className={`absolute left-2 -top-1 bg-white px-1 text-xs transition-all peer-placeholder-shown:top-5 peer-placeholder-shown:text-sm peer-placeholder-shown:text-gray-400 peer-focus:-top-1 peer-focus:text-xs z-10 pointer-events-none ${showErrors && !formData.fullName ? 'text-red-500 peer-focus:text-red-500' : 'text-gray-500 peer-focus:text-green-600'}`}>
+                    <input type="text" id="fullName" value={formData.fullName} onChange={(e) => setFormData({ ...formData, fullName: e.target.value })} className={`peer w-full border ${showErrors && !formData.fullName ? 'border-red-500' : 'border-gray-300'} rounded-md px-2 sm:px-3 py-2 sm:py-3 text-[13.5px] sm:text-sm focus:outline-none ${showErrors && !formData.fullName ? '' : 'focus:border-green-600 focus:ring-0.5 focus:ring-green-600'}`} placeholder=" " />
+                    <label htmlFor="fullName" className={`absolute left-2 -top-0 bg-white px-1 text-xs transition-all peer-placeholder-shown:top-[18px] sm:peer-placeholder-shown:top-5 peer-placeholder-shown:text-xs sm:peer-placeholder-shown:text-sm peer-placeholder-shown:text-gray-400 peer-focus:-top-0 sm:peer-focus:-top-0 peer-focus:text-xs z-10 pointer-events-none ${showErrors && !formData.fullName ? 'text-red-500 peer-focus:text-red-500' : 'text-gray-500 peer-focus:text-green-600'}`}>
                         Full Name*
                     </label>
                     {showErrors && !formData.fullName && (
-                        <div className="absolute right-3 top-[21px] pointer-events-none">
+                        <div className="absolute right-2 sm:right-3 top-[18px] sm:top-[21px] pointer-events-none">
                             <svg className="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                         </div>
                     )}
@@ -146,12 +162,12 @@ function CheckoutContent() {
                 </div>
 
                 <div className="relative pt-2">
-                    <input type="text" id="addressLine1" value={formData.addressLine1} onChange={(e) => setFormData({ ...formData, addressLine1: e.target.value })} className={`peer w-full border ${showErrors && !formData.addressLine1 ? 'border-red-500' : 'border-gray-300'} rounded-md px-3 py-2 sm:py-3 text-sm focus:outline-none ${showErrors && !formData.addressLine1 ? '' : 'focus:border-green-600 focus:ring-1 focus:ring-green-600'}`} placeholder=" " />
-                    <label htmlFor="addressLine1" className={`absolute left-2 -top-1 bg-white px-1 text-xs transition-all peer-placeholder-shown:top-5 peer-placeholder-shown:text-sm peer-placeholder-shown:text-gray-400 peer-focus:-top-1 peer-focus:text-xs z-10 pointer-events-none ${showErrors && !formData.addressLine1 ? 'text-red-500 peer-focus:text-red-500' : 'text-gray-500 peer-focus:text-green-600'}`}>
+                    <input type="text" id="addressLine1" value={formData.addressLine1} onChange={(e) => setFormData({ ...formData, addressLine1: e.target.value })} className={`peer w-full border ${showErrors && !formData.addressLine1 ? 'border-red-500' : 'border-gray-300'} rounded-md px-2 sm:px-3 py-2 sm:py-3 text-[13.5px] sm:text-sm focus:outline-none ${showErrors && !formData.addressLine1 ? '' : 'focus:border-green-600 focus:ring-0.5 focus:ring-green-600'}`} placeholder=" " />
+                    <label htmlFor="addressLine1" className={`absolute left-2 -top-0 bg-white px-1 text-xs transition-all peer-placeholder-shown:top-[18px] sm:peer-placeholder-shown:top-5 peer-placeholder-shown:text-xs sm:peer-placeholder-shown:text-sm peer-placeholder-shown:text-gray-400 peer-focus:-top-0 sm:peer-focus:-top-0 peer-focus:text-xs z-10 pointer-events-none ${showErrors && !formData.addressLine1 ? 'text-red-500 peer-focus:text-red-500' : 'text-gray-500 peer-focus:text-green-600'}`}>
                         Address Line 1*
                     </label>
                     {showErrors && !formData.addressLine1 && (
-                        <div className="absolute right-3 top-[21px] pointer-events-none">
+                        <div className="absolute right-2 sm:right-3 top-[18px] sm:top-[21px] pointer-events-none">
                             <svg className="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                         </div>
                     )}
@@ -160,38 +176,38 @@ function CheckoutContent() {
 
                 {showAddressLine2 ? (
                     <div className="relative pt-2">
-                        <input type="text" id="addressLine2" value={formData.addressLine2} onChange={(e) => setFormData({ ...formData, addressLine2: e.target.value })} className="peer w-full border border-gray-300 rounded-md px-3 py-2 sm:py-3 text-sm focus:outline-none focus:border-green-600 focus:ring-1 focus:ring-green-600" placeholder=" " />
-                        <label htmlFor="addressLine2" className="absolute left-2 -top-1 bg-white px-1 text-xs text-gray-500 transition-all peer-placeholder-shown:top-5 peer-placeholder-shown:text-sm peer-placeholder-shown:text-gray-400 peer-focus:-top-1 peer-focus:text-xs peer-focus:text-green-600 z-10 pointer-events-none">
+                        <input type="text" id="addressLine2" value={formData.addressLine2} onChange={(e) => setFormData({ ...formData, addressLine2: e.target.value })} className="peer w-full border border-gray-300 rounded-md px-2 sm:px-3 py-2 sm:py-3 text-[13.5px] sm:text-sm focus:outline-none focus:border-green-600 focus:ring-0.5 focus:ring-green-600" placeholder=" " />
+                        <label htmlFor="addressLine2" className="absolute left-2 -top-0 bg-white px-1 text-xs text-gray-500 transition-all peer-placeholder-shown:top-[18px] sm:peer-placeholder-shown:top-5 peer-placeholder-shown:text-xs sm:peer-placeholder-shown:text-sm peer-placeholder-shown:text-gray-400 peer-focus:-top-0 sm:peer-focus:-top-0 peer-focus:text-xs peer-focus:text-green-600 z-10 pointer-events-none">
                             Address Line 2
                         </label>
                     </div>
                 ) : (
                     <div className="pt-1">
-                        <button type="button" onClick={() => setShowAddressLine2(true)} className="text-sm text-blue-600 hover:underline text-left w-max cursor-pointer block">Add Address Line 2</button>
+                        <button type="button" onClick={() => setShowAddressLine2(true)} className="text-[12px] sm:text-sm text-green-600 hover:underline text-left w-max cursor-pointer block">Add Address Line 2</button>
                     </div>
                 )}
 
                 {showLandmark ? (
                     <div className="relative pt-2">
-                        <input type="text" id="landmark" value={formData.landmark} onChange={(e) => setFormData({ ...formData, landmark: e.target.value })} className="peer w-full border border-gray-300 rounded-md px-3 py-2 sm:py-3 text-sm focus:outline-none focus:border-green-600 focus:ring-1 focus:ring-green-600" placeholder=" " />
-                        <label htmlFor="landmark" className="absolute left-2 -top-1 bg-white px-1 text-xs text-gray-500 transition-all peer-placeholder-shown:top-5 peer-placeholder-shown:text-sm peer-placeholder-shown:text-gray-400 peer-focus:-top-1 peer-focus:text-xs peer-focus:text-green-600 z-10 pointer-events-none">
-                            Major landmarks
+                        <input type="text" id="landmark" value={formData.landmark} onChange={(e) => setFormData({ ...formData, landmark: e.target.value })} className="peer w-full border border-gray-300 rounded-md px-2 sm:px-3 py-2 sm:py-3 text-[13.5px] sm:text-sm focus:outline-none focus:border-green-600 focus:ring-0.5 focus:ring-green-600" placeholder=" " />
+                        <label htmlFor="landmark" className="absolute left-2 -top-0 bg-white px-1 text-xs text-gray-500 transition-all peer-placeholder-shown:top-[18px] sm:peer-placeholder-shown:top-5 peer-placeholder-shown:text-xs sm:peer-placeholder-shown:text-sm peer-placeholder-shown:text-gray-400 peer-focus:-top-0 sm:peer-focus:-top-0 peer-focus:text-xs peer-focus:text-green-600 z-10 pointer-events-none">
+                            Landmarks
                         </label>
                     </div>
                 ) : (
                     <div className="pt-1">
-                        <button type="button" onClick={() => setShowLandmark(true)} className="text-sm text-blue-600 hover:underline text-left w-max cursor-pointer block">Add Major landmarks</button>
+                        <button type="button" onClick={() => setShowLandmark(true)} className="text-[12px] sm:text-sm text-green-600 hover:underline text-left w-max cursor-pointer block">Add landmarks</button>
                     </div>
                 )}
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-1 sm:gap-3">
                     <div className="relative pt-2">
-                        <input type="text" id="city" value={formData.city} onChange={(e) => setFormData({ ...formData, city: e.target.value })} className={`peer w-full border ${showErrors && !formData.city ? 'border-red-500' : 'border-gray-300'} rounded-md px-3 py-2 sm:py-3 text-sm focus:outline-none ${showErrors && !formData.city ? '' : 'focus:border-green-600 focus:ring-1 focus:ring-green-600'}`} placeholder=" " />
-                        <label htmlFor="city" className={`absolute left-2 -top-1 bg-white px-1 text-xs transition-all peer-placeholder-shown:top-5 peer-placeholder-shown:text-sm peer-placeholder-shown:text-gray-400 peer-focus:-top-1 peer-focus:text-xs z-10 pointer-events-none ${showErrors && !formData.city ? 'text-red-500 peer-focus:text-red-500' : 'text-gray-500 peer-focus:text-green-600'}`}>
-                            Colony/Area name*
+                        <input type="text" id="city" value={formData.city} onChange={(e) => setFormData({ ...formData, city: e.target.value })} className={`peer w-full border ${showErrors && !formData.city ? 'border-red-500' : 'border-gray-300'} rounded-md px-2 sm:px-3 py-2 sm:py-3 text-[13.5px] sm:text-sm focus:outline-none ${showErrors && !formData.city ? '' : 'focus:border-green-600 focus:ring-0.5 focus:ring-green-600'}`} placeholder=" " />
+                        <label htmlFor="city" className={`absolute left-2 -top-0 bg-white px-1 text-xs transition-all peer-placeholder-shown:top-[18px] sm:peer-placeholder-shown:top-5 peer-placeholder-shown:text-xs sm:peer-placeholder-shown:text-sm peer-placeholder-shown:text-gray-400 peer-focus:-top-0 sm:peer-focus:-top-0 peer-focus:text-xs z-10 pointer-events-none ${showErrors && !formData.city ? 'text-red-500 peer-focus:text-red-500' : 'text-gray-500 peer-focus:text-green-600'}`}>
+                            Area name*
                         </label>
                         {showErrors && !formData.city && (
-                            <div className="absolute right-3 top-[21px] pointer-events-none">
+                            <div className="absolute right-2 sm:right-3 top-[18px] sm:top-[21px] pointer-events-none">
                                 <svg className="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                             </div>
                         )}
@@ -199,12 +215,12 @@ function CheckoutContent() {
                     </div>
 
                     <div className="relative pt-2">
-                        <input type="text" id="state" value={formData.state} onChange={(e) => setFormData({ ...formData, state: e.target.value })} className={`peer w-full border ${showErrors && !formData.state ? 'border-red-500' : 'border-gray-300'} rounded-md px-3 py-2 sm:py-3 text-sm focus:outline-none ${showErrors && !formData.state ? '' : 'focus:border-green-600 focus:ring-1 focus:ring-green-600'}`} placeholder=" " />
-                        <label htmlFor="state" className={`absolute left-2 -top-1 bg-white px-1 text-xs transition-all peer-placeholder-shown:top-5 peer-placeholder-shown:text-sm peer-placeholder-shown:text-gray-400 peer-focus:-top-1 peer-focus:text-xs z-10 pointer-events-none ${showErrors && !formData.state ? 'text-red-500 peer-focus:text-red-500' : 'text-gray-500 peer-focus:text-green-600'}`}>
-                            State / Region*
+                        <input type="text" id="state" value={formData.state} onChange={(e) => setFormData({ ...formData, state: e.target.value })} className={`peer w-full border ${showErrors && !formData.state ? 'border-red-500' : 'border-gray-300'} rounded-md px-2 sm:px-3 py-2 sm:py-3 text-[13.5px] sm:text-sm focus:outline-none ${showErrors && !formData.state ? '' : 'focus:border-green-600 focus:ring-0.5 focus:ring-green-600'}`} placeholder=" " />
+                        <label htmlFor="state" className={`absolute left-2 -top-0 bg-white px-1 text-xs transition-all peer-placeholder-shown:top-[18px] sm:peer-placeholder-shown:top-5 peer-placeholder-shown:text-xs sm:peer-placeholder-shown:text-sm peer-placeholder-shown:text-gray-400 peer-focus:-top-0 sm:peer-focus:-top-0 peer-focus:text-xs z-10 pointer-events-none ${showErrors && !formData.state ? 'text-red-500 peer-focus:text-red-500' : 'text-gray-500 peer-focus:text-green-600'}`}>
+                            State*
                         </label>
                         {showErrors && !formData.state && (
-                            <div className="absolute right-3 top-[21px] pointer-events-none">
+                            <div className="absolute right-2 sm:right-3 top-[18px] sm:top-[21px] pointer-events-none">
                                 <svg className="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                             </div>
                         )}
@@ -212,12 +228,12 @@ function CheckoutContent() {
                     </div>
 
                     <div className="relative pt-2">
-                        <input type="text" id="zip" value={formData.zip} onChange={(e) => setFormData({ ...formData, zip: e.target.value })} className={`peer w-full border ${showErrors && !formData.zip ? 'border-red-500' : 'border-gray-300'} rounded-md px-3 py-2 sm:py-3 text-sm focus:outline-none ${showErrors && !formData.zip ? '' : 'focus:border-green-600 focus:ring-1 focus:ring-green-600'}`} placeholder=" " />
-                        <label htmlFor="zip" className={`absolute left-2 -top-1 bg-white px-1 text-xs transition-all peer-placeholder-shown:top-5 peer-placeholder-shown:text-sm peer-placeholder-shown:text-gray-400 peer-focus:-top-1 peer-focus:text-xs z-10 pointer-events-none ${showErrors && !formData.zip ? 'text-red-500 peer-focus:text-red-500' : 'text-gray-500 peer-focus:text-green-600'}`}>
-                            Zip / Postal Code*
+                        <input type="text" id="zip" value={formData.zip} onChange={(e) => setFormData({ ...formData, zip: e.target.value })} className={`peer w-full border ${showErrors && !formData.zip ? 'border-red-500' : 'border-gray-300'} rounded-md px-2 sm:px-3 py-2 sm:py-3 text-[13.5px] sm:text-sm focus:outline-none ${showErrors && !formData.zip ? '' : 'focus:border-green-600 focus:ring-0.5 focus:ring-green-600'}`} placeholder=" " />
+                        <label htmlFor="zip" className={`absolute left-2 -top-0 bg-white px-1 text-xs transition-all peer-placeholder-shown:top-[18px] sm:peer-placeholder-shown:top-5 peer-placeholder-shown:text-xs sm:peer-placeholder-shown:text-sm peer-placeholder-shown:text-gray-400 peer-focus:-top-0 sm:peer-focus:-top-0 peer-focus:text-xs z-10 pointer-events-none ${showErrors && !formData.zip ? 'text-red-500 peer-focus:text-red-500' : 'text-gray-500 peer-focus:text-green-600'}`}>
+                            Postal Code*
                         </label>
                         {showErrors && !formData.zip && (
-                            <div className="absolute right-3 top-[21px] pointer-events-none">
+                            <div className="absolute right-2 sm:right-3 top-[18px] sm:top-[21px] pointer-events-none">
                                 <svg className="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                             </div>
                         )}
@@ -226,30 +242,36 @@ function CheckoutContent() {
                 </div>
 
                 <div className="relative pt-2">
-                    <input type="text" id="phone" value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} className={`peer w-full border ${showErrors && !formData.phone ? 'border-red-500' : 'border-gray-300'} rounded-md px-3 py-2 sm:py-3 text-sm focus:outline-none ${showErrors && !formData.phone ? '' : 'focus:border-green-600 focus:ring-1 focus:ring-green-600'}`} placeholder=" " />
-                    <label htmlFor="phone" className={`absolute left-2 -top-1 bg-white px-1 text-xs transition-all peer-placeholder-shown:top-5 peer-placeholder-shown:text-sm peer-placeholder-shown:text-gray-400 peer-focus:-top-1 peer-focus:text-xs z-10 pointer-events-none ${showErrors && !formData.phone ? 'text-red-500 peer-focus:text-red-500' : 'text-gray-500 peer-focus:text-green-600'}`}>
-                        Mobile Number / Billing Phone Number*
+                    <input type="text" id="phone" maxLength={10} value={formData.phone} onChange={(e) => {
+                        const val = e.target.value.replace(/\D/g, '');
+                        if (val.length <= 10) setFormData({ ...formData, phone: val });
+                    }} className={`peer w-full border ${showErrors && formData.phone.length !== 10 ? 'border-red-500' : 'border-gray-300'} rounded-md pl-[38px] sm:pl-[42px] px-2 sm:px-3 py-2 sm:py-3 text-[13.5px] sm:text-sm focus:outline-none ${showErrors && formData.phone.length !== 10 ? '' : 'focus:border-green-600 focus:ring-0.5 focus:ring-green-600'}`} placeholder=" " />
+                    <label htmlFor="phone" className={`absolute left-2 -top-0 bg-white px-1 text-xs transition-all peer-placeholder-shown:top-[18px] sm:peer-placeholder-shown:top-5 peer-placeholder-shown:left-[36px] sm:peer-placeholder-shown:left-[40px] peer-placeholder-shown:text-xs sm:peer-placeholder-shown:text-sm peer-placeholder-shown:text-gray-400 peer-focus:left-2 sm:peer-focus:left-2 peer-focus:-top-0 sm:peer-focus:-top-0 peer-focus:text-xs z-10 pointer-events-none ${showErrors && formData.phone.length !== 10 ? 'text-red-500 peer-focus:text-red-500' : 'text-gray-500 peer-focus:text-green-600'}`}>
+                        Mobile Number*
                     </label>
-                    {showErrors && !formData.phone && (
-                        <div className="absolute right-3 top-[21px] pointer-events-none">
+                    <div className="absolute left-3 top-[13px] sm:top-[18px] pointer-events-none">
+                        <span className="text-[13.5px] sm:text-sm text-green-700">+91</span>
+                    </div>
+                    {showErrors && formData.phone.length !== 10 && (
+                        <div className="absolute right-2 sm:right-3 top-[18px] sm:top-[21px] pointer-events-none">
                             <svg className="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                         </div>
                     )}
-                    {showErrors && !formData.phone && <p className="text-[#d32f2f] text-xs mt-1">Phone number is required.</p>}
+                    {showErrors && formData.phone.length !== 10 && <p className="text-[#d32f2f] text-xs mt-1">A valid 10-digit phone number is required.</p>}
                 </div>
 
                 <div className="flex items-center gap-2 pt-2">
-                    <input type="checkbox" id="default-addr" checked={formData.isDefault} onChange={(e) => setFormData({ ...formData, isDefault: e.target.checked })} className="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500 cursor-pointer accent-[#458500]" />
-                    <label htmlFor="default-addr" className="text-sm text-gray-700 cursor-pointer">Set as my default shipping address</label>
+                    <input type="checkbox" id="default-addr" checked={formData.isDefault} onChange={(e) => setFormData({ ...formData, isDefault: e.target.checked })} className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-green-600 border-gray-300 rounded focus:ring-green-500 cursor-pointer accent-[#458500]" />
+                    <label htmlFor="default-addr" className="text-[12px] sm:text-sm text-gray-700 cursor-pointer">Set as my default shipping address</label>
                 </div>
 
                 <div className="pt-4 flex flex-col md:flex-row justify-end gap-3 w-full">
                     {editingAddressId !== 'new' && (
-                        <button type="button" onClick={() => setEditingAddressId(null)} className="w-full md:w-auto border border-gray-300 hover:bg-gray-50 text-gray-900 font-bold py-3 px-16 rounded-md transition-colors shadow-sm text-[16px] cursor-pointer bg-white">
+                        <button type="button" onClick={() => setEditingAddressId(null)} className="w-full md:w-auto border border-gray-300 hover:bg-gray-50 text-gray-900 font-bold py-2 sm:py-3 px-4 sm:px-16 rounded-md transition-colors shadow-sm text-[14px] sm:text-[16px] cursor-pointer bg-white">
                             Cancel
                         </button>
                     )}
-                    <button type="submit" className="w-full md:w-auto bg-[#458500] hover:bg-[#366800] text-white font-bold py-3 px-16 rounded-md transition-colors shadow-sm text-[16px] cursor-pointer">
+                    <button type="submit" className="w-full md:w-auto bg-[#458500] hover:bg-[#366800] text-white font-bold py-2 sm:py-3 px-10 sm:px-16 rounded-md transition-colors shadow-sm text-[15px] sm:text-[16px] cursor-pointer">
                         Save and Continue
                     </button>
                 </div>
@@ -265,7 +287,7 @@ function CheckoutContent() {
             {savedAddresses.map((addr) => (
                 <div
                     key={addr._id}
-                    className={`border rounded-md p-4 cursor-pointer transition-colors ${selectedAddressMode === addr._id ? 'border-[#458500] bg-white' : 'border-gray-300 bg-white'}`}
+                    className={`border rounded-md p-3 sm:p-4 cursor-pointer transition-colors ${selectedAddressMode === addr._id ? 'border-[#458500] bg-white' : 'border-gray-300 bg-white'}`}
                     onClick={() => {
                         setSelectedAddressMode(addr._id);
                         setEditingAddressId(null);
@@ -283,18 +305,18 @@ function CheckoutContent() {
                         />
                         <div className="flex-1">
                             <div className="flex justify-between items-start mb-1">
-                                <span className="font-bold text-gray-900 text-[16px]">{addr.fullName}</span>
+                                <span className="font-bold text-gray-900 text-[14px] sm:text-[16px]">{addr.fullName}</span>
                                 <div className="flex gap-3 text-gray-500">
                                     <button onClick={(e) => handleEditClick(e, addr)} className="hover:text-gray-700 cursor-pointer">
-                                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                                        <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
                                     </button>
                                     <button onClick={(e) => handleDeleteClick(e, addr._id)} className="hover:text-gray-700 cursor-pointer">
-                                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                        <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                                     </button>
                                 </div>
                             </div>
-                            <div className="text-[13px] text-gray-500">
-                                {addr.addressLine1} | {addr.city}, {addr.state}, {addr.zip} | India | {addr.phone}
+                            <div className="text-[12px] sm:text-[14px] text-gray-500">
+                                {addr.addressLine1} {addr.addressLine2}, {addr.landmark}, {addr.city}, {addr.state}, {addr.zip} | India | {addr.phone}
                             </div>
                         </div>
                     </div>
@@ -302,14 +324,14 @@ function CheckoutContent() {
                     {editingAddressId === addr._id && addressFormUI}
 
                     {selectedAddressMode === addr._id && editingAddressId !== addr._id && (
-                        <div className="mt-4 flex justify-end">
+                        <div className="mt-2 sm:mt-4 flex justify-end">
                             <button type="button" onClick={() => {
                                 if (checkoutStep === 1) {
                                     router.push('?step=2');
                                 } else {
                                     setIsAddressModalOpen(false);
                                 }
-                            }} className="bg-[#458500] hover:bg-[#366800] text-white font-normal py-3 px-20 rounded-md transition-colors font-bold text-[16px] cursor-pointer">
+                            }} className="bg-[#458500] hover:bg-[#366800] text-white font-normal py-1.5 sm:py-3 px-4 sm:px-20 rounded-md transition-colors font-bold text-[14px] sm:text-[16px] cursor-pointer">
                                 Continue
                             </button>
                         </div>
@@ -324,7 +346,7 @@ function CheckoutContent() {
                     if (selectedAddressMode !== 'new') {
                         setSelectedAddressMode('new');
                         setEditingAddressId('new');
-                        setFormData({ fullName: '', addressLine1: '', addressLine2: '', landmark: '', city: '', state: '', zip: '', phone: '+91', isDefault: false });
+                        setFormData({ fullName: '', addressLine1: '', addressLine2: '', landmark: '', city: '', state: '', zip: '', phone: '', isDefault: false });
                     }
                 }}
             >
@@ -335,17 +357,17 @@ function CheckoutContent() {
                         onChange={() => {
                             setSelectedAddressMode('new');
                             setEditingAddressId('new');
-                            setFormData({ fullName: '', addressLine1: '', addressLine2: '', landmark: '', city: '', state: '', zip: '', phone: '+91', isDefault: false });
+                            setFormData({ fullName: '', addressLine1: '', addressLine2: '', landmark: '', city: '', state: '', zip: '', phone: '', isDefault: false });
                         }}
                         className="w-5 h-5 text-green-600 border-gray-300 focus:ring-green-500 accent-[#458500] cursor-pointer"
                     />
-                    <span className="font-bold text-gray-900 text-sm">Add a new shipping address</span>
+                    <span className="font-bold text-gray-900 text-sm sm:text-[18px]">Add a new shipping address</span>
                 </div>
 
                 {selectedAddressMode === 'new' && editingAddressId === 'new' && addressFormUI}
                 {selectedAddressMode === 'new' && editingAddressId !== 'new' && (
                     <div className="mt-4 ml-8">
-                        <button type="button" onClick={() => { setEditingAddressId('new'); setFormData({ fullName: '', addressLine1: '', addressLine2: '', landmark: '', city: '', state: '', zip: '', phone: '+91', isDefault: false }); }} className="bg-[#458500] hover:bg-[#366800] text-white font-normal py-3 px-12 rounded-md transition-colors font-bold mb-4 text-[16px] cursor-pointer">
+                        <button type="button" onClick={() => { setEditingAddressId('new'); setFormData({ fullName: '', addressLine1: '', addressLine2: '', landmark: '', city: '', state: '', zip: '', phone: '', isDefault: false }); }} className="bg-[#458500] hover:bg-[#366800] text-white font-normal py-3 px-12 rounded-md transition-colors font-bold mb-4 text-[16px] cursor-pointer">
                             Fill New Address Form
                         </button>
                     </div>
@@ -434,35 +456,36 @@ function CheckoutContent() {
             )}
         </div>
     );
+    if (isLoadingAddresses) {
+        return <PageLoader />;
+    }
 
     return (
         <div className="font-sans min-h-screen bg-[#f5f5f5] relative">
-            <div className="max-w-[1400px] mx-auto px-3 sm:px-4 py-4 sm:py-8 flex flex-col lg:flex-row gap-6">
+            <div className="max-w-[1400px] mx-auto px-2.5 sm:px-4 py-3 sm:py-8 flex flex-col lg:flex-row gap-6">
 
                 {/* LEFT COLUMN */}
                 <div className="flex-1 space-y-6">
 
                     {checkoutStep === 1 && (
                         <>
-                            <div className="bg-white rounded shadow-sm overflow-hidden mb-6">
-                                <div className="p-4 sm:p-6">
-                                    <h2 className="text-[22px] font-bold text-gray-900 mb-6">Shipping information</h2>
-                                    <h3 className="text-base font-bold text-gray-900 mb-4">Select a shipping address</h3>
+                            <div className="bg-white rounded shadow-sm overflow-hidden mb-2 sm:mb-6">
+                                <div className="p-3 sm:p-6">
+                                    <h2 className="text-[12px] sm:text-[22px] font-bold text-gray-900 mb-1 sm:mb-4">Shipping information</h2>
+                                    <h3 className="text-base font-bold text-gray-900 mb-3 sm:mb-4">Select a shipping address</h3>
 
-                                    {isLoadingAddresses ? (
-                                        <div className="py-8 text-center text-gray-500">Loading addresses...</div>
-                                    ) : addressSelectionUI}
+                                    {addressSelectionUI}
                                 </div>
                             </div>
 
-                            <div className="bg-white rounded shadow-sm opacity-60 mb-6">
-                                <div className="p-4 sm:p-6">
+                            <div className="bg-white rounded shadow-sm opacity-60 mb-2 sm:mb-6">
+                                <div className="p-3 sm:p-6">
                                     <h2 className="text-[18px] sm:text-[22px] font-bold text-gray-400">Shipping method</h2>
                                 </div>
                             </div>
 
-                            <div className="bg-white rounded shadow-sm opacity-60 mb-6">
-                                <div className="p-4 sm:p-6">
+                            <div className="bg-white rounded shadow-sm opacity-60 mb-2 sm:mb-6">
+                                <div className="p-3 sm:p-6">
                                     <h2 className="text-[18px] sm:text-[22px] font-bold text-gray-400">Payment method</h2>
                                 </div>
                             </div>
@@ -477,7 +500,7 @@ function CheckoutContent() {
                                 <div className="text-sm text-gray-900 space-y-1 font-bold">
                                     {activeAddress?.fullName || 'No address selected'}
                                 </div>
-                                <div className="text-[13px] text-gray-500 mt-1 mb-6">
+                                <div className="text-[13px] text-gray-500 mt-1 mb-2 sm:mb-6">
                                     {activeAddress ? `${activeAddress.addressLine1} | ${activeAddress.city}, ${activeAddress.state}, ${activeAddress.zip} | India | ${activeAddress.phone}` : ''}
                                 </div>
 
@@ -506,11 +529,11 @@ function CheckoutContent() {
                             </div>
 
                             <div className="bg-white rounded shadow-sm">
-                                <div className="p-4 sm:p-6 pb-2 border-b border-gray-200">
+                                <div className="p-3 sm:p-6 pb-2 border-b border-gray-200">
                                     <h2 className="text-[22px] font-bold text-gray-900">Payment method</h2>
                                 </div>
 
-                                <div className="p-4 sm:p-6">
+                                <div className="p-3 sm:p-6">
                                     <h3 className="text-base font-bold text-gray-900 mb-4">Select a payment method</h3>
 
                                     <div className="border-2 border-[#458500] bg-[#f9fdf5] rounded p-4 mb-4">
@@ -541,17 +564,17 @@ function CheckoutContent() {
 
                 {/* RIGHT COLUMN */}
                 <div className="w-full lg:w-[350px] shrink-0">
-                    <div className="lg:sticky lg:top-6 bg-white rounded shadow-sm p-6">
+                    <div className="lg:sticky lg:top-6 bg-white rounded shadow-sm p-4 sm:p-6">
                         <h2 className="text-[18px] font-bold text-gray-900 mb-6">Order summary</h2>
 
-                        <div className="space-y-4 border-b border-gray-200 pb-6 mb-6">
+                        <div className="space-y-4 border-b border-gray-200 pb-3 sm:pb-6 mb-3 sm:mb-6">
                             <div className="flex justify-between text-sm">
                                 <span className="text-gray-600">Items total ({cartCount})</span>
                                 <span className="font-bold text-gray-900">₹{subtotal.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
                             </div>
                         </div>
 
-                        <div className="space-y-3 border-b border-gray-200 pb-6 mb-6">
+                        <div className="space-y-2 sm:space-y-3 border-b border-gray-200 pb-3 sm:pb-6 mb-3 sm:mb-6">
                             <div className="flex justify-between text-sm">
                                 <span className="text-gray-900 font-bold">Subtotal</span>
                                 <span className="font-bold text-gray-900">₹{subtotal.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
@@ -571,7 +594,7 @@ function CheckoutContent() {
                             <span className="text-[18px] font-bold text-gray-900">₹--.--</span>
                         </div>
 
-                        <button className="w-full bg-[#458500] hover:bg-[#366800] text-white font-normal py-3 px-6 rounded-md transition-colors font-bold mb-4 text-[16px] cursor-pointer">
+                        <button className="w-full bg-[#458500] hover:bg-[#366800] text-white font-normal py-2 sm:py-3 px-6 rounded-md transition-colors font-bold mb-4 text-[16px] cursor-pointer">
                             Place Order
                         </button>
 

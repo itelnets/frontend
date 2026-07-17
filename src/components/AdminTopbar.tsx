@@ -52,30 +52,26 @@ export default function AdminTopbar({ onMenuClick }: AdminTopbarProps) {
 
                 {!pathname.includes('/products/add') && !pathname.includes('/products/edit') ? (
                     <div className="flex items-center gap-4">
-                        <Link href="/admin/products/add" className="bg-green-600 cursor-pointer hover:bg-green-700 text-white px-4 py-1.5 border border-transparent rounded-md text-sm font-medium transition-colors">
+                        <Link href="/admin/products/add" className="bg-green-600 cursor-pointer hover:bg-green-700 text-white px-2 sm:px-4 py-1 sm:py-1.5 border border-transparent rounded-md text-[13px] sm:text-sm font-medium transition-colors">
                             Add Product
                         </Link>
                     </div>
                 ) : (
                     <div className="flex items-center gap-4">
-                        <button onClick={handleCancel} className="bg-white text-gray-700 text-sm font-medium px-4 py-1.5 border border-gray-200 rounded-md hover:bg-gray-50 transition-colors cursor-pointer shadow-sm">
+                        <button onClick={handleCancel} className="bg-white text-gray-700 text-[13px] sm:text-sm font-medium px-2 sm:px-4 py-1 sm:py-1.5 border border-gray-200 rounded-md hover:bg-gray-50 transition-colors cursor-pointer shadow-sm">
                             Cancel
                         </button>
                         <button
                             type="submit"
                             form="product-form"
-                            className="bg-green-600 hover:bg-green-700 text-white text-sm font-medium px-4 py-1.5 border border-transparent rounded-md transition-colors cursor-pointer shadow-sm"
+                            className="bg-green-600 hover:bg-green-700 text-white text-[13px] sm:text-sm font-medium px-2 sm:px-4 py-1 sm:py-1.5 border border-transparent rounded-md transition-colors cursor-pointer shadow-sm"
                         >
                             {pathname.includes('/products/add') ? 'Create Product' : 'Save Product'}
                         </button>
                     </div>
                 )}
             </header>
-            {isCancelling && (
-                <div className="fixed inset-0 top-16 bg-gradient-to-br from-green-50/40 via-gray-50 to-green-50/40 flex items-center justify-center z-50">
-                    <PageLoader />
-                </div>
-            )}
+            {isCancelling && <PageLoader />}
         </>
     );
 }

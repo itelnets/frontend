@@ -4,6 +4,7 @@ import "../globals.css";
 import Navbar from "@/components/Navbar";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import { Toaster } from 'react-hot-toast';
+import { CartProvider } from "@/context/CartContext";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -21,12 +22,12 @@ export default function StoreLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <>
+    <CartProvider>
       <Navbar />
       <main className="flex-1 flex flex-col">
         {children}
       </main>
       <WhatsAppButton />
-    </>
+    </CartProvider>
   );
 }

@@ -7,6 +7,7 @@ import { getBanners, createBanner, deleteBanner, BannerItem, updateBanner, reord
 import toast from 'react-hot-toast';
 import ConfirmModal from '@/components/ConfirmModal';
 import Spinner from '@/components/Spinner';
+import PageLoader from '@/components/PageLoader';
 
 import { formatDate } from '@/utils/formatDate';
 
@@ -222,6 +223,10 @@ export default function BannersPage() {
         return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
     };
 
+    if (isLoading || isUploading) {
+        return <PageLoader />;
+    }
+
     return (
         <div className="p-4 sm:p-6 max-w-6xl mx-auto select-none">
             <div className="mb-6 flex flex-col sm:flex-row justify-between sm:items-center gap-3">
@@ -286,15 +291,10 @@ export default function BannersPage() {
                 </div>
             </form>
 
-            {/* List layout of uploaded banners in a clean Admin Table View */}
             <div className="border-t border-gray-200 pt-6">
                 <h3 className="text-lg font-bold text-gray-900 mb-4">Uploaded Banners</h3>
 
-                {isLoading ? (
-                    <div className="flex justify-center items-center py-20">
-                        <Spinner className="w-10 h-10 text-green-600" />
-                    </div>
-                ) : banners.length === 0 ? (
+                {banners.length === 0 ? (
                     <div className="bg-white border border-gray-200 rounded-xl p-12 text-center shadow-xs">
                         <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-gray-100 text-gray-400">
                             <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -432,7 +432,7 @@ export default function BannersPage() {
             <ConfirmModal
                 isOpen={!!bannerToDelete}
                 title="Delete banner?"
-                description="Are you absolutely sure you want to delete this banner? This action cannot be undone."
+                description="Are you sure you want to delete this product permanently?"
                 onCancel={() => setBannerToDelete(null)}
                 onConfirm={confirmDelete}
                 cancelText="Cancel"

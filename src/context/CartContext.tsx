@@ -165,12 +165,14 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
                 const { data } = await apiRemoveFromCart(productId);
                 setCartItems(data.items || []);
                 setSavedForLater(data.savedItems || []);
+                toast.success('Item removed from cart');
             } catch (error) {
                 console.error('Failed to remove from cart API', error);
                 toast.error('Failed to remove item');
             }
         } else {
             setCartItems(prev => prev.filter(item => item.product._id !== productId));
+            toast.success('Item removed from cart');
         }
     };
 
@@ -248,6 +250,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
             try {
                 const { data } = await apiRemoveFromWishlist(productId);
                 setMyLists(normalizeProductList(data.wishlist || []));
+                toast.success('Item removed from my lists');
             } catch (error) {
                 console.error('Failed to remove from wishlist API', error);
                 toast.error('Failed to remove from my lists');
@@ -256,6 +259,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
         }
 
         setMyLists(prev => prev.filter(item => item._id !== productId));
+        toast.success('Item removed from my lists');
     };
 
     const saveForLater = async (product: any) => {
@@ -267,7 +271,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
                 const { data } = await apiUpdateCartItem(productId, { saveForLater: true });
                 setCartItems(data.items || []);
                 setSavedForLater(normalizeProductList(data.savedItems || []));
-                toast.success('Saved for later');
+                toast.success('Item has been moved to save for later');
             } catch (error) {
                 console.error('Failed to save item for later API', error);
                 toast.error('Failed to save for later');
@@ -275,14 +279,14 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
             return;
         }
 
-        removeFromCart(productId);
+        setCartItems(prev => prev.filter(item => item.product._id !== productId));
         setSavedForLater(prev => {
             if (!prev.find(item => getProductIdFromItem(item) === productId)) {
                 return [...prev, productObj];
             }
             return prev;
         });
-        toast.success('Saved for later');
+        toast.success('Item has been moved to save for later');
     };
 
     const moveToCartFromSaved = async (item: any) => {
@@ -313,6 +317,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
                 const { data } = await apiRemoveFromCart(productId);
                 setCartItems(data.items || []);
                 setSavedForLater(normalizeProductList(data.savedItems || []));
+                toast.success('Item removed from saved for later');
             } catch (error) {
                 console.error('Failed to remove saved item API', error);
                 toast.error('Failed to remove saved item');
@@ -321,6 +326,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
         }
 
         setSavedForLater(prev => prev.filter(entry => getProductIdFromItem(entry) !== productId));
+        toast.success('Item removed from saved for later');
     };
 
     const cartCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);

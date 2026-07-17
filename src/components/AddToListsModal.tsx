@@ -53,12 +53,12 @@ export default function AddToListsModal({ product, isOpen, isAlreadyAdded, onClo
             onClick={onClose}
         >
             <div
-                className="bg-white rounded-lg p-6 w-[90%] max-w-[420px] shadow-xl"
+                className="bg-white rounded-lg p-4 sm:p-6 w-[90%] max-w-[420px] shadow-xl"
                 onClick={e => e.stopPropagation()}
             >
                 {/* Header */}
-                <div className="flex justify-between items-center mb-5">
-                    <h3 className="font-bold text-gray-900 text-lg">Add to Lists</h3>
+                <div className="flex justify-between items-center mb-2 sm:mb-5">
+                    <h3 className="font-bold text-gray-900 sm:text-md sm:text-lg">Add to Lists</h3>
                     <button onClick={onClose} className="text-gray-500 hover:text-gray-900 cursor-pointer">
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -68,14 +68,14 @@ export default function AddToListsModal({ product, isOpen, isAlreadyAdded, onClo
 
                 {/* My List row */}
                 <div className="mb-4">
-                    <label className="flex items-center gap-3 py-3 border-b border-gray-100 cursor-pointer">
+                    <label className="flex items-center gap-2 sm:gap-3 py-3 border-b border-gray-100 cursor-pointer">
                         <input
                             type="checkbox"
-                            className="w-4 h-4 accent-green-600 rounded cursor-pointer"
+                            className="w-3 sm:w-4 h-3 sm:h-4 accent-green-600 rounded cursor-pointer"
                             checked={myListChecked}
                             onChange={() => setMyListChecked(prev => !prev)}
                         />
-                        <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                         </svg>
                         <span className="text-sm text-gray-800">My List ({myLists.length})</span>
@@ -85,7 +85,7 @@ export default function AddToListsModal({ product, isOpen, isAlreadyAdded, onClo
                 {/* Done button */}
                 <button
                     onClick={handleDone}
-                    className="w-full bg-[#458500] hover:bg-[#366800] text-white font-bold py-3 rounded-md transition-colors cursor-pointer"
+                    className="w-full bg-[#458500] hover:bg-[#366800] text-white font-bold py-2 sm:py-[9px] rounded-md transition-colors cursor-pointer text-[14px] sm:text-[16px]"
                 >
                     Done
                 </button>
