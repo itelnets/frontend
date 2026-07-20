@@ -34,8 +34,8 @@ export default function ProductsPage() {
     const [filters, setFilters] = useState({
         inStock: false,
         brands: [] as string[],
-        price: '',
-        rating: ''
+        price: [] as string[],
+        rating: [] as string[]
     });
 
     useEffect(() => {
@@ -51,23 +51,15 @@ export default function ProductsPage() {
     }, []);
 
     useEffect(() => {
-        window.scrollTo(0, 0);
         const fetchProducts = async () => {
             try {
                 setIsLoading(true);
-                let minPrice = '';
-                let maxPrice = '';
-                if (filters.price === 'Under ₹500') { maxPrice = '500'; }
-                if (filters.price === '₹500 - ₹1,000') { minPrice = '500'; maxPrice = '1000'; }
-                if (filters.price === 'Over ₹1,000') { minPrice = '1000'; }
-
                 const params = {
                     sort: sortOption !== 'Featured' ? sortOption : undefined,
                     inStock: filters.inStock ? 'true' : undefined,
-                    brand: filters.brands.length > 0 ? filters.brands.join(',') : undefined,
-                    minPrice,
-                    maxPrice,
-                    rating: filters.rating ? filters.rating : undefined
+                    brand: filters.brands.length > 0 ? filters.brands.join('|') : undefined,
+                    priceRanges: filters.price.length > 0 ? filters.price.join('|') : undefined,
+                    ratings: filters.rating.length > 0 ? filters.rating.join('|') : undefined
                 };
                 const { data } = await getProducts(params);
                 setProducts(data);
@@ -84,13 +76,7 @@ export default function ProductsPage() {
 
 
 
-    if (isLoading) {
-        return (
-            <div className="absolute min-h-auto inset-0 flex items-center justify-center">
-                <Spinner className="w-8 h-8 text-green-700" />
-            </div>
-        );
-    }
+
 
     return (
         <div className="min-h-screen bg-gray-50 py-2.5 sm:py-5 px-2.5 sm:px-4 lg:px-5">
@@ -142,8 +128,13 @@ export default function ProductsPage() {
                                         type="checkbox"
                                         name="price"
                                         className="text-[#458500] focus:ring-[#458500] rounded accent-[#458500] w-4 h-4 cursor-pointer border-gray-300"
-                                        checked={filters.price === priceOption}
-                                        onChange={() => setFilters({ ...filters, price: filters.price === priceOption ? '' : priceOption })}
+                                        checked={filters.price.includes(priceOption)}
+                                        onChange={(e) => {
+                                            const newPrice = e.target.checked 
+                                                ? [...filters.price, priceOption]
+                                                : filters.price.filter(p => p !== priceOption);
+                                            setFilters({ ...filters, price: newPrice });
+                                        }}
                                     /> {priceOption}
                                 </label>
                             ))}
@@ -159,8 +150,13 @@ export default function ProductsPage() {
                                         type="checkbox"
                                         name="rating"
                                         className="text-[#458500] focus:ring-[#458500] rounded accent-[#458500] w-4 h-4 cursor-pointer border-gray-300"
-                                        checked={filters.rating === ratingOption}
-                                        onChange={() => setFilters({ ...filters, rating: filters.rating === ratingOption ? '' : ratingOption })}
+                                        checked={filters.rating.includes(ratingOption)}
+                                        onChange={(e) => {
+                                            const newRating = e.target.checked 
+                                                ? [...filters.rating, ratingOption]
+                                                : filters.rating.filter(r => r !== ratingOption);
+                                            setFilters({ ...filters, rating: newRating });
+                                        }}
                                     /> {ratingOption}
                                 </label>
                             ))}
@@ -174,7 +170,7 @@ export default function ProductsPage() {
                     {/* Mobile Quick Filters Bar */}
                     <div className="lg:hidden flex items-center gap-2 overflow-x-auto hide-scrollbar pb-1 sm:pb-4 sm:mb-2">
                         {(() => {
-                            const activeCount = filters.brands.length + (filters.inStock ? 1 : 0) + (filters.price ? 1 : 0) + (filters.rating ? 1 : 0);
+                            const activeCount = filters.brands.length + (filters.inStock ? 1 : 0) + filters.price.length + filters.rating.length;
                             return (
                                 <button
                                     onClick={() => { setMobileFilterView('main'); setIsMobileFilterOpen(true); }}
@@ -248,16 +244,24 @@ export default function ProductsPage() {
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-5 gap-2 sm:gap-3">
-                        {products.map((product) => (
-                            <div key={product._id} className="h-full">
-                                <ProductCard product={product} />
+                    {isLoading ? (
+                        <div className="w-full flex items-center justify-center py-20">
+                            <Spinner className="w-8 h-8 text-green-700" />
+                        </div>
+                    ) : (
+                        <>
+                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-5 gap-2 sm:gap-3">
+                                {products.map((product) => (
+                                    <div key={product._id} className="h-full">
+                                        <ProductCard product={product} />
+                                    </div>
+                                ))}
                             </div>
-                        ))}
-                    </div>
 
-                    {products.length === 0 && (
-                        <p className="text-[15px] sm:text-xl text-gray-500">No products found. Check back soon!</p>
+                            {products.length === 0 && (
+                                <p className="text-[15px] sm:text-xl text-gray-500">No products found. Check back soon!</p>
+                            )}
+                        </>
                     )}
                 </div>
             </div>

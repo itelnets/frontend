@@ -114,8 +114,13 @@ export default function MobileFilterDrawer({ isOpen, onClose, totalResults, init
                         type="checkbox" 
                         name="mobile-rating" 
                         className="w-5 h-5 border-gray-300 rounded text-[#458500] focus:ring-[#458500] accent-[#458500]" 
-                        checked={localFilters.rating === ratingOption}
-                        onChange={() => setLocalFilters({ ...localFilters, rating: localFilters.rating === ratingOption ? '' : ratingOption })}
+                        checked={localFilters.rating.includes(ratingOption)}
+                        onChange={(e) => {
+                            const newRating = e.target.checked 
+                                ? [...localFilters.rating, ratingOption]
+                                : localFilters.rating.filter((r: string) => r !== ratingOption);
+                            setLocalFilters({ ...localFilters, rating: newRating });
+                        }}
                     />
                     <span className="text-gray-600 font-medium ml-1">{ratingOption}</span>
                 </label>
@@ -131,8 +136,13 @@ export default function MobileFilterDrawer({ isOpen, onClose, totalResults, init
                         type="checkbox" 
                         name="mobile-price"
                         className="w-5 h-5 rounded border-gray-300 text-[#458500] focus:ring-[#458500] accent-[#458500]"
-                        checked={localFilters.price === priceOption}
-                        onChange={() => setLocalFilters({ ...localFilters, price: localFilters.price === priceOption ? '' : priceOption })}
+                        checked={localFilters.price.includes(priceOption)}
+                        onChange={(e) => {
+                            const newPrice = e.target.checked 
+                                ? [...localFilters.price, priceOption]
+                                : localFilters.price.filter((p: string) => p !== priceOption);
+                            setLocalFilters({ ...localFilters, price: newPrice });
+                        }}
                     />
                     <span className="text-gray-900 font-medium">{priceOption}</span>
                 </label>
@@ -208,10 +218,10 @@ export default function MobileFilterDrawer({ isOpen, onClose, totalResults, init
                             <AccordionItem title="Brands" activeValue={localFilters.brands.length > 0 ? localFilters.brands.join(', ') : undefined}>
                                 {renderBrandsContent()}
                             </AccordionItem>
-                            <AccordionItem title="Ratings" activeValue={localFilters.rating || undefined}>
+                            <AccordionItem title="Ratings" activeValue={localFilters.rating.length > 0 ? localFilters.rating.join(', ') : undefined}>
                                 {renderRatingsContent()}
                             </AccordionItem>
-                            <AccordionItem title="Price" activeValue={localFilters.price || undefined}>
+                            <AccordionItem title="Price" activeValue={localFilters.price.length > 0 ? localFilters.price.join(', ') : undefined}>
                                 {renderPriceContent()}
                             </AccordionItem>
                             <AccordionItem title="Special offers" />
@@ -226,7 +236,7 @@ export default function MobileFilterDrawer({ isOpen, onClose, totalResults, init
                 </div>
 
                 {/* Active Filters Bar */}
-                {(localFilters.inStock || localFilters.price || localFilters.rating || localFilters.brands.length > 0) && (
+                {(localFilters.inStock || localFilters.price.length > 0 || localFilters.rating.length > 0 || localFilters.brands.length > 0) && (
                     <div className="border-t border-gray-200 p-3 bg-white shrink-0">
                         <div className="flex items-center gap-2 overflow-x-auto hide-scrollbar pb-1">
                             {localFilters.inStock && (
@@ -237,22 +247,22 @@ export default function MobileFilterDrawer({ isOpen, onClose, totalResults, init
                                     </button>
                                 </div>
                             )}
-                            {localFilters.price && (
-                                <div className="flex items-center gap-1.5 px-3 py-1.5 border border-[#458500] text-[#458500] rounded-full text-sm font-medium whitespace-nowrap shrink-0 bg-white">
-                                    {localFilters.price} 
-                                    <button onClick={() => setLocalFilters({ ...localFilters, price: '' })} className="p-0.5 hover:bg-green-50 rounded-full transition-colors flex items-center justify-center">
+                            {localFilters.price.map((p: string) => (
+                                <div key={p} className="flex items-center gap-1.5 px-3 py-1.5 border border-[#458500] text-[#458500] rounded-full text-sm font-medium whitespace-nowrap shrink-0 bg-white">
+                                    {p} 
+                                    <button onClick={() => setLocalFilters({ ...localFilters, price: localFilters.price.filter((item: string) => item !== p) })} className="p-0.5 hover:bg-green-50 rounded-full transition-colors flex items-center justify-center">
                                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" /></svg>
                                     </button>
                                 </div>
-                            )}
-                            {localFilters.rating && (
-                                <div className="flex items-center gap-1.5 px-3 py-1.5 border border-[#458500] text-[#458500] rounded-full text-sm font-medium whitespace-nowrap shrink-0 bg-white">
-                                    {localFilters.rating} 
-                                    <button onClick={() => setLocalFilters({ ...localFilters, rating: '' })} className="p-0.5 hover:bg-green-50 rounded-full transition-colors flex items-center justify-center">
+                            ))}
+                            {localFilters.rating.map((r: string) => (
+                                <div key={r} className="flex items-center gap-1.5 px-3 py-1.5 border border-[#458500] text-[#458500] rounded-full text-sm font-medium whitespace-nowrap shrink-0 bg-white">
+                                    {r} 
+                                    <button onClick={() => setLocalFilters({ ...localFilters, rating: localFilters.rating.filter((item: string) => item !== r) })} className="p-0.5 hover:bg-green-50 rounded-full transition-colors flex items-center justify-center">
                                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" /></svg>
                                     </button>
                                 </div>
-                            )}
+                            ))}
                             {localFilters.brands.map((brand: string) => (
                                 <div key={brand} className="flex items-center gap-1.5 px-3 py-1.5 border border-[#458500] text-[#458500] rounded-full text-sm font-medium whitespace-nowrap shrink-0 bg-white">
                                     {brand} 
