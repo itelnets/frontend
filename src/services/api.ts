@@ -37,9 +37,20 @@ api.interceptors.response.use(
                 return Promise.reject(error);
             }
 
+            let redirectUrl = '/login';
+            const userInfoStr = localStorage.getItem('userInfo');
+            if (userInfoStr) {
+                try {
+                    const userInfo = JSON.parse(userInfoStr);
+                    if (userInfo.role === 'admin' || userInfo.role === 'Admin') {
+                        redirectUrl = '/admin/login';
+                    }
+                } catch (e) {}
+            }
+
             localStorage.removeItem('userInfo');
             if (typeof window !== 'undefined') {
-                window.location.href = '/login';
+                window.location.href = redirectUrl;
             }
             return Promise.reject(error);
         }
