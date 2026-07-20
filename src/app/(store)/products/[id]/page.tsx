@@ -300,8 +300,12 @@ export default function ProductDetailsPage() {
                     </button>
                 </div>
 
-                <button onClick={() => addToCart(displayProduct, quantity)} className="w-full bg-[#f38700] hover:bg-[#e07b00] cursor-pointer text-white font-bold py-2.5 lg:py-3.5 rounded-md transition-colors shadow-sm mb-3 lg:mb-4 text-sm lg:text-base">
-                    Add to Cart
+                <button 
+                    onClick={() => { if (displayProduct.inStock?.toLowerCase() === 'yes') addToCart(displayProduct, quantity); }} 
+                    disabled={displayProduct.inStock?.toLowerCase() !== 'yes'}
+                    className={`w-full ${displayProduct.inStock?.toLowerCase() === 'yes' ? 'bg-[#f38700] hover:bg-[#e07b00] cursor-pointer text-white' : 'bg-gray-300 text-gray-500 cursor-not-allowed'} font-bold py-2.5 lg:py-3.5 rounded-md transition-colors shadow-sm mb-3 lg:mb-4 text-sm lg:text-base`}
+                >
+                    {displayProduct.inStock?.toLowerCase() === 'yes' ? 'Add to Cart' : 'Out of Stock'}
                 </button>
 
                 <button

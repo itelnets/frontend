@@ -136,7 +136,7 @@ const CustomerReviews = ({ productId, onReviewSubmitted }: Props) => {
 
     return (
         <div className="w-full mt-2">
-            <h2 className="text-[18px] lg:text-[20px] font-bold text-gray-900 mb-4 lg:mb-6">Customer reviews</h2>
+            <h2 className="text-[18px] lg:text-[20px] font-bold text-gray-900 mb-4 lg:mb-6">Ratings</h2>
             <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
                 {/* Left Column */}
                 <div className="w-full lg:w-[35%] flex flex-col gap-4 sm:gap-6">

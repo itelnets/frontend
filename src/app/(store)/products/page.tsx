@@ -66,7 +66,8 @@ export default function ProductsPage() {
                     inStock: filters.inStock ? 'true' : undefined,
                     brand: filters.brands.length > 0 ? filters.brands.join(',') : undefined,
                     minPrice,
-                    maxPrice
+                    maxPrice,
+                    rating: filters.rating ? filters.rating : undefined
                 };
                 const { data } = await getProducts(params);
                 setProducts(data);
@@ -138,11 +139,11 @@ export default function ProductsPage() {
                             {['Under ₹500', '₹500 - ₹1,000', 'Over ₹1,000'].map(priceOption => (
                                 <label key={priceOption} className="flex items-center gap-2 cursor-pointer hover:text-[#458500]">
                                     <input
-                                        type="radio"
+                                        type="checkbox"
                                         name="price"
-                                        className="text-[#458500] focus:ring-[#458500] accent-[#458500] w-4 h-4 cursor-pointer"
+                                        className="text-[#458500] focus:ring-[#458500] rounded accent-[#458500] w-4 h-4 cursor-pointer border-gray-300"
                                         checked={filters.price === priceOption}
-                                        onChange={() => setFilters({ ...filters, price: priceOption })}
+                                        onChange={() => setFilters({ ...filters, price: filters.price === priceOption ? '' : priceOption })}
                                     /> {priceOption}
                                 </label>
                             ))}
@@ -150,16 +151,16 @@ export default function ProductsPage() {
                     </div>
 
                     <div className="border-t border-gray-100 pt-4">
-                        <h3 className="font-semibold text-sm text-gray-800 mb-3">Customer Review</h3>
+                        <h3 className="font-semibold text-sm text-gray-800 mb-3">Ratings</h3>
                         <div className="space-y-2.5 text-sm text-gray-600">
                             {['4 Stars & Up', '3 Stars & Up'].map(ratingOption => (
                                 <label key={ratingOption} className="flex items-center gap-2 cursor-pointer hover:text-[#458500]">
                                     <input
-                                        type="radio"
+                                        type="checkbox"
                                         name="rating"
-                                        className="text-[#458500] focus:ring-[#458500] accent-[#458500] w-4 h-4 cursor-pointer"
+                                        className="text-[#458500] focus:ring-[#458500] rounded accent-[#458500] w-4 h-4 cursor-pointer border-gray-300"
                                         checked={filters.rating === ratingOption}
-                                        onChange={() => setFilters({ ...filters, rating: ratingOption })}
+                                        onChange={() => setFilters({ ...filters, rating: filters.rating === ratingOption ? '' : ratingOption })}
                                     /> {ratingOption}
                                 </label>
                             ))}
@@ -225,7 +226,7 @@ export default function ProductsPage() {
                         <div className="hidden sm:flex items-center gap-3 text-sm mt-4 sm:mt-0">
                             <label className="text-gray-600 whitespace-nowrap">Sort by:</label>
                             <SortDropdown
-                                options={['Featured', 'Best sellers', 'Top Rated', 'Most Rated', 'Price: Low to High', 'Price: High to Low', 'Newest', 'Heaviest', 'Lightest', 'Highest Discount']}
+                                options={['Featured', 'Best sellers', 'Top Rated', 'Price: Low to High', 'Price: High to Low', 'Newest', 'Heaviest', 'Lightest', 'Highest Discount']}
                                 value={sortOption}
                                 onChange={setSortOption}
                                 className="w-auto z-[90]"
@@ -274,7 +275,7 @@ export default function ProductsPage() {
             <MobileSortDrawer
                 isOpen={isMobileSortOpen}
                 onClose={() => setIsMobileSortOpen(false)}
-                options={['Featured', 'Best sellers', 'Top Rated', 'Most Rated', 'Price: Low to High', 'Price: High to Low', 'Newest', 'Heaviest', 'Lightest', 'Highest Discount']}
+                options={['Featured', 'Best sellers', 'Top Rated', 'Price: Low to High', 'Price: High to Low', 'Newest', 'Heaviest', 'Lightest', 'Highest Discount']}
                 value={sortOption}
                 onChange={setSortOption}
                 totalResults={products.length}

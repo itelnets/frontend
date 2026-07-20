@@ -111,11 +111,11 @@ export default function MobileFilterDrawer({ isOpen, onClose, totalResults, init
             {['4 Stars & Up', '3 Stars & Up'].map((ratingOption, idx) => (
                 <label key={idx} className="flex items-center gap-3 cursor-pointer">
                     <input 
-                        type="radio" 
+                        type="checkbox" 
                         name="mobile-rating" 
-                        className="w-5 h-5 border-gray-300 text-[#458500] focus:ring-[#458500] accent-[#458500]" 
+                        className="w-5 h-5 border-gray-300 rounded text-[#458500] focus:ring-[#458500] accent-[#458500]" 
                         checked={localFilters.rating === ratingOption}
-                        onChange={() => setLocalFilters({ ...localFilters, rating: ratingOption })}
+                        onChange={() => setLocalFilters({ ...localFilters, rating: localFilters.rating === ratingOption ? '' : ratingOption })}
                     />
                     <span className="text-gray-600 font-medium ml-1">{ratingOption}</span>
                 </label>
@@ -128,11 +128,11 @@ export default function MobileFilterDrawer({ isOpen, onClose, totalResults, init
             {['Under ₹500', '₹500 - ₹1,000', 'Over ₹1,000'].map(priceOption => (
                 <label key={priceOption} className="flex items-center gap-3 cursor-pointer">
                     <input 
-                        type="radio" 
+                        type="checkbox" 
                         name="mobile-price"
                         className="w-5 h-5 rounded border-gray-300 text-[#458500] focus:ring-[#458500] accent-[#458500]"
                         checked={localFilters.price === priceOption}
-                        onChange={() => setLocalFilters({ ...localFilters, price: priceOption })}
+                        onChange={() => setLocalFilters({ ...localFilters, price: localFilters.price === priceOption ? '' : priceOption })}
                     />
                     <span className="text-gray-900 font-medium">{priceOption}</span>
                 </label>
