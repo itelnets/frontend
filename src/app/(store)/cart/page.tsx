@@ -12,7 +12,7 @@ import ProductCard from '@/components/ProductCard';
 import PageLoader from '@/components/PageLoader';
 
 export default function CartPage() {
-    const { cartItems, cartCount, removeFromCart, addToCart, myLists, moveToCartFromList, moveToList, clearCart, removeFromList, savedForLater, saveForLater, moveToCartFromSaved, removeFromSaved, isCartLoading } = useCart();
+    const { cartItems, cartCount, removeFromCart, addToCart, updateQuantity, myLists, moveToCartFromList, moveToList, clearCart, removeFromList, savedForLater, saveForLater, moveToCartFromSaved, removeFromSaved, isCartLoading } = useCart();
     const router = useRouter();
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [recommended, setRecommended] = useState<any[]>([]);
@@ -59,17 +59,7 @@ export default function CartPage() {
         fetchRecs();
     }, []);
 
-    const updateQuantity = (product: any, newQty: number, currentQty: number) => {
-        if (newQty === 0) {
-            removeFromCart(product._id);
-            return;
-        }
-        if (newQty < 1) return;
-        const diff = newQty - currentQty;
-        addToCart(product, diff);
-    };
-
-    if (isCartLoading || isRecsLoading) {
+    if (isCartLoading) {
         return <PageLoader />;
     }
 
@@ -77,11 +67,17 @@ export default function CartPage() {
         <div className="mt-2">
             <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-2 sm:mb-6">Recommended for you</h2>
             <div className="relative">
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 sm:gap-4 pb-4">
-                    {recommended.length > 0 ? recommended.map((product: any) => (
-                        <ProductCard key={product._id} product={product} />
-                    )) : null}
-                </div>
+                {isRecsLoading ? (
+                    <div className="flex justify-center py-10">
+                        <div className="w-8 h-8 border-4 border-gray-200 border-t-green-700 rounded-full animate-spin"></div>
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 sm:gap-4 pb-4">
+                        {recommended.length > 0 ? recommended.map((product: any) => (
+                            <ProductCard key={product._id} product={product} />
+                        )) : null}
+                    </div>
+                )}
             </div>
         </div>
     );
@@ -152,9 +148,9 @@ export default function CartPage() {
                                 <div className="space-y-6">
                                     {cartItems.map((item, index) => (
                                         <div key={item.product?._id ? item.product._id : `cart-item-${index}`} className="flex gap-2 sm:gap-4 border-b border-gray-100 pb-6">
-                                            <div className="w-16 h-16 sm:w-24 sm:h-24 shrink-0 bg-gray-50 border border-gray-200 rounded p-1">
+                                            <div className="w-16 h-16 sm:w-24 sm:h-24 shrink-0 bg-white border border-gray-200 rounded p-1">
                                                 {item.product.images && item.product.images.length > 0 ? (
-                                                    <img src={item.product.images[0].startsWith('http') ? item.product.images[0] : `${process.env.NEXT_PUBLIC_API_URL}/upload/file/${item.product.images[0]}`} alt={item.product.name} className="w-full h-full object-contain mix-blend-multiply" />
+                                                    <img src={item.product.images[0].startsWith('http') ? item.product.images[0] : `${process.env.NEXT_PUBLIC_API_URL}/upload/file/${item.product.images[0]}`} alt={item.product.name} className="w-full h-full object-contain" />
                                                 ) : (
                                                     <div className="w-full h-full flex items-center justify-center text-gray-300">
                                                         <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
@@ -180,10 +176,10 @@ export default function CartPage() {
                                                     {/* Quantity Dropdown */}
                                                     <QuantityDropdown
                                                         value={item.quantity}
-                                                        onChange={(qty) => updateQuantity(item.product, qty, item.quantity)}
+                                                        onChange={(qty) => updateQuantity(item.product._id, qty)}
                                                     />
 
-                                                    <button onClick={() => setDeleteTarget({ type: 'cart', item })} className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center border border-gray-300 rounded-full hover:bg-gray-50 text-gray-500 hover:text-black transition-colors cursor-pointer" title="Remove">
+                                                    <button onClick={() => setDeleteTarget({ type: 'cart', item })} className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center border border-gray-300 rounded-full hover:bg-gray-50 text-gray-800 hover:text-black transition-colors cursor-pointer" title="Remove">
                                                         <svg className="w-4 h-4 sm:w-4.5 sm:h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                                                     </button>
 
@@ -315,7 +311,7 @@ export default function CartPage() {
                                     <Link href={`/products/${product._id}`} className="block border border-gray-200 rounded p-4 mb-2 hover:shadow-sm">
                                         <div className="w-full aspect-square flex items-center justify-center relative bg-white">
                                             {product.images && product.images.length > 0 ? (
-                                                <img src={product.images[0].startsWith('http') ? product.images[0] : `${process.env.NEXT_PUBLIC_API_URL}/upload/file/${product.images[0]}`} alt={product.name} className="w-full h-full object-contain mix-blend-multiply" />
+                                                <img src={product.images[0].startsWith('http') ? product.images[0] : `${process.env.NEXT_PUBLIC_API_URL}/upload/file/${product.images[0]}`} alt={product.name} className="w-full h-full object-contain" />
                                             ) : (
                                                 <div className="w-full h-full bg-gray-100 rounded"></div>
                                             )}

@@ -38,8 +38,9 @@ export default function ConfirmModal({
     if (!mounted || !isOpen) return null;
 
     const modal = (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-            <div className={`bg-white rounded-lg p-6 max-w-sm w-full shadow-xl ${className}`}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onCancel}></div>
+            <div className={`relative bg-white rounded-lg p-6 max-w-sm w-full shadow-xl ${className}`}>
                 <div className="flex justify-between items-center mb-4">
                     <div className="flex items-center gap-3">
                         {icon && <div className="rounded-full bg-gray-100 p-2">{icon}</div>}

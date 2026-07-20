@@ -2,11 +2,14 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { getProducts } from '@/services/product';
+import { getProducts, getFilters } from '@/services/product';
 import toast from 'react-hot-toast';
 import ProductCard from '@/components/ProductCard';
 import { useCart } from '@/context/CartContext';
 import Spinner from '@/components/Spinner';
+import SortDropdown from '@/components/SortDropdown';
+import MobileFilterDrawer from '@/components/MobileFilterDrawer';
+import MobileSortDrawer from '@/components/MobileSortDrawer';
 
 interface Product {
     _id: string;
@@ -22,12 +25,50 @@ export default function ProductsPage() {
     const { myLists, moveToList, removeFromList } = useCart();
     const [products, setProducts] = useState<Product[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [sortOption, setSortOption] = useState('Featured');
+    const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
+    const [mobileFilterView, setMobileFilterView] = useState<'main' | 'brands' | 'ratings' | 'price'>('main');
+    const [isMobileSortOpen, setIsMobileSortOpen] = useState(false);
+
+    const [availableBrands, setAvailableBrands] = useState<string[]>([]);
+    const [filters, setFilters] = useState({
+        inStock: false,
+        brands: [] as string[],
+        price: '',
+        rating: ''
+    });
+
+    useEffect(() => {
+        const fetchFilters = async () => {
+            try {
+                const { data } = await getFilters();
+                setAvailableBrands(data.brands || []);
+            } catch (err) {
+                console.error(err);
+            }
+        };
+        fetchFilters();
+    }, []);
 
     useEffect(() => {
         window.scrollTo(0, 0);
         const fetchProducts = async () => {
             try {
-                const { data } = await getProducts();
+                setIsLoading(true);
+                let minPrice = '';
+                let maxPrice = '';
+                if (filters.price === 'Under ₹500') { maxPrice = '500'; }
+                if (filters.price === '₹500 - ₹1,000') { minPrice = '500'; maxPrice = '1000'; }
+                if (filters.price === 'Over ₹1,000') { minPrice = '1000'; }
+
+                const params = {
+                    sort: sortOption !== 'Featured' ? sortOption : undefined,
+                    inStock: filters.inStock ? 'true' : undefined,
+                    brand: filters.brands.length > 0 ? filters.brands.join(',') : undefined,
+                    minPrice,
+                    maxPrice
+                };
+                const { data } = await getProducts(params);
                 setProducts(data);
             } catch (error) {
                 console.error('Failed to fetch products', error);
@@ -38,18 +79,9 @@ export default function ProductsPage() {
         };
 
         fetchProducts();
-    }, []);
+    }, [filters, sortOption]);
 
-    const isInList = (productId: string) => myLists.some((p: any) => p._id === productId);
 
-    const toggleList = (e: React.MouseEvent, product: Product) => {
-        e.stopPropagation();
-        if (isInList(product._id)) {
-            removeFromList(product._id);
-        } else {
-            moveToList(product);
-        }
-    };
 
     if (isLoading) {
         return (
@@ -60,75 +92,193 @@ export default function ProductsPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 py-5 px-2.5 sm:px-4 lg:px-5">
-            <div className="max-w-[1500px] mx-auto flex gap-8">
-                {/* Left Sidebar (Filters - Desktop Only) */}
-                <div className="w-64 shrink-0 hidden lg:block bg-white p-5 rounded-xl border border-gray-200 h-fit sticky top-6 shadow-sm">
+        <div className="min-h-screen bg-gray-50 py-2.5 sm:py-5 px-2.5 sm:px-4 lg:px-5">
+            <div className="max-w-[1400px] mx-auto flex flex-col lg:flex-row gap-4">
+                {/* Left Sidebar (Filters - Desktop) */}
+                <div className="hidden lg:block w-56 shrink-0 bg-white p-5 rounded-xl border border-gray-200 h-fit sticky top-6 shadow-sm">
                     <h2 className="font-bold text-lg text-gray-900 mb-4 border-b border-gray-100 pb-2">Filters</h2>
 
                     <div className="mb-6">
-                        <h3 className="font-semibold text-sm text-gray-800 mb-3">Categories</h3>
-                        <div className="space-y-2.5 text-sm text-gray-600">
-                            <label className="flex items-center gap-2 cursor-pointer hover:text-[#007185]"><input type="checkbox" className="rounded text-[#007185] focus:ring-[#007185] w-4 h-4 cursor-pointer" /> All Products</label>
-                            <label className="flex items-center gap-2 cursor-pointer hover:text-[#007185]"><input type="checkbox" className="rounded text-[#007185] focus:ring-[#007185] w-4 h-4 cursor-pointer" /> Supplements</label>
-                            <label className="flex items-center gap-2 cursor-pointer hover:text-[#007185]"><input type="checkbox" className="rounded text-[#007185] focus:ring-[#007185] w-4 h-4 cursor-pointer" /> Beauty</label>
-                            <label className="flex items-center gap-2 cursor-pointer hover:text-[#007185]"><input type="checkbox" className="rounded text-[#007185] focus:ring-[#007185] w-4 h-4 cursor-pointer" /> Grocery</label>
+                        <label className="flex items-center justify-between cursor-pointer group">
+                            <span className="font-semibold text-sm text-gray-800 group-hover:text-[#458500] transition-colors">In Stock</span>
+                            <div className={`w-11 h-6 rounded-full flex items-center transition-colors px-0.5 ${filters.inStock ? 'bg-green-600' : 'bg-gray-400'}`}>
+                                <div className={`bg-white w-5 h-5 rounded-full shadow-sm transform transition-transform ${filters.inStock ? 'translate-x-5' : ''}`} />
+                            </div>
+                            <input type="checkbox" className="hidden accent-[#458500]" checked={filters.inStock} onChange={(e) => setFilters({ ...filters, inStock: e.target.checked })} />
+                        </label>
+                    </div>
+
+                    <div className="mb-6 border-t border-gray-100 pt-4">
+                        <h3 className="font-semibold text-sm text-gray-800 mb-3">Brands</h3>
+                        <div className="space-y-2.5 text-sm text-gray-600 max-h-60 overflow-y-auto scrollbar-thin">
+                            {availableBrands.map(brand => (
+                                <label key={brand} className="flex items-start gap-2.5 cursor-pointer group">
+                                    <input
+                                        type="checkbox"
+                                        className="rounded text-[#458500] focus:ring-[#458500] accent-[#458500] w-4 h-4 cursor-pointer mt-0.5"
+                                        checked={filters.brands.includes(brand)}
+                                        onChange={(e) => {
+                                            const newBrands = e.target.checked
+                                                ? [...filters.brands, brand]
+                                                : filters.brands.filter(b => b !== brand);
+                                            setFilters({ ...filters, brands: newBrands });
+                                        }}
+                                    />
+                                    <div className="flex-1 flex justify-between items-start leading-snug group-hover:text-[#458500] transition-colors">
+                                        <span className="pr-2">{brand}</span>
+                                    </div>
+                                </label>
+                            ))}
                         </div>
                     </div>
 
                     <div className="mb-6 border-t border-gray-100 pt-4">
                         <h3 className="font-semibold text-sm text-gray-800 mb-3">Price Range</h3>
                         <div className="space-y-2.5 text-sm text-gray-600">
-                            <label className="flex items-center gap-2 cursor-pointer hover:text-[#007185]"><input type="radio" name="price" className="text-[#007185] focus:ring-[#007185] w-4 h-4 cursor-pointer" /> Under ₹500</label>
-                            <label className="flex items-center gap-2 cursor-pointer hover:text-[#007185]"><input type="radio" name="price" className="text-[#007185] focus:ring-[#007185] w-4 h-4 cursor-pointer" /> ₹500 - ₹1,000</label>
-                            <label className="flex items-center gap-2 cursor-pointer hover:text-[#007185]"><input type="radio" name="price" className="text-[#007185] focus:ring-[#007185] w-4 h-4 cursor-pointer" /> Over ₹1,000</label>
+                            {['Under ₹500', '₹500 - ₹1,000', 'Over ₹1,000'].map(priceOption => (
+                                <label key={priceOption} className="flex items-center gap-2 cursor-pointer hover:text-[#458500]">
+                                    <input
+                                        type="radio"
+                                        name="price"
+                                        className="text-[#458500] focus:ring-[#458500] accent-[#458500] w-4 h-4 cursor-pointer"
+                                        checked={filters.price === priceOption}
+                                        onChange={() => setFilters({ ...filters, price: priceOption })}
+                                    /> {priceOption}
+                                </label>
+                            ))}
                         </div>
                     </div>
 
                     <div className="border-t border-gray-100 pt-4">
                         <h3 className="font-semibold text-sm text-gray-800 mb-3">Customer Review</h3>
                         <div className="space-y-2.5 text-sm text-gray-600">
-                            <label className="flex items-center gap-2 cursor-pointer hover:text-[#007185]"><input type="radio" name="rating" className="text-[#007185] focus:ring-[#007185] w-4 h-4 cursor-pointer" /> 4 Stars & Up</label>
-                            <label className="flex items-center gap-2 cursor-pointer hover:text-[#007185]"><input type="radio" name="rating" className="text-[#007185] focus:ring-[#007185] w-4 h-4 cursor-pointer" /> 3 Stars & Up</label>
+                            {['4 Stars & Up', '3 Stars & Up'].map(ratingOption => (
+                                <label key={ratingOption} className="flex items-center gap-2 cursor-pointer hover:text-[#458500]">
+                                    <input
+                                        type="radio"
+                                        name="rating"
+                                        className="text-[#458500] focus:ring-[#458500] accent-[#458500] w-4 h-4 cursor-pointer"
+                                        checked={filters.rating === ratingOption}
+                                        onChange={() => setFilters({ ...filters, rating: ratingOption })}
+                                    /> {ratingOption}
+                                </label>
+                            ))}
                         </div>
                     </div>
                 </div>
 
                 {/* Main Content Area */}
                 <div className="flex-1 w-full min-w-0">
+
+                    {/* Mobile Quick Filters Bar */}
+                    <div className="lg:hidden flex items-center gap-2 overflow-x-auto hide-scrollbar pb-1 sm:pb-4 sm:mb-2">
+                        {(() => {
+                            const activeCount = filters.brands.length + (filters.inStock ? 1 : 0) + (filters.price ? 1 : 0) + (filters.rating ? 1 : 0);
+                            return (
+                                <button
+                                    onClick={() => { setMobileFilterView('main'); setIsMobileFilterOpen(true); }}
+                                    className={`flex items-center gap-2 px-3 py-1.5 border rounded-full text-sm font-bold whitespace-nowrap shrink-0 shadow-sm transition-colors ${activeCount > 0 ? 'bg-green-50 border-[#458500] text-[#458500]' : 'bg-white border-gray-300 text-gray-800'}`}
+                                >
+                                    {activeCount > 0 && (
+                                        <div className="w-5 h-5 bg-[#458500] text-white rounded-full flex items-center justify-center text-xs">
+                                            {activeCount}
+                                        </div>
+                                    )}
+                                    <svg className={`w-4 h-4 ${activeCount > 0 ? 'text-[#458500]' : 'text-gray-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" /></svg>
+                                    Filters
+                                </button>
+                            );
+                        })()}
+                        <button
+                            onClick={() => setFilters({ ...filters, inStock: !filters.inStock })}
+                            className={`px-3 py-1.5 border rounded-full text-sm flex items-center gap-1 whitespace-nowrap shrink-0 shadow-sm transition-colors ${filters.inStock ? 'bg-green-50 border-[#458500] text-[#458500] font-medium' : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'}`}
+                        >
+                            In stock
+                        </button>
+                        <button
+                            onClick={() => { setMobileFilterView('brands'); setIsMobileFilterOpen(true); }}
+                            className="px-3 py-1.5 bg-white border border-gray-300 rounded-full text-sm text-gray-700 flex items-center gap-1 whitespace-nowrap shrink-0 hover:bg-gray-50 shadow-sm"
+                        >
+                            Brands <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 9l-7 7-7-7" /></svg>
+                        </button>
+                        <button
+                            onClick={() => { setMobileFilterView('price'); setIsMobileFilterOpen(true); }}
+                            className="px-3 py-1.5 bg-white border border-gray-300 rounded-full text-sm text-gray-700 flex items-center gap-1 whitespace-nowrap shrink-0 hover:bg-gray-50 shadow-sm"
+                        >
+                            Price <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 9l-7 7-7-7" /></svg>
+                        </button>
+                        <button
+                            onClick={() => { setMobileFilterView('ratings'); setIsMobileFilterOpen(true); }}
+                            className="px-3 py-1.5 bg-white border border-gray-300 rounded-full text-sm text-gray-700 flex items-center gap-1 whitespace-nowrap shrink-0 hover:bg-gray-50 shadow-sm"
+                        >
+                            Ratings <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 9l-7 7-7-7" /></svg>
+                        </button>
+                    </div>
+
                     {/* Header Bar */}
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-gray-200 pb-4 mb-6 bg-white p-4 rounded-xl shadow-sm">
-                        <div>
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-gray-200 pb-3 mb-4 sm:mb-6 sm:bg-white sm:p-4 sm:rounded-xl sm:shadow-sm mt-1 sm:mt-0">
+                        {/* Desktop Header */}
+                        <div className="hidden sm:block">
                             <h1 className="text-xl sm:text-2xl text-gray-900 font-bold">All Products</h1>
                             <p className="text-sm text-gray-500 mt-1">Showing 1-{products.length} of {products.length} results</p>
                         </div>
-                        <div className="mt-4 sm:mt-0 flex items-center gap-3 text-sm">
-                            <label className="text-gray-600 hidden sm:block whitespace-nowrap">Sort by:</label>
-                            <select className="w-full sm:w-auto border border-gray-300 rounded-lg py-2 px-3 text-gray-700 bg-gray-50 hover:bg-gray-100 outline-none focus:border-[#007185] focus:ring-1 focus:ring-[#007185] cursor-pointer transition-colors shadow-sm">
-                                <option>Featured</option>
-                                <option>Price: Low to High</option>
-                                <option>Price: High to Low</option>
-                                <option>Avg. Customer Review</option>
-                                <option>Newest Arrivals</option>
-                            </select>
+                        <div className="hidden sm:flex items-center gap-3 text-sm mt-4 sm:mt-0">
+                            <label className="text-gray-600 whitespace-nowrap">Sort by:</label>
+                            <SortDropdown
+                                options={['Featured', 'Best sellers', 'Top Rated', 'Most Rated', 'Price: Low to High', 'Price: High to Low', 'Newest', 'Heaviest', 'Lightest', 'Highest Discount']}
+                                value={sortOption}
+                                onChange={setSortOption}
+                                className="w-auto z-[90]"
+                            />
+                        </div>
+
+                        {/* Mobile Header */}
+                        <div className="sm:hidden flex items-center justify-between w-full px-1">
+                            <div className="text-sm font-medium text-gray-600">
+                                {products.length.toLocaleString()} results
+                            </div>
+                            <button
+                                onClick={() => setIsMobileSortOpen(true)}
+                                className="flex items-center gap-1 text-[15px] text-gray-800 hover:text-black"
+                            >
+                                {sortOption}
+                                <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 9l4-4 4 4m0 6l-4 4-4-4" /></svg>
+                            </button>
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-6 gap-2 sm:gap-3">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-5 gap-2 sm:gap-3">
                         {products.map((product) => (
                             <div key={product._id} className="h-full">
-                                <ProductCard product={product} showHeart={true} />
+                                <ProductCard product={product} />
                             </div>
                         ))}
                     </div>
 
                     {products.length === 0 && (
-                        <div className="text-center py-24 bg-white rounded-xl border border-gray-200 mt-6 shadow-sm">
-                            <p className="text-xl text-gray-500">No products found. Check back soon!</p>
-                        </div>
+                        <p className="text-[15px] sm:text-xl text-gray-500">No products found. Check back soon!</p>
                     )}
                 </div>
             </div>
+
+            <MobileFilterDrawer
+                isOpen={isMobileFilterOpen}
+                onClose={() => setIsMobileFilterOpen(false)}
+                totalResults={products.length}
+                initialView={mobileFilterView}
+                availableBrands={availableBrands}
+                filters={filters}
+                setFilters={setFilters}
+            />
+
+            <MobileSortDrawer
+                isOpen={isMobileSortOpen}
+                onClose={() => setIsMobileSortOpen(false)}
+                options={['Featured', 'Best sellers', 'Top Rated', 'Most Rated', 'Price: Low to High', 'Price: High to Low', 'Newest', 'Heaviest', 'Lightest', 'Highest Discount']}
+                value={sortOption}
+                onChange={setSortOption}
+                totalResults={products.length}
+            />
         </div>
     );
 }

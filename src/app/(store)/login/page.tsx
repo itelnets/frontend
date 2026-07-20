@@ -87,10 +87,10 @@ export default function LoginPage() {
             } else {
                 router.push('/');
             }
+            // Do not set isLoading to false here, let the page transition happen
         } catch (err: any) {
             const errorMessage = err.response?.data?.message || 'Login failed';
             toast.error(errorMessage);
-        } finally {
             setIsLoading(false);
         }
     };

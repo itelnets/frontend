@@ -26,22 +26,22 @@ export default function ProductDetailsPage() {
     // Derived: check if this product is already in myLists (persisted in localStorage)
     const addedToList = myLists.some((p: any) => p._id === product?._id);
 
+    const fetchProduct = async () => {
+        try {
+            if (params.id) {
+                const { data } = await getProductById(params.id as string);
+                setProduct(data);
+            }
+        } catch (error) {
+            console.error("Failed to fetch product data:", error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     useEffect(() => {
         window.scrollTo(0, 0);
-        const fetchData = async () => {
-            try {
-                if (params.id) {
-                    const { data } = await getProductById(params.id as string);
-                    setProduct(data);
-                }
-
-            } catch (error) {
-                console.error("Failed to fetch product data:", error);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-        fetchData();
+        fetchProduct();
     }, [params.id]);
 
     const getImageUrl = (img: string | undefined, fallback: string = "https://via.placeholder.com/600x600?text=No+Image+Available") => {
@@ -54,8 +54,8 @@ export default function ProductDetailsPage() {
         name: product?.name,
         brand: product?.brand,
         manufacturer: product?.manufacturer,
-        rating: 0,
-        reviews: "0",
+        rating: product?.rating || 0,
+        numReviews: product?.numReviews || 0,
         price: product?.price,
         discount: product?.discount,
         inStock: product?.inStock,
@@ -90,14 +90,38 @@ export default function ProductDetailsPage() {
     const renderReviewsPopover = () => (
         <div className="absolute top-full left-0 mt-2 w-[350px] bg-white border border-gray-200 rounded-xl shadow-xl z-50 p-5 cursor-default" onClick={e => e.stopPropagation()}>
             <div className="flex items-center gap-4 mb-4">
-                <div className="text-4xl font-extrabold text-gray-900">4.8</div>
+                <div className="text-4xl font-extrabold text-gray-900">{displayProduct.rating || 0}</div>
                 <div className="flex flex-col">
                     <div className="flex text-yellow-400 mb-1">
-                        {[...Array(5)].map((_, i) => (
-                            <svg key={i} className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
-                        ))}
+                        {[...Array(5)].map((_, i) => {
+                            const rating = displayProduct.rating || 0;
+                            if (rating >= i + 1) {
+                                return (
+                                    <svg key={i} className="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                    </svg>
+                                );
+                            } else if (rating > i) {
+                                return (
+                                    <div key={i} className="relative w-4 h-4">
+                                        <svg className="absolute top-0 left-0 w-4 h-4 text-gray-200" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                        </svg>
+                                        <svg className="absolute top-0 left-0 w-4 h-4 text-yellow-400" style={{ clipPath: 'inset(0 50% 0 0)' }} fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                        </svg>
+                                    </div>
+                                );
+                            } else {
+                                return (
+                                    <svg key={i} className="w-4 h-4 text-gray-200" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                    </svg>
+                                );
+                            }
+                        })}
                     </div>
-                    <span className="text-[10px] text-gray-500">Based on {displayProduct.reviews} ratings</span>
+                    <span className="text-[10px] text-gray-500">Based on {displayProduct.numReviews} ratings</span>
                 </div>
             </div>
 
@@ -190,14 +214,47 @@ export default function ProductDetailsPage() {
                     onMouseEnter={() => setShowReviewsPopover(true)}
                     onMouseLeave={() => setShowReviewsPopover(false)}
                 >
-                    <span className="font-bold text-gray-700 hover:underline">{displayProduct.rating}</span>
-                    <div className="flex text-yellow-400">
-                        {[...Array(5)].map((_, i) => (
-                            <svg key={i} className="w-3.5 h-3.5 lg:w-4 lg:h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
-                        ))}
+                    {/* Mobile View: 4.9 [1 star] 409 */}
+                    <div className="flex lg:hidden items-center gap-1 cursor-pointer">
+                        <span className="font-bold text-gray-700">{displayProduct.rating || 0}</span>
+                        <svg className="w-3.5 h-3.5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
+                        <span className="text-[#0052A5]">{displayProduct.numReviews || 0}</span>
                     </div>
-                    <span className="text-blue-600 hover:underline cursor-pointer">{displayProduct.reviews}</span>
-                    <svg className="w-3.5 h-3.5 text-gray-500 hover:text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+
+                    {/* Desktop View: 4.9 [5 stars] 409 */}
+                    <div className="hidden lg:flex items-center gap-1 cursor-pointer">
+                        <span className="font-bold text-gray-700">{displayProduct.rating || 0}</span>
+                        <div className="flex text-yellow-400">
+                            {[...Array(5)].map((_, i) => {
+                                const rating = displayProduct.rating || 0;
+                                if (rating >= i + 1) {
+                                    return (
+                                        <svg key={i} className="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                        </svg>
+                                    );
+                                } else if (rating > i) {
+                                    return (
+                                        <div key={i} className="relative w-4 h-4">
+                                            <svg className="absolute top-0 left-0 w-4 h-4 text-gray-200" fill="currentColor" viewBox="0 0 20 20">
+                                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                            </svg>
+                                            <svg className="absolute top-0 left-0 w-4 h-4 text-yellow-400" style={{ clipPath: 'inset(0 50% 0 0)' }} fill="currentColor" viewBox="0 0 20 20">
+                                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                            </svg>
+                                        </div>
+                                    );
+                                } else {
+                                    return (
+                                        <svg key={i} className="w-4 h-4 text-gray-200" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                        </svg>
+                                    );
+                                }
+                            })}
+                        </div>
+                        <span className="text-[#0052A5]">{displayProduct.numReviews || 0}</span>
+                    </div>
 
                     {showReviewsPopover && renderReviewsPopover()}
                 </div>
@@ -212,8 +269,8 @@ export default function ProductDetailsPage() {
             </div>
             <div className="grid grid-cols-4 gap-1.5 lg:gap-2">
                 {displayProduct.images.map((img: string, idx: number) => (
-                    <div key={idx} onClick={() => setSelectedImageIdx(idx)} className={`aspect-square rounded-md border-2 p-1 cursor-pointer transition-colors ${idx === selectedImageIdx ? 'border-green-600' : 'border-transparent hover:border-gray-300'}`}>
-                        <img src={img} alt="Thumbnail" className="w-full h-full object-contain mix-blend-multiply" />
+                    <div key={idx} onClick={() => setSelectedImageIdx(idx)} className={`aspect-square bg-white rounded-md border-2 p-1 cursor-pointer transition-colors ${idx === selectedImageIdx ? 'border-green-600' : 'border-transparent hover:border-gray-300'}`}>
+                        <img src={img} alt="Thumbnail" className="w-full h-full object-contain" />
                     </div>
                 ))}
             </div>
@@ -342,7 +399,7 @@ export default function ProductDetailsPage() {
                     {recommendedProducts.length > 0 ? recommendedProducts.map((prod, i) => (
                         <div key={i} onClick={() => router.push(`/products/${prod._id}`)} className="min-w-[140px] max-w-[140px] lg:min-w-[160px] lg:max-w-[160px] flex flex-col cursor-pointer group">
                             <div className="aspect-square bg-white p-2 mb-2 lg:mb-3 flex items-center justify-center relative overflow-hidden transition-colors border border-gray-100 rounded">
-                                <img src={getImageUrl(prod.images?.[0], 'https://via.placeholder.com/150x150?text=No+Image')} className="h-[80%] object-contain mix-blend-multiply transition-transform duration-300 group-hover:scale-105" />
+                                <img src={getImageUrl(prod.images?.[0], 'https://via.placeholder.com/150x150?text=No+Image')} className="h-[80%] object-contain     rm duration-300 group-hover:scale-105" />
                             </div>
                             <div className="text-[10px] lg:text-[11px] text-gray-800 hover:underline mb-1 line-clamp-3 leading-snug">
                                 {prod.name}
@@ -496,7 +553,7 @@ export default function ProductDetailsPage() {
                 {/* NEW SECTIONS: Appended to both mobile & desktop layouts */}
                 {renderFrequentlyPurchased()}
                 {renderProductInformation()}
-                <CustomerReviews productId={params.id as string} />
+                <CustomerReviews productId={params.id as string} onReviewSubmitted={fetchProduct} />
 
             </div>
         </div>

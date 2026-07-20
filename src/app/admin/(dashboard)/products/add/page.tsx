@@ -47,6 +47,8 @@ export default function AddProductPage() {
         inStock: '',
         packageQuantity: '',
         bestSeller: '',
+        categories: '',
+        rating: '',
     });
 
     // State for Selected Images
@@ -98,7 +100,7 @@ export default function AddProductPage() {
     // State for Specifications
     const [specifications, setSpecifications] = useState<{ key: string, value: string }[]>([]);
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
@@ -223,6 +225,8 @@ export default function AddProductPage() {
                 ...formData,
                 price: Number(formData.price),
                 discount: Number(formData.discount),
+                rating: formData.rating ? Number(formData.rating) : 0,
+                categories: formData.categories ? formData.categories.split(',').map((c: string) => c.trim()).filter(Boolean) : [],
                 images: uploadedImageUrls, // Send array of full S3 URLs
                 specifications: specifications.filter(s => s.key.trim() !== '' && s.value.trim() !== ''),
             };
@@ -357,11 +361,29 @@ export default function AddProductPage() {
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm font-semibold text-gray-700 mb-2">In Stock</label>
-                                    <input name="inStock" value={formData.inStock} onChange={handleChange} className="w-full px-3 py-2 text-sm bg-white/50 border border-gray-200 rounded-md focus:outline-none focus:border-green-600 transition-all outline-none placeholder-gray-400" placeholder="e.g. Yes" />
+                                    <div className="flex items-center gap-6 px-1 py-1">
+                                        <label className="flex items-center gap-2 cursor-pointer text-sm text-gray-700">
+                                            <input type="radio" name="inStock" value="Yes" checked={formData.inStock === 'Yes'} onChange={handleChange} className="accent-green-600 w-4 h-4 cursor-pointer" /> Yes
+                                        </label>
+                                        <label className="flex items-center gap-2 cursor-pointer text-sm text-gray-700">
+                                            <input type="radio" name="inStock" value="No" checked={formData.inStock === 'No'} onChange={handleChange} className="accent-green-600 w-4 h-4 cursor-pointer" /> No
+                                        </label>
+                                    </div>
                                 </div>
                                 <div>
                                     <label className="block text-sm font-semibold text-gray-700 mb-2">Package Quantity</label>
                                     <input name="packageQuantity" value={formData.packageQuantity} onChange={handleChange} className="w-full px-3 py-2 text-sm bg-white/50 border border-gray-200 rounded-md focus:outline-none focus:border-green-600 transition-all outline-none placeholder-gray-400" placeholder="e.g. 240 Tablets" />
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-semibold text-gray-700 mb-2">Categories (comma-separated)</label>
+                                    <input name="categories" value={formData.categories} onChange={handleChange} className="w-full px-3 py-2 text-sm bg-white/50 border border-gray-200 rounded-md focus:outline-none focus:border-green-600 transition-all outline-none placeholder-gray-400" placeholder="e.g. Supplements, Vitamins" />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-semibold text-gray-700 mb-2">Manual Rating (optional)</label>
+                                    <input name="rating" type="number" step="0.1" min="0" max="5" value={formData.rating} onChange={handleChange} className="w-full px-3 py-2 text-sm bg-white/50 border border-gray-200 rounded-md focus:outline-none focus:border-green-600 transition-all outline-none placeholder-gray-400" placeholder="e.g. 4.5" />
                                 </div>
                             </div>
 

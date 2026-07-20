@@ -159,8 +159,8 @@ export default function HeroCarousel() {
                 )}
 
                 {isBannerLoading && (
-                    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-white">
-                        <Spinner className="w-12 h-12 text-[#458500]" />
+                    <div className="absolute inset-0 z-10 flex items-center justify-center bg-gray-50">
+                        <Spinner className="w-8 h-8 text-[#458500]" />
                     </div>
                 )}
 

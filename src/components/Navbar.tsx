@@ -5,6 +5,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useCart } from '@/context/CartContext';
 import Spinner from './Spinner';
+import SearchBar from './SearchBar';
 
 const Navbar = () => {
     const router = useRouter();
@@ -93,16 +94,7 @@ const Navbar = () => {
                         </div>
 
                         {/* Search Bar */}
-                        <div className="flex-1 max-w-4xl hidden sm:block relative">
-                            <input
-                                type="text"
-                                placeholder="Search all of Itelents"
-                                className="w-full rounded-full py-2.5 px-5 text-black outline-none h-12 text-sm shadow-inner bg-white"
-                            />
-                            <button className="absolute right-0 top-0 bottom-0 px-4 text-gray-500 hover:text-black">
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-                            </button>
-                        </div>
+                        <SearchBar />
 
                         {/* Auth & Cart */}
                         <div className="flex items-center gap-3 sm:gap-6 shrink-0 relative z-50">
@@ -265,7 +257,7 @@ const Navbar = () => {
                 </div>
 
                 {/* Sub-navigation categories (visually hidden when scrolled) */}
-                <div className={`bg-white border-b border-gray-200`}>
+                <div className={`hidden sm:block bg-white border-b border-gray-200`}>
                     <div className="max-w-[1400px] mx-auto px-2 sm:px-4">
                         <div className="flex items-center justify-between h-8 sm:h-12 overflow-x-auto whitespace-nowrap text-[12px] sm:text-sm font-semibold text-gray-700 hide-scrollbar">
                             <div className="flex items-center gap-6">
@@ -293,12 +285,7 @@ const Navbar = () => {
 
                 {/* Mobile Search (Shows only on mobile below header) */}
                 <div className="sm:hidden bg-[#458500] p-1.5 h-[55px] border-t border-[#3b7100]">
-                    <div className="relative">
-                        <input type="text" placeholder="Search all of Itelents" className="w-full rounded-full py-2 px-4 h-[41px] text-black outline-none text-sm shadow-inner bg-white" />
-                        <button className="absolute right-0 top-0 bottom-0 px-4 text-gray-500 hover:text-black">
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-                        </button>
-                    </div>
+                    <SearchBar isMobile={true} />
                 </div>
 
                 {/* Mobile Menu Drawer */}
@@ -308,32 +295,71 @@ const Navbar = () => {
                         <div className="fixed inset-0 bg-black/50 transition-opacity" onClick={() => setIsMobileMenuOpen(false)}></div>
 
                         {/* Sidebar */}
-                        <div className="relative w-[55vw] max-w-[220px] h-full bg-white shadow-xl flex flex-col overflow-y-auto animate-fade-in-left">
-                            {/* Sidebar Header */}
-                            <div className="p-4 bg-[#458500] text-white flex justify-between items-center shrink-0">
-                                <Link href="/" className="font-extrabold text-2xl tracking-tighter" onClick={() => setIsMobileMenuOpen(false)}>
-                                    Itelents
-                                </Link>
-                                <button onClick={() => setIsMobileMenuOpen(false)} className="p-1 hover:bg-[#3b7100] rounded">
-                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                        <div className="relative w-[85vw] max-w-[300px] h-full bg-white shadow-xl flex flex-col overflow-y-auto overflow-x-hidden animate-fade-in-left">
+
+                            {/* Top Header */}
+                            <div className="p-4 flex justify-between items-start shrink-0 pb-2">
+                                <div className="text-[#458500] font-medium text-lg pr-4 truncate">
+                                    {user ? `Hi, ${user.email}!` : 'Welcome!'}
+                                </div>
+                                <button onClick={() => setIsMobileMenuOpen(false)} className="text-gray-500 hover:text-gray-700 p-1">
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" /></svg>
                                 </button>
                             </div>
 
-                            <div className="flex-1 px-4 py-2 overflow-y-auto">
-                                <Link href="/" onClick={() => setIsMobileMenuOpen(false)} className="block hover:text-[#458500] py-3 text-base font-medium border-b border-gray-100">Home</Link>
-                                <Link href="/products" onClick={() => setIsMobileMenuOpen(false)} className="block hover:text-[#458500] py-3 text-base font-medium border-b border-gray-100">Products</Link>
-                                <Link href="/about" onClick={() => setIsMobileMenuOpen(false)} className="block hover:text-[#458500] py-3 text-base font-medium border-b border-gray-100">About</Link>
+                            <div className="pb-4">
+                                {/* Main Categories */}
+                                <div className="flex flex-col">
+                                    {['Supplements', 'Sports', 'Bath & Personal Care', 'Beauty', 'Grocery', 'Healthy Home', 'Baby & Kids', 'Pets'].map(cat => (
+                                        <Link key={cat} href="/products" className="flex items-center justify-between px-4 py-3.5 hover:bg-gray-50 border-b border-gray-50">
+                                            <span className="text-base font-medium text-gray-900">{cat}</span>
+                                            <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                                        </Link>
+                                    ))}
+                                </div>
 
-                                {/* Mobile Auth Links */}
-                                {!user ? (
-                                    <Link href="/login" onClick={() => setIsMobileMenuOpen(false)} className="block hover:text-[#458500] py-2 sm:py-3 text-base font-bold text-[#458500]">
-                                        Sign In
+                                {/* Shop By Section */}
+                                <div className="pt-6 pb-2">
+                                    <div className="px-4 text-xs text-gray-500 mb-2 uppercase tracking-wide">Shop By</div>
+                                    <Link href="/products" className="flex items-center justify-between px-4 py-3 hover:bg-gray-50">
+                                        <span className="text-base font-medium text-gray-900">Health Topics</span>
+                                        <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
                                     </Link>
-                                ) : (
-                                    <button onClick={() => { handleLogout(); setIsMobileMenuOpen(false); }} className="w-full text-left py-3 text-base font-medium text-red-600 border-t border-gray-100 mt-2">
-                                        Logout
-                                    </button>
-                                )}
+                                    <Link href="/products" className="flex items-center justify-between px-4 py-3 hover:bg-gray-50">
+                                        <span className="text-base font-medium text-gray-900">Brands</span>
+                                        <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                                    </Link>
+                                    <Link href="/products" className="block px-4 py-3 hover:bg-gray-50 text-base font-medium text-red-600">Deals</Link>
+                                    <Link href="/products" className="block px-4 py-3 hover:bg-gray-50 text-base font-medium text-gray-900">Best Sellers</Link>
+                                    <Link href="/products" className="block px-4 py-3 hover:bg-gray-50 text-base font-medium text-gray-900">New</Link>
+                                    <Link href="/products" className="block px-4 py-3 hover:bg-gray-50 text-base font-medium text-gray-900 border-b border-gray-100">Try</Link>
+                                </div>
+
+                                {/* Learn Section */}
+                                <div className="pt-4 pb-2 border-b border-gray-100">
+                                    <div className="px-4 text-xs text-gray-500 mb-2 uppercase tracking-wide">Learn</div>
+                                    <Link href="/products" className="block px-4 py-3 hover:bg-gray-50 text-base font-medium text-gray-900">Wellness Hub</Link>
+                                </div>
+
+                                {/* Bottom Links */}
+                                <div className="py-2 border-b border-gray-100">
+                                    <Link href="/" className="block px-4 py-3 hover:bg-gray-50 text-[15px] text-gray-700">Sales & Offers</Link>
+                                    <Link href="/" className="block px-4 py-3 hover:bg-gray-50 text-[15px] text-gray-700">Brands</Link>
+                                    <Link href="/" className="block px-4 py-3 hover:bg-gray-50 text-[15px] text-gray-700">Rewards</Link>
+                                    <Link href="/" className="block px-4 py-3 hover:bg-gray-50 text-[15px] text-gray-700">EGift Card</Link>
+                                </div>
+
+                                {/* Footer Area */}
+                                <div className="p-4 flex flex-col gap-4 mt-2">
+                                    <div className="flex items-center gap-2 text-gray-700 cursor-pointer hover:text-black">
+                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                        <span className="text-[15px]">24/7 Support</span>
+                                    </div>
+                                    <div className="flex items-center gap-2 text-gray-700 cursor-pointer hover:text-black">
+                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                        <span className="text-[15px]">IN | EN | INR</span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>

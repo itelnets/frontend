@@ -147,7 +147,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
         }
     };
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         let value = e.target.value;
         if (e.target.name !== 'price' && e.target.name !== 'discount' && value.length > 0) {
             value = value.charAt(0).toUpperCase() + value.slice(1);
@@ -429,7 +429,14 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm font-semibold text-gray-700 mb-2">In Stock</label>
-                                    <input name="inStock" value={formData.inStock} onChange={handleChange} className="w-full px-3 py-2 text-sm bg-white/50 border border-gray-200 rounded-md focus:outline-none focus:border-green-600 transition-all outline-none placeholder-gray-400" placeholder="e.g. Yes" />
+                                    <div className="flex items-center gap-6 px-1 py-1">
+                                        <label className="flex items-center gap-2 cursor-pointer text-sm text-gray-700">
+                                            <input type="radio" name="inStock" value="Yes" checked={formData.inStock === 'Yes'} onChange={handleChange} className="accent-green-600 w-4 h-4 cursor-pointer" /> Yes
+                                        </label>
+                                        <label className="flex items-center gap-2 cursor-pointer text-sm text-gray-700">
+                                            <input type="radio" name="inStock" value="No" checked={formData.inStock === 'No'} onChange={handleChange} className="accent-green-600 w-4 h-4 cursor-pointer" /> No
+                                        </label>
+                                    </div>
                                 </div>
                                 <div>
                                     <label className="block text-sm font-semibold text-gray-700 mb-2">Package Quantity</label>

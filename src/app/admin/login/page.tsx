@@ -28,6 +28,7 @@ export default function AdminLoginPage() {
 
             if (data.role !== 'admin') {
                 toast.error('Access denied. Only admin can access.');
+                setIsLoading(false);
                 return;
             }
 
@@ -40,10 +41,10 @@ export default function AdminLoginPage() {
             toast.success('Admin login successful');
             await new Promise(resolve => setTimeout(resolve, 1500));
             router.push('/admin');
+            // Do not set isLoading to false here, let the page transition happen
         } catch (err: any) {
             const errorMessage = err.response?.data?.message || 'Login failed';
             toast.error(errorMessage);
-        } finally {
             setIsLoading(false);
         }
     };
