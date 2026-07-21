@@ -19,8 +19,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="overflow-x-hidden max-w-full">
-      <body className={`${inter.variable} font-sans antialiased bg-gray-50 min-h-screen flex flex-col overflow-x-hidden w-full max-w-full`}>
+    <html lang="en" className="overflow-x-clip max-w-full">
+      <body className={`${inter.variable} font-sans antialiased bg-gray-50 min-h-screen flex flex-col overflow-x-clip w-full max-w-full`}>
         <Toaster
           position="top-center"
           toastOptions={{

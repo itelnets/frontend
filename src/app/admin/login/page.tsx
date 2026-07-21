@@ -32,7 +32,7 @@ export default function AdminLoginPage() {
                 return;
             }
 
-            localStorage.setItem('userInfo', JSON.stringify(data));
+            localStorage.setItem('adminInfo', JSON.stringify(data));
 
             if (data.token) {
                 api.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;

@@ -39,6 +39,16 @@ export default function ProductsPage() {
     });
 
     useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const params = new URLSearchParams(window.location.search);
+            const brand = params.get('brand');
+            if (brand) {
+                setFilters(prev => ({ ...prev, brands: [brand] }));
+            }
+        }
+    }, []);
+
+    useEffect(() => {
         const fetchFilters = async () => {
             try {
                 const { data } = await getFilters();

@@ -6,6 +6,7 @@ import { getProductById, updateProduct } from '@/services/product';
 import toast from 'react-hot-toast';
 import Spinner from '@/components/Spinner';
 import PageLoader from '@/components/PageLoader';
+import CustomDropdown from '@/components/CustomDropdown';
 
 type ImageItem =
     | { type: 'existing', id: string, url: string }
@@ -40,7 +41,6 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
         brand: '',
         manufacturer: '',
         inStock: '',
-        packageQuantity: '',
         bestSeller: '',
     });
 
@@ -102,7 +102,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
         if (fetched.current) return;
         fetched.current = true;
 
-        const userInfo = localStorage.getItem('userInfo');
+        const userInfo = localStorage.getItem('adminInfo');
         if (!userInfo || JSON.parse(userInfo).role !== 'admin') {
             router.push('/login');
             return;
@@ -126,10 +126,9 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                 warnings: data.warnings || '',
                 disclaimer: data.disclaimer || '',
                 brand: data.brand || '',
-                manufacturer: data.manufacturer || '',
-                inStock: data.inStock || '',
-                packageQuantity: data.packageQuantity || '',
-                bestSeller: data.bestSeller || '',
+                manufacturer: data.manufacturer || "",
+                inStock: data.inStock || "Yes",
+                bestSeller: data.bestSeller || "No",
             });
             const existingMapped: ImageItem[] = (data.images || []).map((img: string) => ({
                 type: 'existing',
@@ -137,7 +136,28 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                 url: img
             }));
             setImages(existingMapped);
-            setSpecifications(data.specifications || []);
+            const defaultSpecs = [
+                { key: 'Shipping Weight (gm)', value: '' },
+                { key: 'Product Quantity (No)', value: '' },
+                { key: 'Product Code (SKU)', value: '' },
+                { key: 'Dimensions (l x b h)', value: '' },
+                { key: 'Form', value: '' }
+            ];
+
+            const fetchedSpecs = data.specifications || [];
+
+            const mergedSpecs = defaultSpecs.map(defaultSpec => {
+                const found = fetchedSpecs.find((s: any) => s.key === defaultSpec.key);
+                return found ? found : defaultSpec;
+            });
+
+            fetchedSpecs.forEach((spec: any) => {
+                if (!defaultSpecs.find(ds => ds.key === spec.key)) {
+                    mergedSpecs.push(spec);
+                }
+            });
+
+            setSpecifications(mergedSpecs);
         } catch (error) {
             console.error('Failed to fetch product', error);
             toast.error('Failed to load product details');
@@ -230,13 +250,25 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
         setSpecifications([...specifications, { key: '', value: '' }]);
     };
 
-    const handleSpecificationChange = (index: number, field: 'key' | 'value', value: string) => {
-        if (value.length > 0) {
-            value = value.charAt(0).toUpperCase() + value.slice(1);
-        }
-        const newSpecs = [...specifications];
-        newSpecs[index][field] = value;
-        setSpecifications(newSpecs);
+    const handleSpecificationChange = (index: number, field: 'key' | 'value', val: string) => {
+        setSpecifications(prev => {
+            const newSpecs = [...prev];
+            newSpecs[index] = { ...newSpecs[index], [field]: val };
+            return newSpecs;
+        });
+    };
+
+    const handleDimensionChange = (index: number, partIndex: number, val: string) => {
+        const spec = specifications[index];
+        const parts = (spec.value || '').split(' x ');
+        const paddedParts = [parts[0] || '', parts[1] || '', parts[2] || ''];
+        paddedParts[partIndex] = val;
+
+        setSpecifications(prev => {
+            const newSpecs = [...prev];
+            newSpecs[index] = { ...newSpecs[index], value: paddedParts.join(' x ') };
+            return newSpecs;
+        });
     };
 
     const handleRemoveSpecification = (index: number) => {
@@ -254,7 +286,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
         setIsSaving(true);
 
         try {
-            const token = JSON.parse(localStorage.getItem('userInfo') || '{}').token;
+            const token = JSON.parse(localStorage.getItem('adminInfo') || '{}').token;
             // Process all images in their current exact order
             const uploadPromises = images.map(async (item) => {
                 if (item.type === 'existing') {
@@ -426,7 +458,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div className="mb-4">
                                 <div>
                                     <label className="block text-sm font-semibold text-gray-700 mb-2">In Stock</label>
                                     <div className="flex items-center gap-6 px-1 py-1">
@@ -438,16 +470,32 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                                         </label>
                                     </div>
                                 </div>
-                                <div>
-                                    <label className="block text-sm font-semibold text-gray-700 mb-2">Package Quantity</label>
-                                    <input name="packageQuantity" value={formData.packageQuantity} onChange={handleChange} className="w-full px-3 py-2 text-sm bg-white/50 border border-gray-200 rounded-md focus:outline-none focus:border-green-600 transition-all outline-none placeholder-gray-400" placeholder="e.g. 240 Tablets" />
-                                </div>
                             </div>
                         </div>
                     </div>
 
                     {/* Right Column - Overview, Details, etc */}
                     <div className="w-full lg:w-7/12 space-y-4 lg:h-full lg:overflow-y-auto lg:pr-2 lg:pb-10 scrollbar-thin scrollbar-thumb-gray-200">
+                        <div>
+                            <label className="block text-sm font-semibold text-gray-700 mb-2">Product Type</label>
+                            <CustomDropdown
+                                options={[
+                                    { label: 'Supplements', value: 'Supplements' },
+                                    { label: 'Sports', value: 'Sports' },
+                                    { label: 'Bath', value: 'Bath' },
+                                    { label: 'Beauty', value: 'Beauty' },
+                                    { label: 'Grocery', value: 'Grocery' },
+                                    { label: 'Home', value: 'Home' },
+                                    { label: 'Baby', value: 'Baby' },
+                                    { label: 'Pets', value: 'Pets' }
+                                ]}
+                                value={formData.type || ''}
+                                onChange={(val) => setFormData({ ...formData, type: val })}
+                                placeholder="Select Product Type"
+                                className="w-full h-[38px]"
+                            />
+                        </div>
+
                         <div>
                             <label className="block text-sm font-semibold text-gray-700 mb-2">Overview</label>
                             <textarea name="overview" value={formData.overview} rows={6} onChange={handleChange} className="w-full px-3 py-2 text-sm bg-white/50 border border-gray-200 rounded-md focus:outline-none focus:border-green-600 transition-all outline-none placeholder-gray-400" placeholder="Extensive product overview..." />
@@ -456,32 +504,54 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                         <div className="bg-green-50/30 rounded-md border border-green-50/50">
                             <label className="block text-sm font-semibold text-gray-800 mb-2">Specifications</label>
                             {specifications.map((spec, index) => (
-                                <div key={index} className="relative flex flex-col sm:flex-row gap-1 sm:gap-3 bg-white/60 p-2 pr-11 sm:pr-2 rounded-md border border-gray-100">
-                                    <input
-                                        type="text"
-                                        placeholder="e.g. Weight"
-                                        value={spec.key}
-                                        onChange={(e) => handleSpecificationChange(index, 'key', e.target.value)}
-                                        className="flex-1 px-3 py-2 text-sm bg-white border border-gray-200 rounded-md focus:outline-none focus:border-green-600 outline-none transition-all"
-                                    />
-                                    <input
-                                        type="text"
-                                        placeholder="e.g. 1 kg"
-                                        value={spec.value}
-                                        onChange={(e) => handleSpecificationChange(index, 'value', e.target.value)}
-                                        className="flex-1 px-3 py-2 text-sm bg-white border border-gray-200 rounded-md focus:outline-none focus:border-green-600 outline-none transition-all"
-                                    />
+                                <div key={index} className={`relative flex flex-col sm:flex-row gap-1 sm:gap-3 p-2 rounded-md border ${index < 5 ? 'bg-gray-50 border-gray-200' : 'bg-white/60 border-gray-100 pr-11 sm:pr-2'}`}>
+                                    {index < 5 ? (
+                                        <div className="w-full sm:w-1/2 px-3 py-2 text-sm bg-white border border-gray-200 rounded-md text-gray-700 flex items-center">{spec.key}</div>
+                                    ) : (
+                                        <input
+                                            type="text"
+                                            placeholder="e.g. Dosage"
+                                            value={spec.key}
+                                            onChange={(e) => handleSpecificationChange(index, 'key', e.target.value)}
+                                            className="w-full sm:w-1/2 px-3 py-2 text-sm bg-white border border-gray-200 rounded-md focus:outline-none focus:border-green-600 outline-none transition-all"
+                                        />
+                                    )}
+                                    {spec.key === 'Dimensions (l x b h)' ? (
+                                        <div className="w-full sm:w-1/2 flex items-center gap-1 sm:gap-2">
+                                            <input type="text" placeholder="L" value={(spec.value || '').split(' x ')[0] || ''} onChange={(e) => handleDimensionChange(index, 0, e.target.value)} className="w-full min-w-0 px-2 py-2 text-sm bg-white border border-gray-200 rounded-md focus:outline-none focus:border-green-600 outline-none text-center" />
+                                            <span className="text-gray-400 font-bold text-xs sm:text-sm">x</span>
+                                            <input type="text" placeholder="B" value={(spec.value || '').split(' x ')[1] || ''} onChange={(e) => handleDimensionChange(index, 1, e.target.value)} className="w-full min-w-0 px-2 py-2 text-sm bg-white border border-gray-200 rounded-md focus:outline-none focus:border-green-600 outline-none text-center" />
+                                            <span className="text-gray-400 font-bold text-xs sm:text-sm">x</span>
+                                            <input type="text" placeholder="H" value={(spec.value || '').split(' x ')[2] || ''} onChange={(e) => handleDimensionChange(index, 2, e.target.value)} className="w-full min-w-0 px-2 py-2 text-sm bg-white border border-gray-200 rounded-md focus:outline-none focus:border-green-600 outline-none text-center" />
+                                        </div>
+                                    ) : (
+                                        <input
+                                            type="text"
+                                            placeholder={
+                                                index === 0 ? "e.g. 200 gm" :
+                                                    index === 1 ? "e.g. 100" :
+                                                        index === 2 ? "e.g. MLI-00952" :
+                                                            index === 4 ? "e.g. Tablet,Capsule,Syrup,Oil etc." :
+                                                                "1 capsule daily after meals"
+                                            }
+                                            value={spec.value}
+                                            onChange={(e) => handleSpecificationChange(index, 'value', e.target.value)}
+                                            className="w-full sm:w-1/2 px-3 py-2 text-sm bg-white border border-gray-200 rounded-md focus:outline-none focus:border-green-600 outline-none transition-all"
+                                        />
+                                    )}
                                     {/* Delete button: top-right corner on mobile, inline on sm+ */}
-                                    <button
-                                        type="button"
-                                        onClick={() => handleRemoveSpecification(index)}
-                                        className="absolute top-2 right-2 sm:static sm:flex bg-red-50 text-red-600 p-1.5 sm:px-3 sm:py-2 rounded-md hover:bg-red-100 transition-all border border-red-100 cursor-pointer flex items-center justify-center"
-                                        title="Remove Specification"
-                                    >
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                        </svg>
-                                    </button>
+                                    {index >= 5 && (
+                                        <button
+                                            type="button"
+                                            onClick={() => handleRemoveSpecification(index)}
+                                            className="absolute top-2 right-2 sm:static sm:flex bg-red-50 text-red-600 p-1.5 sm:px-3 sm:py-2 rounded-md hover:bg-red-100 transition-all border border-red-100 cursor-pointer flex items-center justify-center"
+                                            title="Remove Specification"
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            </svg>
+                                        </button>
+                                    )}
                                 </div>
                             ))}
                             <button

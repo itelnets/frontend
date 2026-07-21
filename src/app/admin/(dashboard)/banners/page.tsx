@@ -33,7 +33,7 @@ export default function BannersPage() {
     const [activeModalImage, setActiveModalImage] = useState<string | null>(null);
 
     useEffect(() => {
-        const userInfo = localStorage.getItem('userInfo');
+        const userInfo = localStorage.getItem('adminInfo');
         if (!userInfo || JSON.parse(userInfo).role !== 'admin') {
             router.push('/login');
             return;

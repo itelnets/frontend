@@ -4,7 +4,7 @@ export const createProduct = async (productData: any) => {
     return api.post('/products', productData);
 };
 
-export const getProducts = async (params: { search?: string; brand?: string; priceRanges?: string; sort?: string; inStock?: string; categories?: string; ratings?: string } = {}) => {
+export const getProducts = async (params: { search?: string; brand?: string; priceRanges?: string; sort?: string; inStock?: string; categories?: string; ratings?: string; type?: string } = {}) => {
     const queryParams = new URLSearchParams();
     if (params.search) queryParams.append('search', params.search);
     if (params.brand) queryParams.append('brand', params.brand);
@@ -13,14 +13,19 @@ export const getProducts = async (params: { search?: string; brand?: string; pri
     if (params.inStock) queryParams.append('inStock', params.inStock);
     if (params.categories) queryParams.append('categories', params.categories);
     if (params.ratings) queryParams.append('ratings', params.ratings);
+    if (params.type) queryParams.append('type', params.type);
     
     const queryString = queryParams.toString();
     const url = queryString ? `/products?${queryString}` : '/products';
     return api.get(url);
 };
 
-export const getFilters = async () => {
-    return api.get('/products/filters');
+export const getFilters = async (params: { type?: string } = {}) => {
+    const queryParams = new URLSearchParams();
+    if (params.type) queryParams.append('type', params.type);
+    const queryString = queryParams.toString();
+    const url = queryString ? `/products/filters?${queryString}` : '/products/filters';
+    return api.get(url);
 };
 
 export const getProductById = async (id: string) => {

@@ -13,7 +13,7 @@ export default function AdminSidebar({ isOpen, setIsOpen }: AdminSidebarProps) {
     const router = useRouter();
 
     const handleLogout = () => {
-        localStorage.removeItem('userInfo');
+        localStorage.removeItem('adminInfo');
         router.push('/admin/login');
     };
 

@@ -59,7 +59,6 @@ export default function ProductDetailsPage() {
         price: product?.price,
         discount: product?.discount,
         inStock: product?.inStock,
-        packageQuantity: product?.packageQuantity,
         bestSeller: product?.bestSeller,
         soldRecently: "0",
         images: product?.images?.length ? product.images.map((img: string) => getImageUrl(img)) : [
@@ -187,7 +186,7 @@ export default function ProductDetailsPage() {
     );
 
     const renderTitleAndRating = () => (
-        <div className="mb-2 lg:mb-6">
+        <div className="mb-2">
             <div className="flex items-center gap-2 mb-2">
                 <span
                     className={`text-black text-[13px] font-bold px-2 py-1 rounded ${displayProduct.brand ? "bg-[#B7E6FF]" : ""
@@ -202,7 +201,7 @@ export default function ProductDetailsPage() {
                 {displayProduct.name}
             </h1>
 
-            <div className="text-[12px] sm:text-sm text-gray-600">
+            <div className="text-[12px] sm:text-sm text-gray-600 mb-1">
                 By <Link href="#" className="text-[#0052A5]">{displayProduct.manufacturer}</Link>
             </div>
 
@@ -280,12 +279,12 @@ export default function ProductDetailsPage() {
     const renderCartBox = () => (
         <div className="w-full space-y-4">
             <div className="border border-gray-200 rounded-xl p-3 lg:p-5 bg-white">
-                <div className="flex flex-row lg:items-baseline gap-1 lg:gap-2 mb-4 lg:mb-6">
-                    <span className="text-xl lg:text-2xl font-extrabold text-gray-900">₹{(currentPrice * quantity).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                <div className="flex flex-row items-center gap-1 lg:gap-2 mb-4 lg:mb-6">
+                    <span className="text-[18px] sm:text-[20px] lg:text-[22px] font-extrabold text-gray-900">₹{(currentPrice * quantity).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                     {displayProduct.discount > 0 && (
                         <>
-                            <span className="text-sm lg:text-base text-gray-500 line-through">₹{(originalPrice * quantity).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                            <span className="bg-[#ff3344] text-white text-[10px] lg:text-xs font-bold px-1.5 py-1 rounded h-fit shadow-sm">{displayProduct.discount}% OFF</span>
+                            <span className="text-[12px] sm:text-[14px] lg:text-[15px] text-gray-500 line-through">₹{(originalPrice * quantity).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                            <span className="bg-[#ff3344] text-white text-[10px] lg:text-xs font-bold px-1.5 py-[3px] sm:py-1 rounded h-fit shadow-sm">{displayProduct.discount}% OFF</span>
                         </>
                     )}
                 </div>
@@ -300,8 +299,8 @@ export default function ProductDetailsPage() {
                     </button>
                 </div>
 
-                <button 
-                    onClick={() => { if (displayProduct.inStock?.toLowerCase() === 'yes') addToCart(displayProduct, quantity); }} 
+                <button
+                    onClick={() => { if (displayProduct.inStock?.toLowerCase() === 'yes') addToCart(displayProduct, quantity); }}
                     disabled={displayProduct.inStock?.toLowerCase() !== 'yes'}
                     className={`w-full ${displayProduct.inStock?.toLowerCase() === 'yes' ? 'bg-[#f38700] hover:bg-[#e07b00] cursor-pointer text-white' : 'bg-gray-300 text-gray-500 cursor-not-allowed'} font-bold py-2.5 lg:py-3.5 rounded-md transition-colors shadow-sm mb-3 lg:mb-4 text-sm lg:text-base`}
                 >
@@ -367,30 +366,30 @@ export default function ProductDetailsPage() {
     const renderProductDetailsBottom = () => (
         <div className="w-full flex flex-col pt-4 lg:pt-0">
             <div className="flex items-center justify-between mb-2">
-                <span className="text-xs lg:text-sm font-bold text-green-700">In Stock: {displayProduct.inStock}</span>
+                <span className={`text-xs lg:text-sm font-bold ${displayProduct.inStock?.toLowerCase() === 'yes' ? 'text-green-700' : 'text-red-600'}`}>
+                    {displayProduct.inStock?.toLowerCase() === 'yes' ? 'In Stock' : 'Out of Stock'}
+                </span>
                 <span className="text-[10px] lg:text-xs font-medium text-red-600 flex items-center gap-1">
                     <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>
                     {displayProduct.soldRecently} sold in 30 days
                 </span>
             </div>
-            {displayProduct.packageQuantity && (
-                <div className="text-xs lg:text-sm text-gray-700 mb-4 font-medium">
-                    Package Quantity: {displayProduct.packageQuantity}
-                </div>
-            )}
 
-            <div className="space-y-6 lg:space-y-8 mt-6 lg:mt-8 text-sm lg:text-base">
-                <div>
-                    <h3 className="font-bold text-gray-900 mb-3 lg:mb-4 text-base lg:text-lg">Quality standards & manufacturing</h3>
-                    <div className="flex items-center justify-between group cursor-pointer">
-                        <div className="flex items-center gap-2">
-                            <div className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center">
-                                <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" /></svg>
-                            </div>
+            <div className="space-y-6 lg:space-y-8 text-sm lg:text-base">
+                {displayProduct.specifications?.length > 0 && (
+                    <div>
+                        <h3 className="font-bold text-gray-900 mb-3 lg:mb-4 text-base lg:text-lg">Specifications</h3>
+                        <div className="flex flex-col gap-1.5 sm:gap-2.5">
+                            {displayProduct.specifications.map((spec: any, idx: number) => (
+                                <div key={idx} className="flex text-[13px] lg:text-sm">
+                                    <span className="text-[#458500] w-[140px] lg:w-[160px] shrink-0 font-bold">{spec.key}</span>
+                                    <span className="text-[#458500] mr-3">:</span>
+                                    <span className="text-gray-900">{spec.value}</span>
+                                </div>
+                            ))}
                         </div>
-                        <svg className="w-4 h-4 text-gray-400 group-hover:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
                     </div>
-                </div>
+                )}
             </div>
         </div>
     );

@@ -65,7 +65,7 @@ export default function AdminDashboard() {
         fetched.current = true;
 
         const checkAdmin = () => {
-            const userInfo = localStorage.getItem('userInfo');
+            const userInfo = localStorage.getItem('adminInfo');
             if (!userInfo || JSON.parse(userInfo).role !== 'admin') {
                 router.push('/login');
                 return;

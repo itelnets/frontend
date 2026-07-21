@@ -11,13 +11,22 @@ const api = axios.create({
 // Request interceptor to add Access Token to headers
 api.interceptors.request.use(
     (config) => {
-        // Get token from localStorage
-        const userInfo = localStorage.getItem('userInfo');
-        if (userInfo) {
-            const { token } = JSON.parse(userInfo);
-            if (token) {
-                config.headers.Authorization = `Bearer ${token}`;
+        // Get token from localStorage depending on route
+        let token = null;
+        if (typeof window !== 'undefined') {
+            const isAdminRoute = window.location.pathname.startsWith('/admin');
+            const storageKey = isAdminRoute ? 'adminInfo' : 'userInfo';
+            const infoStr = localStorage.getItem(storageKey);
+            if (infoStr) {
+                try {
+                    const parsed = JSON.parse(infoStr);
+                    token = parsed.token;
+                } catch (e) {}
             }
+        }
+
+        if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
         }
         return config;
     },
@@ -30,7 +39,6 @@ api.interceptors.response.use(
     async (error) => {
         const originalRequest = error.config;
 
-
         if (error.response?.status === 401) {
             // Do not force a redirect if the user is already trying to log in
             if (originalRequest.url === '/auth/login' || originalRequest.url === '/auth/admin-login') {
@@ -38,18 +46,14 @@ api.interceptors.response.use(
             }
 
             let redirectUrl = '/login';
-            const userInfoStr = localStorage.getItem('userInfo');
-            if (userInfoStr) {
-                try {
-                    const userInfo = JSON.parse(userInfoStr);
-                    if (userInfo.role === 'admin' || userInfo.role === 'Admin') {
-                        redirectUrl = '/admin/login';
-                    }
-                } catch (e) {}
-            }
-
-            localStorage.removeItem('userInfo');
             if (typeof window !== 'undefined') {
+                const isAdminRoute = window.location.pathname.startsWith('/admin');
+                if (isAdminRoute) {
+                    redirectUrl = '/admin/login';
+                    localStorage.removeItem('adminInfo');
+                } else {
+                    localStorage.removeItem('userInfo');
+                }
                 window.location.href = redirectUrl;
             }
             return Promise.reject(error);

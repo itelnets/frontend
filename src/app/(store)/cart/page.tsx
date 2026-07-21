@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
@@ -63,24 +63,62 @@ export default function CartPage() {
         return <PageLoader />;
     }
 
-    const RecommendedCarousel = () => (
-        <div className="mt-2">
-            <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-2 sm:mb-6">Recommended for you</h2>
-            <div className="relative">
-                {isRecsLoading ? (
-                    <div className="flex justify-center py-10">
-                        <div className="w-8 h-8 border-4 border-gray-200 border-t-green-700 rounded-full animate-spin"></div>
-                    </div>
-                ) : (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 sm:gap-4 pb-4">
-                        {recommended.length > 0 ? recommended.map((product: any) => (
-                            <ProductCard key={product._id} product={product} />
-                        )) : null}
-                    </div>
-                )}
+    const RecommendedCarousel = () => {
+        const scrollRef = useRef<HTMLDivElement>(null);
+
+        const scroll = (direction: 'left' | 'right') => {
+            if (scrollRef.current) {
+                const scrollAmount = scrollRef.current.clientWidth;
+                scrollRef.current.scrollBy({
+                    left: direction === 'left' ? -scrollAmount : scrollAmount,
+                    behavior: 'smooth'
+                });
+            }
+        };
+
+        return (
+            <div className="mt-2 relative">
+                <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-2 sm:mb-6">Recommended for you</h2>
+                <div className="relative">
+                    {isRecsLoading ? (
+                        <div className="flex justify-center py-10">
+                            <div className="w-8 h-8 border-4 border-gray-200 border-t-green-700 rounded-full animate-spin"></div>
+                        </div>
+                    ) : (
+                        <div className="relative">
+                            {/* Left Arrow - positioned at middle of product height */}
+                            <button
+                                onClick={() => scroll('left')}
+                                className="hidden lg:flex absolute left-[-20px] top-1/2 -translate-y-1/2 z-10 bg-white border border-gray-200 shadow-md rounded-full w-9 h-9 items-center justify-center text-gray-600 hover:text-black hover:bg-gray-50 transition-colors cursor-pointer"
+                            >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+                            </button>
+
+                            <div
+                                ref={scrollRef}
+                                className="flex overflow-x-auto gap-2 sm:gap-4 snap-x snap-mandatory scrollbar-hide px-1"
+                                style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                            >
+                                {recommended.length > 0 ? recommended.map((product: any) => (
+                                    <div key={product._id} className={`snap-start shrink-0 w-[calc(50%-0.5rem)] sm:w-[calc(33.333%-0.66rem)] md:w-[calc(25%-0.75rem)] ${cartItems.length === 0 ? 'lg:w-[calc(16.666%-0.833rem)]' : 'lg:w-[calc(25%-0.75rem)]'}`}>
+                                        <ProductCard product={product} />
+                                    </div>
+                                )) : null}
+                            </div>
+
+                            {/* Right Arrow - positioned at middle of product height */}
+                            <button
+                                onClick={() => scroll('right')}
+                                className="hidden lg:flex absolute right-[-20px] top-1/2 -translate-y-1/2 z-10 bg-white border border-gray-200 shadow-md rounded-full w-9 h-9 items-center justify-center text-gray-600 hover:text-black hover:bg-gray-50 transition-colors cursor-pointer"
+                            >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                            </button>
+                        </div>
+                    )}
+                </div>
             </div>
-        </div>
-    );
+        );
+    };
 
     return (
         <div className="font-sans min-h-screen bg-white pb-12">
@@ -191,14 +229,15 @@ export default function CartPage() {
                                         </div>
                                     ))}
                                 </div>
-                                <div className="hidden lg:block">
+
+                                <div className="hidden lg:block mt-8">
                                     <RecommendedCarousel />
                                 </div>
                             </div>
 
                             {/* RIGHT COLUMN: Order Summary */}
                             <div className="w-full lg:w-[380px] shrink-0">
-                                <div className="lg:sticky lg:top-[120px] space-y-4">
+                                <div className="lg:sticky lg:top-[180px] space-y-4">
 
                                     {/* Promo Code */}
                                     <div className="border border-gray-200 rounded-md p-4 bg-white shadow-sm">
@@ -261,19 +300,6 @@ export default function CartPage() {
 
                                         <div className="text-center text-[11px] text-gray-700 font-medium">
                                             Estimated delivery date {getDeliveryDateRange()}
-                                        </div>
-                                    </div>
-
-                                    {/* Accepted Payments */}
-                                    <div className="text-center">
-                                        <div className="text-[11px] font-bold text-gray-700 mb-2">Accepted payment methods</div>
-                                        <div className="flex flex-wrap justify-center gap-2 opacity-80">
-                                            {/* Mock icons for payments */}
-                                            <div className="w-8 h-5 bg-blue-100 rounded border border-gray-200 flex items-center justify-center text-[8px] font-bold text-blue-800">VISA</div>
-                                            <div className="w-8 h-5 bg-red-50 rounded border border-gray-200 flex items-center justify-center text-[8px] font-bold text-red-600">MC</div>
-                                            <div className="w-8 h-5 bg-blue-50 rounded border border-gray-200 flex items-center justify-center text-[8px] font-bold text-blue-500">AMEX</div>
-                                            <div className="w-8 h-5 bg-blue-50 rounded border border-gray-200 flex items-center justify-center text-[8px] font-bold text-blue-700">UPI</div>
-                                            <div className="w-8 h-5 bg-gray-100 rounded border border-gray-200 flex items-center justify-center text-[8px] font-bold text-gray-800">GPay</div>
                                         </div>
                                     </div>
                                 </div>
