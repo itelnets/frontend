@@ -266,9 +266,9 @@ export default function ProductDetailsPage() {
             <div className="mb-2 lg:mb-4">
                 <ImageZoom src={displayProduct.images[selectedImageIdx]} alt={displayProduct.name} onHeartClick={() => setShowListsModal(true)} isHeartFilled={addedToList} />
             </div>
-            <div className="grid grid-cols-4 gap-1.5 lg:gap-2">
+            <div className="flex flex-wrap gap-1.5 lg:gap-2">
                 {displayProduct.images.map((img: string, idx: number) => (
-                    <div key={idx} onClick={() => setSelectedImageIdx(idx)} className={`aspect-square bg-white rounded-md border-2 p-1 cursor-pointer transition-colors ${idx === selectedImageIdx ? 'border-green-600' : 'border-transparent hover:border-gray-300'}`}>
+                    <div key={idx} onClick={() => setSelectedImageIdx(idx)} className={`w-[72px] h-[72px] flex-shrink-0 bg-white rounded-md border-2 p-1 cursor-pointer transition-colors ${idx === selectedImageIdx ? 'border-green-600' : 'border-transparent hover:border-gray-300'}`}>
                         <img src={img} alt="Thumbnail" className="w-full h-full object-contain" />
                     </div>
                 ))}
@@ -289,7 +289,7 @@ export default function ProductDetailsPage() {
                     )}
                 </div>
 
-                <div className="flex items-center justify-between border border-gray-300 rounded-md p-1.5 lg:p-2 mb-3 lg:mb-4">
+                <div className="flex items-center justify-between border border-gray-300 rounded-md p-1.5 mb-3 lg:mb-4">
                     <button onClick={() => setQuantity(Math.max(1, quantity - 1))} className="w-6 h-6 lg:w-8 lg:h-8 flex items-center justify-center text-gray-500 hover:bg-gray-100 rounded">
                         <svg className="w-3 h-3 lg:w-4 lg:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" /></svg>
                     </button>
@@ -302,7 +302,7 @@ export default function ProductDetailsPage() {
                 <button
                     onClick={() => { if (displayProduct.inStock?.toLowerCase() === 'yes') addToCart(displayProduct, quantity); }}
                     disabled={displayProduct.inStock?.toLowerCase() !== 'yes'}
-                    className={`w-full ${displayProduct.inStock?.toLowerCase() === 'yes' ? 'bg-[#f38700] hover:bg-[#e07b00] cursor-pointer text-white' : 'bg-gray-300 text-gray-500 cursor-not-allowed'} font-bold py-2.5 lg:py-3.5 rounded-md transition-colors shadow-sm mb-3 lg:mb-4 text-sm lg:text-base`}
+                    className={`w-full ${displayProduct.inStock?.toLowerCase() === 'yes' ? 'bg-[#f38700] hover:bg-[#e07b00] cursor-pointer text-white' : 'bg-gray-300 text-gray-500 cursor-not-allowed'} font-bold py-[9px] lg:py-3 rounded-md transition-colors shadow-sm mb-3 lg:mb-4 text-sm lg:text-base`}
                 >
                     {displayProduct.inStock?.toLowerCase() === 'yes' ? 'Add to Cart' : 'Out of Stock'}
                 </button>

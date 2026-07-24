@@ -35,9 +35,9 @@ export default function CartPage() {
 
     // Total calculation
     const subtotal = cartItems.reduce((acc, item) => acc + (item.product.discount > 0 ? Math.round(item.product.price * (1 - item.product.discount / 100)) : item.product.price) * item.quantity, 0);
-    const shipping = 0; // Mock
-    const duties = 0; // Mock
-    const total = subtotal + (cartItems.length > 0 ? shipping + duties : 0);
+    const shipping = subtotal > 1000 ? 0 : 99;
+    const taxes = Math.round(subtotal * 0.05); // 5% taxes
+    const total = subtotal + (cartItems.length > 0 ? shipping + taxes : 0);
 
     useEffect(() => {
         // Check Auth
@@ -239,15 +239,7 @@ export default function CartPage() {
                             <div className="w-full lg:w-[380px] shrink-0">
                                 <div className="lg:sticky lg:top-[180px] space-y-4">
 
-                                    {/* Promo Code */}
-                                    <div className="border border-gray-200 rounded-md p-4 bg-white shadow-sm">
-                                        <h3 className="font-bold text-gray-900 mb-3">Promo code</h3>
-                                        <div className="flex gap-2 mb-1">
-                                            <input type="text" className="flex-1 border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-green-600" />
-                                            <button className="px-5 py-1.5 border border-[#458500] text-[#458500] font-bold rounded text-sm hover:bg-[#eef6e6] transition-colors">Apply</button>
-                                        </div>
-                                        <div className="text-[12px] text-gray-500">One code per order</div>
-                                    </div>
+
 
                                     {/* Order Summary Totals */}
                                     <div className="border border-gray-200 rounded-md p-4 sm:p-5 bg-white shadow-sm">
@@ -268,15 +260,15 @@ export default function CartPage() {
                                             </div>
                                             <div className="flex flex-col gap-1 mb-1.5 sm:mb-2.5">
                                                 <div className="flex justify-between text-[12px] sm:text-[14px]">
-                                                    <span className="text-gray-600 flex items-center gap-1">Shipping <svg onClick={() => setInfoModal('shipping')} className="w-3.5 h-3.5 sm:w-4.5 sm:h-4.5 text-gray-500 cursor-pointer hover:text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></span>
+                                                    <span className="text-gray-600 flex items-center gap-1">Shipping <svg onClick={() => setInfoModal('shipping')} className="w-3.5 h-3.5 sm:w-4.5 sm:h-4.5 text-gray-500 cursor-pointer hover:text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></span>
                                                     <span className="text-gray-900">₹{shipping.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
                                                 </div>
                                                 <div className="flex justify-between text-[12px] sm:text-[14px]">
-                                                    <span className="text-gray-600 flex items-center gap-1">Taxes <svg onClick={() => setInfoModal('taxes')} className="w-3.5 h-3.5 sm:w-4.5 sm:h-4.5 text-gray-500 cursor-pointer hover:text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></span>
-                                                    <span className="text-gray-900">₹{duties.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+                                                    <span className="text-gray-600 flex items-center gap-1">Taxes <svg onClick={() => setInfoModal('taxes')} className="w-3.5 h-3.5 sm:w-4.5 sm:h-4.5 text-gray-500 cursor-pointer hover:text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></span>
+                                                    <span className="text-gray-900">₹{taxes.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
                                                 </div>
                                                 <div className="flex justify-between text-[12px] sm:text-[14px]">
-                                                    <span className="text-gray-600 flex items-center gap-1">Rewards Credit <svg onClick={() => setInfoModal('rewards')} className="w-3.5 h-3.5 sm:w-4.5 sm:h-4.5 text-gray-500 cursor-pointer hover:text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></span>
+                                                    <span className="text-gray-600 flex items-center gap-1">Rewards Credit <svg onClick={() => setInfoModal('rewards')} className="w-3.5 h-3.5 sm:w-4.5 sm:h-4.5 text-gray-500 cursor-pointer hover:text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></span>
                                                     <span className="text-red-500 font-medium">₹0.00</span>
                                                 </div>
                                             </div>
@@ -290,7 +282,7 @@ export default function CartPage() {
                                         <button onClick={() => {
                                             const userInfo = localStorage.getItem('userInfo');
                                             if (!userInfo) {
-                                                toast.error('Please login first to proceed to checkout');
+                                                toast.error('Login required to checkout');
                                             } else {
                                                 router.push('/checkout');
                                             }
@@ -415,7 +407,7 @@ export default function CartPage() {
             {infoModal && (
                 <div onClick={() => setInfoModal(null)} className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 p-4">
                     <div onClick={(e) => e.stopPropagation()} className="bg-white rounded-lg p-4 sm:p-5 max-w-md w-full relative shadow-xl">
-                        <button onClick={() => setInfoModal(null)} className="absolute top-4 right-4 text-gray-400 hover:text-gray-700">
+                        <button onClick={() => setInfoModal(null)} className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 cursor-pointer">
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" /></svg>
                         </button>
                         <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-3 sm:mb-4 pr-6">

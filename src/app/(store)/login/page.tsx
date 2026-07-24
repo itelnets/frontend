@@ -80,14 +80,14 @@ export default function LoginPage() {
                 api.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
             }
 
+            setIsLoading(false);
             toast.success(data.message);
-            await new Promise(resolve => setTimeout(resolve, 1500));
+            
             if (data.role === 'admin') {
                 router.push('/admin');
             } else {
                 router.push('/');
             }
-            // Do not set isLoading to false here, let the page transition happen
         } catch (err: any) {
             const errorMessage = err.response?.data?.message || 'Login failed';
             toast.error(errorMessage);

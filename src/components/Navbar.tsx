@@ -6,6 +6,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import { useCart } from '@/context/CartContext';
 import Spinner from './Spinner';
 import SearchBar from './SearchBar';
+import toast from 'react-hot-toast';
 
 const Navbar = () => {
     const router = useRouter();
@@ -56,6 +57,7 @@ const Navbar = () => {
         localStorage.removeItem('userInfo');
         setUser(null);
         setIsAuthOpen(false);
+        toast.success('Logged out successfully!');
         router.push('/login');
     };
 
@@ -240,7 +242,7 @@ const Navbar = () => {
                                                     </Link>
                                                 </div>
 
-                                                <button onClick={handleLogout} className="w-full text-center py-2 sm:py-2.5 bg-white border border-[#458500] text-[#458500] hover:bg-gray-50 font-bold rounded-md shadow-sm transition-colors text-sm mt-auto">
+                                                <button onClick={handleLogout} className="w-full text-center py-2 sm:py-2.5 bg-white border border-[#458500] cursor-pointer text-[#458500] hover:bg-gray-50 font-bold rounded-md shadow-sm transition-colors text-sm mt-auto">
                                                     Sign out
                                                 </button>
                                             </div>
@@ -295,121 +297,132 @@ const Navbar = () => {
                         <div className="fixed inset-0 bg-black/50 transition-opacity" onClick={() => setIsMobileMenuOpen(false)}></div>
 
                         {/* Sidebar */}
-                        <div className="relative w-[85vw] max-w-[300px] h-full bg-white shadow-xl flex flex-col overflow-y-auto overflow-x-hidden animate-fade-in-left">
+                        <div className="relative w-[85vw] max-w-[300px] h-full bg-white shadow-xl flex flex-col animate-fade-in-left">
+                            <div className="flex-1 overflow-y-auto overflow-x-hidden hide-scrollbar">
 
-                            {/* Top Header */}
-                            <div className="p-4 flex justify-between items-start shrink-0 pb-2">
-                                <div className="flex flex-col pr-4 truncate">
-                                    {user ? (
-                                        <>
+                                {/* Top Header */}
+                                <div className="p-4 flex justify-between items-start shrink-0 pb-2">
+                                    <div className="flex flex-col pr-4 truncate">
+                                        {user ? (
+                                            <>
+                                                <div className="text-[#458500] font-bold text-lg">Welcome!</div>
+                                                <div className="text-[#458500] font-bold text-sm truncate">{user.email}</div>
+                                            </>
+                                        ) : (
                                             <div className="text-[#458500] font-bold text-lg">Welcome!</div>
-                                            <div className="text-[#458500] font-bold text-sm truncate">{user.email}</div>
-                                        </>
-                                    ) : (
-                                        <div className="text-[#458500] font-bold text-lg">Welcome!</div>
-                                    )}
+                                        )}
+                                    </div>
+                                    <button onClick={() => setIsMobileMenuOpen(false)} className="text-gray-500 hover:text-gray-700 p-1">
+                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" /></svg>
+                                    </button>
                                 </div>
-                                <button onClick={() => setIsMobileMenuOpen(false)} className="text-gray-500 hover:text-gray-700 p-1">
-                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" /></svg>
-                                </button>
-                            </div>
 
-                            <div className="pb-4">
-                                {/* Authenticated User Links */}
-                                {user && (
-                                    <>
-                                        <div className="flex flex-col py-2">
-                                            <Link href="#" className="flex items-center gap-3 text-[14px] text-[#333] hover:bg-gray-50 px-2.5 py-1.5 transition-colors">
-                                                <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
-                                                My Account
+                                <div className="pb-4">
+                                    {/* Authenticated User Links */}
+                                    {user && (
+                                        <>
+                                            <div className="flex flex-col py-2">
+                                                <Link href="#" className="flex items-center gap-3 text-[14px] text-[#333] hover:bg-gray-50 px-2.5 py-1.5 transition-colors">
+                                                    <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                                                    My Account
+                                                </Link>
+                                                <Link href="#" className="flex items-center gap-3 text-[14px] text-[#333] hover:bg-gray-50 px-2.5 py-1.5 transition-colors">
+                                                    <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
+                                                    Orders
+                                                </Link>
+                                                <Link href="#" className="flex items-center gap-3 text-[14px] text-[#333] hover:bg-gray-50 px-2.5 py-1.5 transition-colors">
+                                                    <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
+                                                    My Lists
+                                                </Link>
+                                                <Link href="#" className="flex items-center gap-3 text-[14px] text-[#333] hover:bg-gray-50 px-2.5 py-1.5 transition-colors">
+                                                    <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                                    Rewards Credit
+                                                </Link>
+                                                <Link href="#" className="flex items-center gap-3 text-[14px] text-[#333] hover:bg-gray-50 px-2.5 py-1.5 transition-colors">
+                                                    <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                                                    My Reviews
+                                                </Link>
+                                                <Link href="#" className="flex items-center gap-3 text-[14px] text-[#333] hover:bg-gray-50 px-2.5 py-1.5 transition-colors">
+                                                    <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" /></svg>
+                                                    Messages
+                                                </Link>
+                                            </div>
+                                            <div className="mx-4 border-b border-gray-200"></div>
+                                        </>
+                                    )}
+                                    {/* Main Categories */}
+                                    <div className="flex flex-col">
+                                        {['Supplements', 'Sports', 'Bath', 'Beauty', 'Grocery', 'Home', 'Baby', 'Pets'].map(cat => (
+                                            <Link key={cat} href={`/type/${cat}`} className="flex items-center justify-between px-4 py-3.5 hover:bg-gray-50 border-b border-gray-50">
+                                                <span className="text-base font-medium text-gray-900">{cat}</span>
+                                                <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
                                             </Link>
-                                            <Link href="#" className="flex items-center gap-3 text-[14px] text-[#333] hover:bg-gray-50 px-2.5 py-1.5 transition-colors">
-                                                <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
-                                                Orders
-                                            </Link>
-                                            <Link href="#" className="flex items-center gap-3 text-[14px] text-[#333] hover:bg-gray-50 px-2.5 py-1.5 transition-colors">
-                                                <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
-                                                My Lists
-                                            </Link>
-                                            <Link href="#" className="flex items-center gap-3 text-[14px] text-[#333] hover:bg-gray-50 px-2.5 py-1.5 transition-colors">
-                                                <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                                Rewards Credit
-                                            </Link>
-                                            <Link href="#" className="flex items-center gap-3 text-[14px] text-[#333] hover:bg-gray-50 px-2.5 py-1.5 transition-colors">
-                                                <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
-                                                My Reviews
-                                            </Link>
-                                            <Link href="#" className="flex items-center gap-3 text-[14px] text-[#333] hover:bg-gray-50 px-2.5 py-1.5 transition-colors">
-                                                <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" /></svg>
-                                                Messages
-                                            </Link>
-                                        </div>
-                                        <div className="mx-4 border-b border-gray-200"></div>
-                                    </>
-                                )}
-                                {/* Main Categories */}
-                                <div className="flex flex-col">
-                                    {['Supplements', 'Sports', 'Bath', 'Beauty', 'Grocery', 'Home', 'Baby', 'Pets'].map(cat => (
-                                        <Link key={cat} href={`/type/${cat}`} className="flex items-center justify-between px-4 py-3.5 hover:bg-gray-50 border-b border-gray-50">
-                                            <span className="text-base font-medium text-gray-900">{cat}</span>
+                                        ))}
+                                    </div>
+
+                                    {/* Shop By Section */}
+                                    <div className="pt-6 pb-2">
+                                        <div className="px-4 text-xs text-gray-500 mb-2 uppercase tracking-wide">Shop By</div>
+                                        <Link href="/products" className="flex items-center justify-between px-4 py-3 hover:bg-gray-50">
+                                            <span className="text-base font-medium text-gray-900">Health Topics</span>
                                             <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
                                         </Link>
-                                    ))}
-                                </div>
-
-                                {/* Shop By Section */}
-                                <div className="pt-6 pb-2">
-                                    <div className="px-4 text-xs text-gray-500 mb-2 uppercase tracking-wide">Shop By</div>
-                                    <Link href="/products" className="flex items-center justify-between px-4 py-3 hover:bg-gray-50">
-                                        <span className="text-base font-medium text-gray-900">Health Topics</span>
-                                        <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
-                                    </Link>
-                                    <Link href="/products" className="flex items-center justify-between px-4 py-3 hover:bg-gray-50">
-                                        <span className="text-base font-medium text-gray-900">Brands</span>
-                                        <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
-                                    </Link>
-                                    <Link href="/products" className="block px-4 py-3 hover:bg-gray-50 text-base font-medium text-red-600">Deals</Link>
-                                    <Link href="/products" className="block px-4 py-3 hover:bg-gray-50 text-base font-medium text-gray-900">Best Sellers</Link>
-                                    <Link href="/products" className="block px-4 py-3 hover:bg-gray-50 text-base font-medium text-gray-900">New</Link>
-                                    <Link href="/products" className="block px-4 py-3 hover:bg-gray-50 text-base font-medium text-gray-900">Try</Link>
-                                </div>
-                                <div className="mx-4 border-b border-gray-200"></div>
-
-                                {/* Learn Section */}
-                                <div className="pt-4 pb-2">
-                                    <div className="px-4 text-xs text-gray-500 mb-2 uppercase tracking-wide">Learn</div>
-                                    <Link href="/products" className="block px-4 py-3 hover:bg-gray-50 text-base font-medium text-gray-900">Wellness Hub</Link>
-                                </div>
-                                <div className="mx-4 border-b border-gray-200"></div>
-
-                                {/* Bottom Links */}
-                                <div className="py-2">
-                                    <Link href="/" className="block px-4 py-3 hover:bg-gray-50 text-[15px] text-gray-700">Sales & Offers</Link>
-                                    <Link href="/" className="block px-4 py-3 hover:bg-gray-50 text-[15px] text-gray-700">Brands</Link>
-                                    <Link href="/" className="block px-4 py-3 hover:bg-gray-50 text-[15px] text-gray-700">Rewards</Link>
-                                    <Link href="/" className="block px-4 py-3 hover:bg-gray-50 text-[15px] text-gray-700">EGift Card</Link>
-                                </div>
-                                <div className="mx-4 border-b border-gray-200"></div>
-
-                                {/* Footer Area */}
-                                <div className="p-4 flex flex-col gap-4 mt-2">
-                                    <div className="flex items-center gap-2 text-gray-700 cursor-pointer hover:text-black">
-                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                        <span className="text-[15px]">24/7 Support</span>
+                                        <Link href="/products" className="flex items-center justify-between px-4 py-3 hover:bg-gray-50">
+                                            <span className="text-base font-medium text-gray-900">Brands</span>
+                                            <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                                        </Link>
+                                        <Link href="/products" className="block px-4 py-3 hover:bg-gray-50 text-base font-medium text-red-600">Deals</Link>
+                                        <Link href="/products" className="block px-4 py-3 hover:bg-gray-50 text-base font-medium text-gray-900">Best Sellers</Link>
+                                        <Link href="/products" className="block px-4 py-3 hover:bg-gray-50 text-base font-medium text-gray-900">New</Link>
+                                        <Link href="/products" className="block px-4 py-3 hover:bg-gray-50 text-base font-medium text-gray-900">Try</Link>
                                     </div>
-                                    <div className="flex items-center gap-2 text-gray-700 cursor-pointer hover:text-black">
-                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                        <span className="text-[15px]">IN | EN | INR</span>
-                                    </div>
+                                    <div className="mx-4 border-b border-gray-200"></div>
 
-                                    {/* Logout Button */}
-                                    {user && (
-                                        <button onClick={() => { handleLogout(); setIsMobileMenuOpen(false); }} className="w-full mt-4 text-center py-2.5 bg-white border border-[#458500] text-[#458500] hover:bg-gray-50 font-bold rounded-md shadow-sm transition-colors text-[15px]">
-                                            Sign out
-                                        </button>
-                                    )}
+                                    {/* Learn Section */}
+                                    <div className="pt-4 pb-2">
+                                        <div className="px-4 text-xs text-gray-500 mb-2 uppercase tracking-wide">Learn</div>
+                                        <Link href="/products" className="block px-4 py-3 hover:bg-gray-50 text-base font-medium text-gray-900">Wellness Hub</Link>
+                                    </div>
+                                    <div className="mx-4 border-b border-gray-200"></div>
+
+                                    {/* Bottom Links */}
+                                    <div className="py-2">
+                                        <Link href="/" className="block px-4 py-3 hover:bg-gray-50 text-[15px] text-gray-700">Sales & Offers</Link>
+                                        <Link href="/" className="block px-4 py-3 hover:bg-gray-50 text-[15px] text-gray-700">Brands</Link>
+                                        <Link href="/" className="block px-4 py-3 hover:bg-gray-50 text-[15px] text-gray-700">Rewards</Link>
+                                        <Link href="/" className="block px-4 py-3 hover:bg-gray-50 text-[15px] text-gray-700">EGift Card</Link>
+                                    </div>
+                                    <div className="mx-4 border-b border-gray-200"></div>
+
+                                    {/* Footer Area */}
+                                    <div className="p-4 flex flex-col gap-4 mt-2">
+                                        <div className="flex items-center gap-2 text-gray-700 cursor-pointer hover:text-black">
+                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                            <span className="text-[15px]">24/7 Support</span>
+                                        </div>
+                                        <div className="flex items-center gap-2 text-gray-700 cursor-pointer hover:text-black">
+                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                            <span className="text-[15px]">IN | EN | INR</span>
+                                        </div>
+
+                                        {/* Logout Button */}
+                                        {user && (
+                                            <button onClick={() => { handleLogout(); setIsMobileMenuOpen(false); }} className="w-full mt-4 text-center py-2.5 bg-white border border-[#458500] text-[#458500] hover:bg-gray-50 font-bold rounded-md shadow-sm transition-colors text-[15px]">
+                                                Sign out
+                                            </button>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
+
+                            {/* Fixed Footer for Logged Out User */}
+                            {!user && (
+                                <div className="p-4 border-t border-gray-100 bg-white mt-auto shrink-0 shadow-[0_-4px_10px_-5px_rgba(0,0,0,0.1)]">
+                                    <Link href="/login" onClick={() => setIsMobileMenuOpen(false)} className="block text-center w-full bg-[#458500] hover:bg-[#366800] text-white py-2.5 rounded-md transition-colors font-bold text-[15px]">
+                                        Sign in
+                                    </Link>
+                                </div>
+                            )}
                         </div>
                     </div>
                 )}
