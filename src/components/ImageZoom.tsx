@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useRef, MouseEvent } from 'react';
-
+import { useState, useRef, MouseEvent, useEffect } from 'react';
+import SharePopover from './SharePopover';
 interface ImageZoomProps {
     src: string;
     alt: string;
@@ -26,8 +26,35 @@ export default function ImageZoom({ src, alt, onHeartClick, isHeartFilled }: Ima
         setPosition({ x, y });
     };
 
+    const [showShare, setShowShare] = useState(false);
+    const [currentUrl, setCurrentUrl] = useState('');
+    const shareContainerRef = useRef<HTMLDivElement>(null);
+
+    // Get current URL on mount
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            setCurrentUrl(window.location.href);
+        }
+    }, []);
+
+    // Handle click outside to close share popover
+    useEffect(() => {
+        const handleClickOutside = (event: globalThis.MouseEvent) => {
+            if (shareContainerRef.current && !shareContainerRef.current.contains(event.target as Node)) {
+                setShowShare(false);
+            }
+        };
+
+        if (showShare) {
+            document.addEventListener('mousedown', handleClickOutside);
+        }
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [showShare]);
+
     return (
-        <div className="relative h-auto sm:w-[400px] h-auto sm:h-[400px] bg-white rounded-xl p-2 group mx-auto">
+        <div className="relative h-auto sm:w-[400px] sm:h-[400px] bg-white rounded-xl p-2 group mx-auto">
             {/* Main Image */}
             <div
                 className="w-full h-full cursor-pointer relative"
@@ -56,12 +83,19 @@ export default function ImageZoom({ src, alt, onHeartClick, isHeartFilled }: Ima
             )}
 
             {/* Action Buttons Overlay (Share & Heart) */}
-            <div className="absolute top-4 right-4 flex flex-col gap-3 z-10">
+            <div className="absolute top-4 right-4 flex flex-col gap-3 z-10 items-end">
                 <div onClick={onHeartClick} className={`w-10 h-10 bg-white rounded-full flex items-center justify-center border shadow-sm cursor-pointer transition-colors ${isHeartFilled ? 'border-green-600 text-green-600 bg-[#f0f7f4]' : 'border-gray-400 text-gray-500 hover:bg-gray-50 hover:text-gray-800'}`}>
-                <svg className="w-6 h-6" fill={isHeartFilled ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
+                    <svg className="w-6 h-6" fill={isHeartFilled ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
                 </div>
-                <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center border border-orange-200 shadow-sm text-orange-500 cursor-pointer pointer-events-auto hover:bg-orange-50 hover:text-orange-600 transition-colors">
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" /></svg>
+
+                <div className="relative" ref={shareContainerRef}>
+                    <div onClick={() => setShowShare(!showShare)} className="w-10 h-10 bg-white rounded-full flex items-center justify-center border border-orange-200 shadow-sm text-orange-500 cursor-pointer pointer-events-auto hover:bg-orange-50 hover:text-orange-600 transition-colors">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" /></svg>
+                    </div>
+
+                    {showShare && (
+                        <SharePopover url={currentUrl} />
+                    )}
                 </div>
             </div>
         </div>

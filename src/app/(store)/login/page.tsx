@@ -75,6 +75,7 @@ export default function LoginPage() {
             const { data } = await api.post('/auth/login', { email, password });
             console.log('Login success:', data);
             localStorage.setItem('userInfo', JSON.stringify(data));
+            document.cookie = "isLoggedIn=true; path=/; max-age=2592000"; // 30 days
 
             if (data.token) {
                 api.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
@@ -82,7 +83,7 @@ export default function LoginPage() {
 
             setIsLoading(false);
             toast.success(data.message);
-            
+
             if (data.role === 'admin') {
                 router.push('/admin');
             } else {
@@ -125,7 +126,7 @@ export default function LoginPage() {
                             <label htmlFor="email" className="block text-sm font-medium text-gray-700">
                                 Email Address
                             </label>
-                            <div className="mt-1 flex rounded-md border border-gray-300 focus-within:border-[#458500] focus-within:ring-1 focus-within:ring-[#458500] overflow-hidden transition duration-200">
+                            <div className="mt-1 relative">
                                 <input
                                     id="email"
                                     name="email"
@@ -134,7 +135,7 @@ export default function LoginPage() {
                                     required
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
-                                    className="block w-full px-3 py-2 sm:px-4 sm:py-3 placeholder-gray-400 outline-none text-sm bg-white"
+                                    className="block w-full px-3 py-2 sm:px-4 sm:py-3 rounded-md border border-gray-300 placeholder-gray-400 focus:border-[#458500] focus:ring-[#458500] transition duration-200 outline-none text-sm"
                                     placeholder="you@example.com"
                                 />
                             </div>

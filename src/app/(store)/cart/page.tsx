@@ -3,9 +3,11 @@
 import React, { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import toast from 'react-hot-toast';
+import { toast } from 'react-hot-toast';
+import Spinner from '@/components/Spinner';
 import { useCart } from '@/context/CartContext';
 import { getProducts } from '@/services/product';
+import { fetchAddresses } from '@/services/addressService';
 import ConfirmModal from '@/components/ConfirmModal';
 import QuantityDropdown from '@/components/QuantityDropdown';
 import ProductCard from '@/components/ProductCard';
@@ -21,6 +23,24 @@ export default function CartPage() {
     const [isRemoveAllModalOpen, setIsRemoveAllModalOpen] = useState(false);
     const [deleteTarget, setDeleteTarget] = useState<{ type: 'cart' | 'saved' | 'myList'; item: any } | null>(null);
     const [infoModal, setInfoModal] = useState<'shipping' | 'taxes' | 'rewards' | null>(null);
+    const [defaultAddress, setDefaultAddress] = useState<any>(null);
+    const [savedAddresses, setSavedAddresses] = useState<any[]>([]);
+    const [isAddressDropdownOpen, setIsAddressDropdownOpen] = useState(false);
+    const addressDropdownRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (addressDropdownRef.current && !addressDropdownRef.current.contains(event.target as Node)) {
+                setIsAddressDropdownOpen(false);
+            }
+        };
+        if (isAddressDropdownOpen) {
+            document.addEventListener('mousedown', handleClickOutside);
+        }
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [isAddressDropdownOpen]);
 
     // Estimated delivery date: 7-12 days from today
     const getDeliveryDateRange = () => {
@@ -44,6 +64,18 @@ export default function CartPage() {
         const userInfo = localStorage.getItem('userInfo');
         setIsLoggedIn(!!userInfo);
 
+        if (userInfo) {
+            fetchAddresses()
+                .then(addresses => {
+                    if (addresses && addresses.length > 0) {
+                        setSavedAddresses(addresses);
+                        const def = addresses.find((a: any) => a.isDefault) || addresses[0];
+                        setDefaultAddress(def);
+                    }
+                })
+                .catch(err => console.error("Failed to load addresses", err));
+        }
+
         // Fetch recommendations
         const fetchRecs = async () => {
             try {
@@ -59,8 +91,14 @@ export default function CartPage() {
         fetchRecs();
     }, []);
 
-    if (isCartLoading) {
-        return <PageLoader />;
+    if (isCartLoading || isRecsLoading) {
+        return (
+            <div className="font-sans min-h-screen bg-white">
+                <div className="flex justify-center items-center h-[100vh]">
+                    <Spinner className="w-8 h-8 sm:h-12 sm:w-12 text-[#458500]" />
+                </div>
+            </div>
+        );
     }
 
     const RecommendedCarousel = () => {
@@ -78,43 +116,37 @@ export default function CartPage() {
 
         return (
             <div className="mt-2 relative">
-                <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-2 sm:mb-6">Recommended for you</h2>
+                <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-2 sm:mb-4 md-mb-6 mt-4 lg:mt-0 md:ml-2 lg:ml-5 xl:ml-6 2xl:ml-0">Recommended for you</h2>
                 <div className="relative">
-                    {isRecsLoading ? (
-                        <div className="flex justify-center py-10">
-                            <div className="w-8 h-8 border-4 border-gray-200 border-t-green-700 rounded-full animate-spin"></div>
-                        </div>
-                    ) : (
-                        <div className="relative">
-                            {/* Left Arrow - positioned at middle of product height */}
-                            <button
-                                onClick={() => scroll('left')}
-                                className="hidden lg:flex absolute left-[-20px] top-1/2 -translate-y-1/2 z-10 bg-white border border-gray-200 shadow-md rounded-full w-9 h-9 items-center justify-center text-gray-600 hover:text-black hover:bg-gray-50 transition-colors cursor-pointer"
-                            >
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
-                            </button>
+                    <div className="relative ml-0 lg:ml-5 2xl:ml-0">
+                        {/* Left Arrow - positioned at middle of product height */}
+                        <button
+                            onClick={() => scroll('left')}
+                            className="hidden lg:flex absolute left-[-18px] top-1/2 -translate-y-1/2 z-10 bg-white border border-gray-200 shadow-md rounded-full w-9 h-9 items-center justify-center text-gray-600 hover:text-black hover:bg-gray-50 transition-colors cursor-pointer"
+                        >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+                        </button>
 
-                            <div
-                                ref={scrollRef}
-                                className="flex overflow-x-auto gap-2 sm:gap-4 snap-x snap-mandatory scrollbar-hide px-1"
-                                style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-                            >
-                                {recommended.length > 0 ? recommended.map((product: any) => (
-                                    <div key={product._id} className={`snap-start shrink-0 w-[calc(50%-0.5rem)] sm:w-[calc(33.333%-0.66rem)] md:w-[calc(25%-0.75rem)] ${cartItems.length === 0 ? 'lg:w-[calc(16.666%-0.833rem)]' : 'lg:w-[calc(25%-0.75rem)]'}`}>
-                                        <ProductCard product={product} />
-                                    </div>
-                                )) : null}
-                            </div>
-
-                            {/* Right Arrow - positioned at middle of product height */}
-                            <button
-                                onClick={() => scroll('right')}
-                                className="hidden lg:flex absolute right-[-20px] top-1/2 -translate-y-1/2 z-10 bg-white border border-gray-200 shadow-md rounded-full w-9 h-9 items-center justify-center text-gray-600 hover:text-black hover:bg-gray-50 transition-colors cursor-pointer"
-                            >
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
-                            </button>
+                        <div
+                            ref={scrollRef}
+                            className="flex overflow-x-auto gap-2 sm:gap-4 snap-x snap-mandatory scrollbar-hide px-1"
+                            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                        >
+                            {recommended.length > 0 ? recommended.map((product: any) => (
+                                <div key={product._id} className={`snap-start shrink-0 w-[calc(50%-0.5rem)] sm:w-[calc(33.333%-0.66rem)] md:w-[calc(25%-0.75rem)] ${cartItems.length === 0 ? 'lg:w-[calc(16.666%-0.833rem)]' : 'lg:w-[calc(33.333%-0.66rem)] xl:w-[calc(25%-0.75rem)]'}`}>
+                                    <ProductCard product={product} />
+                                </div>
+                            )) : null}
                         </div>
-                    )}
+
+                        {/* Right Arrow - positioned at middle of product height */}
+                        <button
+                            onClick={() => scroll('right')}
+                            className="hidden lg:flex absolute right-[-10px] top-1/2 -translate-y-1/2 z-10 bg-white border border-gray-200 shadow-md rounded-full w-9 h-9 items-center justify-center text-gray-600 hover:text-black hover:bg-gray-50 transition-colors cursor-pointer"
+                        >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                        </button>
+                    </div>
                 </div>
             </div>
         );
@@ -157,7 +189,7 @@ export default function CartPage() {
                     </div>
                 ) : (
                     <>
-                        <div className="flex flex-col lg:flex-row gap-6 lg:gap-10">
+                        <div className="flex flex-col lg:flex-row gap-6 xl:gap-10">
                             {/* LEFT COLUMN: Cart Items */}
                             <div className="flex-1 min-w-0">
                                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4 border-b border-gray-200 pb-3">
@@ -165,10 +197,63 @@ export default function CartPage() {
                                         <h1 className="text-xl md:text-2xl font-bold text-gray-900 flex items-center gap-2">
                                             Cart ({cartCount})
                                         </h1>
-                                        <span className="text-[12px] font-normal text-gray-600 bg-gray-100 px-2.5 py-1 rounded flex items-center gap-1 cursor-pointer hover:bg-gray-200">
-                                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-                                            Ship to India &gt;
-                                        </span>
+                                        <div className="relative" ref={addressDropdownRef}>
+                                            <span
+                                                onClick={() => setIsAddressDropdownOpen(!isAddressDropdownOpen)}
+                                                className="text-[11px] sm:text-[13px] font-semibold text-gray-900 bg-gray-100 px-2 py-1 sm:px-3 sm:py-1.5 rounded-full flex items-center gap-1 sm:gap-1.5 cursor-pointer hover:bg-gray-200 transition-colors max-w-[180px] sm:max-w-[350px]"
+                                            >
+                                                <svg className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0 text-gray-900" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" /></svg>
+                                                <span className="truncate">
+                                                    Ship to {defaultAddress ? `${defaultAddress.addressLine1}${defaultAddress.addressLine2 ? ', ' + defaultAddress.addressLine2 : ''}` : 'India'}
+                                                </span>
+                                                <svg className={`w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0 text-gray-600 transition-transform ${isAddressDropdownOpen ? '-rotate-90' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" /></svg>
+                                            </span>
+
+                                            {isAddressDropdownOpen && (
+                                                <div className="absolute top-full left-0 mt-1 w-56 sm:w-72 bg-white rounded-lg shadow-xl border border-gray-200 z-50 overflow-hidden">
+                                                    <div className="max-h-52 sm:max-h-60 overflow-y-auto p-1.5 sm:p-2 space-y-0.5 sm:space-y-1">
+                                                        {savedAddresses.map((addr) => (
+                                                            <div
+                                                                key={addr._id}
+                                                                onClick={() => {
+                                                                    setDefaultAddress(addr);
+                                                                    setIsAddressDropdownOpen(false);
+                                                                }}
+                                                                className={`p-1.5 sm:p-2 rounded cursor-pointer hover:bg-gray-50 flex items-start gap-1.5 sm:gap-2 ${defaultAddress?._id === addr._id ? 'bg-[#f4faef] border border-[#d6efc2]' : 'border border-transparent'}`}
+                                                            >
+                                                                <svg className={`w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0 mt-0.5 ${defaultAddress?._id === addr._id ? 'text-[#458500]' : 'text-gray-400'}`} fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" /></svg>
+                                                                <div className="flex-1 min-w-0">
+                                                                    <div className="text-[13px] sm:text-sm font-bold text-gray-900">{addr.fullName}</div>
+                                                                    <div className="text-[11px] sm:text-[12px] text-gray-700 leading-tight mt-0.5 whitespace-normal break-words">
+                                                                        {addr.addressLine1}
+                                                                        {addr.addressLine2 ? ', ' + addr.addressLine2 : ''}
+                                                                        {addr.landmark ? ', ' + addr.landmark : ''}
+                                                                    </div>
+                                                                    <div className="text-[11px] sm:text-[12px] text-gray-600 leading-tight mt-0.5 whitespace-normal break-words">
+                                                                        {addr.city}, {addr.state} {addr.zip}
+                                                                    </div>
+                                                                    <div className="text-[11px] sm:text-[12px] text-gray-600 leading-tight mt-0.5">
+                                                                        {addr.phone}
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        ))}
+                                                        {savedAddresses.length === 0 && (
+                                                            <div className="p-2 sm:p-3 text-center text-[13px] sm:text-sm text-gray-500">No addresses saved yet</div>
+                                                        )}
+                                                    </div>
+                                                    <div className="p-2 sm:p-3 border-t border-gray-100 bg-white">
+                                                        <button
+                                                            onClick={() => router.push('/checkout')}
+                                                            className="block text-center w-full bg-[#458500] hover:bg-[#366800] text-white font-normal py-1.5 sm:py-2 px-3 sm:px-4 rounded-md transition-colors font-bold text-[13px] sm:text-sm cursor-pointer flex items-center justify-center gap-1.5 sm:gap-2"
+                                                        >
+                                                            <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
+                                                            Add New Address
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
                                     <div className="flex items-center justify-between md:justify-end gap-4 text-sm font-bold text-gray-600 w-full md:w-auto">
                                         <button onClick={() => setIsRemoveAllModalOpen(true)} className="flex items-center gap-1 hover:text-black cursor-pointer">
@@ -304,7 +389,7 @@ export default function CartPage() {
                 )}
 
                 {/* Save for later / My Lists Section */}
-                <div className="my-4 sm:my-8 border-t border-gray-200">
+                <div className="my-4 sm:my-6 lg:py-8 border-t border-gray-200">
                     <div className="flex border-b border-gray-200 gap-8">
                         <button
                             onClick={() => setActiveTab('saved')}

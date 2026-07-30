@@ -290,11 +290,11 @@ export default function ProductDetailsPage() {
                 </div>
 
                 <div className="flex items-center justify-between border border-gray-300 rounded-md p-1.5 mb-3 lg:mb-4">
-                    <button onClick={() => setQuantity(Math.max(1, quantity - 1))} className="w-6 h-6 lg:w-8 lg:h-8 flex items-center justify-center text-gray-500 hover:bg-gray-100 rounded">
+                    <button onClick={() => setQuantity(Math.max(1, quantity - 1))} className="w-6 h-6 lg:w-8 lg:h-8 flex items-center justify-center text-gray-500 hover:bg-gray-100 rounded cursor-pointer">
                         <svg className="w-3 h-3 lg:w-4 lg:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" /></svg>
                     </button>
                     <span className="font-bold text-gray-900 text-sm lg:text-base">{quantity}</span>
-                    <button onClick={() => setQuantity(quantity + 1)} className="w-6 h-6 lg:w-8 lg:h-8 flex items-center justify-center text-gray-500 hover:bg-gray-100 rounded">
+                    <button onClick={() => setQuantity(quantity + 1)} className="w-6 h-6 lg:w-8 lg:h-8 flex items-center justify-center text-gray-500 hover:bg-gray-100 rounded cursor-pointer">
                         <svg className="w-3 h-3 lg:w-4 lg:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
                     </button>
                 </div>
@@ -384,7 +384,10 @@ export default function ProductDetailsPage() {
                                 <div key={idx} className="flex text-[13px] lg:text-sm">
                                     <span className="text-[#458500] w-[140px] lg:w-[160px] shrink-0 font-bold">{spec.key}</span>
                                     <span className="text-[#458500] mr-3">:</span>
-                                    <span className="text-gray-900">{spec.value}</span>
+                                    <span className="text-gray-900">
+                                        {spec.value}
+                                        {spec.key === 'Shipping Weight (gm)' && ' gm'}
+                                    </span>
                                 </div>
                             ))}
                         </div>

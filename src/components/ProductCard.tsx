@@ -1,8 +1,10 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import AddToCartButton from '@/components/AddToCartButton';
 import { useCart } from '@/context/CartContext';
+import ConfirmModal from '@/components/ConfirmModal';
 
 interface Product {
     _id: string;
@@ -22,6 +24,7 @@ interface ProductCardProps {
 
 export default function ProductCard({ product, showHeart = false }: ProductCardProps) {
     const { myLists, moveToList, removeFromList } = useCart();
+    const [isRemoveModalOpen, setIsRemoveModalOpen] = useState(false);
 
     const isInList = showHeart ? myLists.some((p: any) => p._id === product._id) : false;
 
@@ -29,10 +32,27 @@ export default function ProductCard({ product, showHeart = false }: ProductCardP
         e.preventDefault();
         e.stopPropagation();
         if (isInList) {
-            removeFromList(product._id);
+            setIsRemoveModalOpen(true);
         } else {
             moveToList(product as any);
         }
+    };
+
+    const confirmRemove = (e?: React.MouseEvent) => {
+        if (e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        removeFromList(product._id);
+        setIsRemoveModalOpen(false);
+    };
+
+    const cancelRemove = (e?: React.MouseEvent) => {
+        if (e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        setIsRemoveModalOpen(false);
     };
 
     return (
@@ -43,7 +63,7 @@ export default function ProductCard({ product, showHeart = false }: ProductCardP
             {showHeart && (
                 <button
                     onClick={toggleList}
-                    className={`absolute top-2 right-2 p-1.5 rounded-full z-10 transition-colors ${isInList ? 'text-[#458500] bg-green-50' : 'text-gray-400 hover:text-[#458500] hover:bg-green-50'}`}
+                    className={`absolute top-2 right-2 p-1.5 rounded-full z-10 transition-colors cursor-pointer ${isInList ? 'text-[#458500] bg-green-50' : 'text-gray-400 hover:text-[#458500] hover:bg-green-50'}`}
                     title={isInList ? 'Remove from list' : 'Add to list'}
                 >
                     {isInList ? (
@@ -57,6 +77,16 @@ export default function ProductCard({ product, showHeart = false }: ProductCardP
                     )}
                 </button>
             )}
+
+            <ConfirmModal
+                isOpen={isRemoveModalOpen}
+                title="Remove from My Lists"
+                description="Are you sure you want to remove this item from your lists?"
+                onCancel={cancelRemove}
+                onConfirm={confirmRemove}
+                cancelText="Cancel"
+                confirmText="Remove"
+            />
 
             <div className="w-full aspect-[6/5] flex items-center justify-center relative bg-white border-b border-gray-100 p-2 sm:p-4">
                 {product.images && product.images.length > 0 ? (
@@ -111,16 +141,16 @@ export default function ProductCard({ product, showHeart = false }: ProductCardP
                     <span className="text-[14px] text-blue-600 hover:underline cursor-pointer">{product.numReviews || 0}</span>
                 </div>
 
-                <div className="flex items-center gap-2 mt-auto">
-                    <div className="text-lg font-bold text-gray-900">
-                        <span className="text-sm font-medium relative -top-0.5 pr-0.5">₹</span>{product.discount > 0 ? Math.round(product.price * (1 - product.discount / 100)) : product.price}
+                <div className="flex items-center gap-1 lg:gap-2 mt-auto overflow-hidden">
+                    <div className="text-[15px] lg:text-[15px] xl:text-lg font-bold text-gray-900 whitespace-nowrap">
+                        <span className="text-xs xl:text-sm font-medium relative -top-0.5 pr-0.5">₹</span>{product.discount > 0 ? Math.round(product.price * (1 - product.discount / 100)) : product.price}
                     </div>
                     {product.discount > 0 && (
                         <>
-                            <div className="text-xs text-gray-500 line-through">
+                            <div className="text-[10px] xl:text-xs text-gray-500 line-through whitespace-nowrap truncate">
                                 ₹{product.price}
                             </div>
-                            <div className="bg-[#ff3344] text-white text-[10px] font-bold px-1.5 py-0.5 rounded shadow-sm">
+                            <div className="whitespace-nowrap bg-[#ff3344] text-white text-[9px] xl:text-[10px] font-bold px-1 xl:px-1.5 py-0.5 rounded shadow-sm shrink-0">
                                 {product.discount}% OFF
                             </div>
                         </>

@@ -18,6 +18,13 @@ export function middleware(request: NextRequest) {
         return NextResponse.redirect(redirectUrl);
     }
 
+    const isLoggedIn = request.cookies.get('isLoggedIn')?.value === 'true';
+
+    // Protect /user routes from logged-out users
+    if (url.pathname.startsWith('/user') && !isLoggedIn) {
+        return NextResponse.redirect(new URL('/login', request.url));
+    }
+
     return NextResponse.next();
 }
 
