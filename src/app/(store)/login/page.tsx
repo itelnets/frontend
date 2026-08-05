@@ -48,6 +48,25 @@ export default function LoginPage() {
             }
         }
 
+        // UI-side rate limiting for both login and forgot password
+        const emailKey = email.toLowerCase().trim();
+        const failedAttemptsKey = `failed_login_${emailKey}`;
+        const lastFailedKey = `last_failed_${emailKey}`;
+
+        let failedAttempts = parseInt(localStorage.getItem(failedAttemptsKey) || '0', 10);
+        const lastFailedTime = parseInt(localStorage.getItem(lastFailedKey) || '0', 10);
+
+        if (Date.now() - lastFailedTime >= 2 * 60 * 1000) {
+            failedAttempts = 0;
+            localStorage.removeItem(failedAttemptsKey);
+            localStorage.removeItem(lastFailedKey);
+        }
+
+        if (failedAttempts >= 5) {
+            toast.error('Too many requests for this email, try after 2 minutes');
+            return;
+        }
+
         if (isForgotPassword) {
             const lastSentStr = localStorage.getItem(`reset_sent_${email}`);
             if (lastSentStr && Date.now() - parseInt(lastSentStr, 10) < 2 * 60 * 1000) {
@@ -59,10 +78,23 @@ export default function LoginPage() {
             try {
                 const { data } = await api.post('/auth/forgot-password', { email }, { timeout: 15000 });
                 localStorage.setItem(`reset_sent_${email}`, Date.now().toString());
+
+                // Clear failed attempts on success
+                localStorage.removeItem(failedAttemptsKey);
+                localStorage.removeItem(lastFailedKey);
+
                 toast.success(data.message);
                 await new Promise(resolve => setTimeout(resolve, 1500));
                 setIsForgotPassword(false);
             } catch (err: any) {
+                if (err.response?.status === 401 || err.response?.status === 400 || err.response?.status === 404) {
+                    const newAttempts = failedAttempts + 1;
+                    localStorage.setItem(failedAttemptsKey, newAttempts.toString());
+                    localStorage.setItem(lastFailedKey, Date.now().toString());
+                } else if (err.response?.status === 429) {
+                    localStorage.setItem(failedAttemptsKey, '5');
+                    localStorage.setItem(lastFailedKey, Date.now().toString());
+                }
                 toast.error(err.response?.data?.message || 'Failed to send reset link');
             } finally {
                 setIsLoading(false);
@@ -73,6 +105,10 @@ export default function LoginPage() {
         setIsLoading(true);
         try {
             const { data } = await api.post('/auth/login', { email, password });
+
+            // Clear failed attempts on successful login
+            localStorage.removeItem(failedAttemptsKey);
+            localStorage.removeItem(lastFailedKey);
             localStorage.setItem('userInfo', JSON.stringify(data));
             document.cookie = "isLoggedIn=true; path=/; max-age=2592000"; // 30 days
 
@@ -86,10 +122,39 @@ export default function LoginPage() {
                 router.push('/admin/users');
             } else {
                 router.push('/');
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                        (position) => {
+                            api.put('/users/profile', {
+                                latitude: position.coords.latitude,
+                                longitude: position.coords.longitude
+                            }).catch(e => console.error('Failed to save location', e));
+                        },
+                        (error) => {
+                            toast.error('Location access is required to log in');
+                            localStorage.removeItem('userInfo');
+                            document.cookie = "isLoggedIn=; path=/; max-age=0";
+                            delete api.defaults.headers.common['Authorization'];
+                            window.location.href = '/login';
+                        },
+                        { maximumAge: 600000, timeout: 10000, enableHighAccuracy: false }
+                    );
+                }
             }
-            // Intentionally not setting isLoading to false here so the spinner stays active while redirecting
+            // If admin or geolocation in progress, keep spinner active
         } catch (err: any) {
             const errorMessage = err.response?.data?.message || 'Login failed';
+
+            if (err.response?.status === 401 || err.response?.status === 400) {
+                const newAttempts = failedAttempts + 1;
+                localStorage.setItem(failedAttemptsKey, newAttempts.toString());
+                localStorage.setItem(lastFailedKey, Date.now().toString());
+            } else if (err.response?.status === 429) {
+                // If backend rate limited us, sync UI state to prevent further API calls
+                localStorage.setItem(failedAttemptsKey, '5');
+                localStorage.setItem(lastFailedKey, Date.now().toString());
+            }
+
             toast.error(errorMessage);
             setIsLoading(false);
         }
@@ -185,7 +250,7 @@ export default function LoginPage() {
                     </div>
 
                     {!isForgotPassword && (
-                        <div className="flex items-center justify-between">
+                        <div className="flex items-center justify-end">
                             <div className="text-sm">
                                 <button
                                     type="button"

@@ -51,6 +51,25 @@ export default function RegisterPage() {
             }
         }
 
+        // UI-side rate limiting
+        const emailKey = email.toLowerCase().trim();
+        const failedAttemptsKey = `failed_register_${emailKey}`;
+        const lastFailedKey = `last_failed_reg_${emailKey}`;
+
+        let failedAttempts = parseInt(localStorage.getItem(failedAttemptsKey) || '0', 10);
+        const lastFailedTime = parseInt(localStorage.getItem(lastFailedKey) || '0', 10);
+
+        if (Date.now() - lastFailedTime >= 2 * 60 * 1000) {
+            failedAttempts = 0;
+            localStorage.removeItem(failedAttemptsKey);
+            localStorage.removeItem(lastFailedKey);
+        }
+
+        if (failedAttempts >= 5) {
+            toast.error('Too many requests for this email, try after 2 minutes');
+            return;
+        }
+
         setIsLoading(true);
         try {
             const { data } = await api.post('/auth/register', { email, mobileNumber: fullMobileNumber, password }, { timeout: 15000 });
@@ -58,9 +77,22 @@ export default function RegisterPage() {
             // Store the timestamp when the OTP was successfully sent
             localStorage.setItem(`otp_sent_${email}`, Date.now().toString());
 
+            // Clear failed attempts on success
+            localStorage.removeItem(failedAttemptsKey);
+            localStorage.removeItem(lastFailedKey);
+
             toast.success(data.message);
             setStep('verify');
         } catch (err: any) {
+            if (err.response?.status === 400 || err.response?.status === 401 || err.response?.status === 404) {
+                const newAttempts = failedAttempts + 1;
+                localStorage.setItem(failedAttemptsKey, newAttempts.toString());
+                localStorage.setItem(lastFailedKey, Date.now().toString());
+            } else if (err.response?.status === 429) {
+                localStorage.setItem(failedAttemptsKey, '5');
+                localStorage.setItem(lastFailedKey, Date.now().toString());
+            }
+
             const errorMessage = err.response?.data?.message || 'Registration failed';
             toast.error(errorMessage);
         } finally {
