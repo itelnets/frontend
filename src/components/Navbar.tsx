@@ -7,6 +7,7 @@ import { useCart } from '@/context/CartContext';
 import Spinner from './Spinner';
 import SearchBar from './SearchBar';
 import toast from 'react-hot-toast';
+import api from '@/services/api';
 
 const Navbar = () => {
     const router = useRouter();
@@ -15,6 +16,8 @@ const Navbar = () => {
     const [isAuthReady, setIsAuthReady] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isAuthOpen, setIsAuthOpen] = useState(false);
+    const [successOrderCount, setSuccessOrderCount] = useState<number>(0);
+    const [successOrderAmount, setSuccessOrderAmount] = useState<number>(0);
     const { cartCount } = useCart();
     const headerRef = useRef<HTMLElement | null>(null);
 
@@ -32,6 +35,10 @@ const Navbar = () => {
                 if (!document.cookie.includes('isLoggedIn=true')) {
                     document.cookie = "isLoggedIn=true; path=/; max-age=2592000";
                 }
+                api.get('/orders/myorders?status=Success&limit=1').then(res => {
+                    setSuccessOrderCount(res.data.totalOrders || 0);
+                    setSuccessOrderAmount(res.data.totalAmount || 0);
+                }).catch(err => console.error('Failed to fetch success orders data:', err));
             } else {
                 setUser(null);
             }
@@ -113,25 +120,7 @@ const Navbar = () => {
 
                                     {/* Unauthenticated Dropdown Wrapper with top padding for gap */}
                                     <div className={`absolute top-full right-[-10px] sm:right-0 pt-1 transition-all z-50 ${isAuthOpen ? 'opacity-100 visible' : 'opacity-0 invisible'}`}>
-                                        <div className="w-[200px] sm:w-[450px] bg-white text-gray-800 rounded-md shadow-[0_4px_20px_-4px_rgba(0,0,0,0.2)] border border-gray-100 flex flex-col sm:flex-row overflow-hidden" onClick={(e) => e.stopPropagation()}>
-
-                                            {/* Left Side: Rewards Info */}
-                                            <div className="hidden sm:flex w-[170px] bg-gray-50 p-3 sm:p-4 border-r border-gray-100 flex-col items-center text-center">
-                                                <div className="text-sm font-bold text-gray-800 mb-1">
-                                                    Itelents <span className="text-gray-400 font-normal text-xs">| REWARDS</span>
-                                                </div>
-                                                <div className="mt-3">
-                                                    <div className="text-base font-extrabold text-gray-900">$98.2M+</div>
-                                                    <div className="text-[10px] text-gray-500 mt-1">Credits rewarded in 2025</div>
-                                                </div>
-                                                <div className="mt-3">
-                                                    <div className="text-base font-extrabold text-gray-900">3.9M+</div>
-                                                    <div className="text-[10px] text-gray-500 mt-1">Orders using rewards in 2025</div>
-                                                </div>
-                                                <Link href="#" className="text-[11px] text-blue-600 font-medium hover:underline mt-4">
-                                                    Learn More &gt;
-                                                </Link>
-                                            </div>
+                                        <div className="w-[200px] sm:w-[250px] bg-white text-gray-800 rounded-md shadow-[0_4px_20px_-4px_rgba(0,0,0,0.2)] border border-gray-100 flex flex-col overflow-hidden" onClick={(e) => e.stopPropagation()}>
 
                                             {/* Right Side: Navigation */}
                                             <div className="flex-1 p-3 sm:p-4 flex flex-col min-w-[200px]">
@@ -149,14 +138,6 @@ const Navbar = () => {
                                                     <Link href="/login" onClick={() => setIsAuthOpen(false)} className="flex items-center gap-2 sm:gap-3 text-[12px] sm:text-[15px] text-gray-800 hover:bg-[#eef6e6] px-3 py-2 sm:py-2.5 rounded-md transition-colors">
                                                         <svg className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
                                                         My Lists
-                                                    </Link>
-                                                    <Link href="/login" onClick={() => setIsAuthOpen(false)} className="flex items-center gap-2 sm:gap-3 text-[12px] sm:text-[15px] text-gray-800 hover:bg-[#eef6e6] px-3 py-2 sm:py-2.5 rounded-md transition-colors">
-                                                        <svg className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                                        Rewards Credit
-                                                    </Link>
-                                                    <Link href="/login" onClick={() => setIsAuthOpen(false)} className="flex items-center gap-2 sm:gap-3 text-[12px]   sm:text-[15px] text-gray-800 hover:bg-[#eef6e6] px-3 py-2 sm:py-2.5 rounded-md transition-colors">
-                                                        <svg className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
-                                                        My Reviews
                                                     </Link>
                                                     <Link href="/login" onClick={() => setIsAuthOpen(false)} className="flex items-center gap-2 sm:gap-3 text-[12px] sm:text-[15px] text-gray-800 hover:bg-[#eef6e6] px-3 py-2 sm:py-2.5 rounded-md transition-colors">
                                                         <svg className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" /></svg>
@@ -181,8 +162,10 @@ const Navbar = () => {
                                     <svg className="w-5 sm:w-6 lg:w-7 lg:h-7 h-5 sm:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
                                     <div className="flex items-center gap-1 text-white">
                                         <div className="flex flex-col text-left">
-                                            <span className="text-[12px] text-gray-200 leading-[10px] mb-1">Hi, {user.email?.split('@')[0]}</span>
-                                            <span className="text-[13px] sm:text-[13px] font-bold leading-[13px]">My Account</span>
+                                            <span className="text-[12px] text-gray-200 leading-[10px] mb-1">Hi, {user.name || user.email?.split('@')[0]}</span>
+                                            <span className="text-[13px] sm:text-[13px] font-bold leading-[13px]">
+                                                My Account
+                                            </span>
                                         </div>
                                         <svg className={`w-3 h-3 ml-1 transition-transform duration-200 ${isAuthOpen ? '-rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
                                     </div>
@@ -191,17 +174,16 @@ const Navbar = () => {
                                     <div className={`absolute top-full right-[-10px] sm:right-0 pt-1 transition-all z-50 ${isAuthOpen ? 'opacity-100 visible' : 'opacity-0 invisible'}`}>
                                         <div className="w-[200px] sm:w-[500px] bg-white text-gray-800 rounded-md shadow-[0_4px_20px_-4px_rgba(0,0,0,0.2)] border border-gray-100 flex flex-col sm:flex-row overflow-hidden" onClick={(e) => e.stopPropagation()}>
 
-                                            {/* Left Side: Rewards Info */}
+                                            {/* Left Side: Orders Info */}
                                             <div className="hidden sm:flex w-[170px] bg-gray-50 p-3 sm:p-4 border-r border-gray-100 flex-col items-center text-center">
                                                 <div className="text-sm font-bold text-[#458500] mb-1 flex items-center gap-1">
-                                                    Itelents <span className="text-gray-400 font-normal text-xs">| REWARDS</span>
+                                                    Itelents <span className="text-gray-400 font-normal text-xs">| ORDERS</span>
                                                 </div>
-                                                <div className="text-[10px] text-gray-500 mt-2">Total Rewards Available</div>
-                                                <div className="text-lg font-extrabold text-[#458500] my-1">₹0.00</div>
-                                                <div className="text-[10px] text-[#458500] font-medium">Converted from <span className="font-bold">0.00 USD</span></div>
-                                                <Link href="#" className="text-xs text-blue-600 font-medium hover:underline mt-4">
-                                                    View all Rewards &gt;
-                                                </Link>
+                                                <div className="text-[10px] text-gray-500 mt-2">Total Paid Orders</div>
+                                                <div className="text-lg font-extrabold text-[#458500] my-1">
+                                                    ₹{successOrderAmount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                                </div>
+                                                <div className="text-[10px] text-[#458500] font-medium">Successful Orders: <span className="font-bold">{successOrderCount}</span></div>
                                             </div>
 
                                             {/* Right Side: Navigation */}
@@ -210,9 +192,12 @@ const Navbar = () => {
                                                 <div className="text-xs sm:text-sm font-bold text-[#458500] mb-3 truncate">{user.email}</div>
 
                                                 <div className="flex flex-col mb-4 sm:mb-6 flex-1">
-                                                    <Link href="/user/myaccount" className="flex items-center gap-2 sm:gap-3 text-sm sm:text-[15px] text-gray-800 hover:bg-[#eef6e6] px-3 py-1.5 sm:py-2.5 rounded-md transition-colors">
-                                                        <svg className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
-                                                        My Account
+                                                    <Link href="/user/myaccount" className="flex items-center justify-between gap-2 sm:gap-3 text-sm sm:text-[15px] text-gray-800 hover:bg-[#eef6e6] px-3 py-1.5 sm:py-2.5 rounded-md transition-colors">
+                                                        <div className="flex items-center gap-2 sm:gap-3">
+                                                            <svg className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                                                            My Account
+                                                        </div>
+                                                        {!user.name && <span className="w-2 h-2 rounded-full bg-[#458500]"></span>}
                                                     </Link>
                                                     <Link href="/user/orders" className="flex items-center gap-2 sm:gap-3 text-sm sm:text-[15px] text-gray-800 hover:bg-[#eef6e6] px-3 py-1.5 sm:py-2.5 rounded-md transition-colors">
                                                         <svg className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
@@ -296,7 +281,7 @@ const Navbar = () => {
                         <div className="fixed inset-0 bg-black/50 transition-opacity" onClick={() => setIsMobileMenuOpen(false)}></div>
 
                         {/* Sidebar */}
-                        <div className="relative w-[85vw] max-w-[300px] h-full bg-white shadow-xl flex flex-col animate-fade-in-left">
+                        <div className="relative w-[85vw] max-w-[250px] sm:max-w-[300px] h-full bg-white shadow-xl flex flex-col animate-fade-in-left">
                             <div className="flex-1 overflow-y-auto overflow-x-hidden hide-scrollbar">
 
                                 {/* Top Header */}
@@ -321,9 +306,12 @@ const Navbar = () => {
                                     {user && (
                                         <>
                                             <div className="flex flex-col py-2">
-                                                <Link href="/user" className="flex items-center gap-3 text-[14px] text-[#333] hover:bg-gray-50 px-2.5 py-1.5 transition-colors">
-                                                    <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
-                                                    My Account
+                                                <Link href="/user" className="flex items-center justify-between text-[14px] text-[#333] hover:bg-gray-50 px-2.5 py-1.5 transition-colors">
+                                                    <div className="flex items-center gap-3">
+                                                        <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                                                        My Account
+                                                    </div>
+                                                    {!user.name && <span className="w-2 h-2 rounded-full bg-[#458500] mr-2"></span>}
                                                 </Link>
                                                 <Link href="/user/orders" className="flex items-center gap-3 text-[14px] text-[#333] hover:bg-gray-50 px-2.5 py-1.5 transition-colors">
                                                     <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
@@ -332,14 +320,6 @@ const Navbar = () => {
                                                 <Link href="/user/lists" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-3 text-[14px] text-[#333] hover:bg-gray-50 px-2.5 py-1.5 transition-colors">
                                                     <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
                                                     My Lists
-                                                </Link>
-                                                <Link href="#" className="flex items-center gap-3 text-[14px] text-[#333] hover:bg-gray-50 px-2.5 py-1.5 transition-colors">
-                                                    <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                                    Rewards Credit
-                                                </Link>
-                                                <Link href="#" className="flex items-center gap-3 text-[14px] text-[#333] hover:bg-gray-50 px-2.5 py-1.5 transition-colors">
-                                                    <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
-                                                    My Reviews
                                                 </Link>
                                                 <Link href="#" className="flex items-center gap-3 text-[14px] text-[#333] hover:bg-gray-50 px-2.5 py-1.5 transition-colors">
                                                     <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" /></svg>
@@ -352,7 +332,7 @@ const Navbar = () => {
                                     {/* Main Categories */}
                                     <div className="flex flex-col">
                                         {['Supplements', 'Sports', 'Bath', 'Beauty', 'Grocery', 'Home', 'Baby', 'Pets'].map((cat) => (
-                                            <Link key={cat} href={`/type/${cat.toLowerCase()}`} className="flex items-center justify-between px-4 py-3.5 hover:bg-gray-50 border-b border-gray-50">
+                                            <Link key={cat} href={`/type/${cat.toLowerCase()}`} className="flex items-center justify-between px-3 sm:px-4 py-2.5 sm:py-3.5 hover:bg-gray-50 border-b border-gray-50">
                                                 <span className="text-base font-medium text-gray-900">{cat}</span>
                                                 <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
                                             </Link>
@@ -371,25 +351,16 @@ const Navbar = () => {
                                             <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
                                         </Link>
                                         <Link href="/products" className="block px-4 py-3 hover:bg-gray-50 text-base font-medium text-red-600">Deals</Link>
-                                        <Link href="/products" className="block px-4 py-3 hover:bg-gray-50 text-base font-medium text-gray-900">Best Sellers</Link>
-                                        <Link href="/products" className="block px-4 py-3 hover:bg-gray-50 text-base font-medium text-gray-900">New</Link>
-                                        <Link href="/products" className="block px-4 py-3 hover:bg-gray-50 text-base font-medium text-gray-900">Try</Link>
+                                        <Link href="/products" className="block px-3 sm:px-4 py-2.5 sm:py-3 hover:bg-gray-50 text-base font-medium text-gray-900">Best Sellers</Link>
+                                        <Link href="/products" className="block px-3 sm:px-4 py-2.5 sm:py-3 hover:bg-gray-50 text-base font-medium text-gray-900">New</Link>
+                                        <Link href="/products" className="block px-3 sm:px-4 py-2.5 sm:py-3 hover:bg-gray-50 text-base font-medium text-gray-900">Try</Link>
                                     </div>
                                     <div className="mx-4 border-b border-gray-200"></div>
 
                                     {/* Learn Section */}
                                     <div className="pt-4 pb-2">
                                         <div className="px-4 text-xs text-gray-500 mb-2 uppercase tracking-wide">Learn</div>
-                                        <Link href="/products" className="block px-4 py-3 hover:bg-gray-50 text-base font-medium text-gray-900">Wellness Hub</Link>
-                                    </div>
-                                    <div className="mx-4 border-b border-gray-200"></div>
-
-                                    {/* Bottom Links */}
-                                    <div className="py-2">
-                                        <Link href="/" className="block px-4 py-3 hover:bg-gray-50 text-[15px] text-gray-700">Sales & Offers</Link>
-                                        <Link href="/" className="block px-4 py-3 hover:bg-gray-50 text-[15px] text-gray-700">Brands</Link>
-                                        <Link href="/" className="block px-4 py-3 hover:bg-gray-50 text-[15px] text-gray-700">Rewards</Link>
-                                        <Link href="/" className="block px-4 py-3 hover:bg-gray-50 text-[15px] text-gray-700">EGift Card</Link>
+                                        <Link href="/products" className="block px-3 sm:px-4 py-2.5 sm:py-3 hover:bg-gray-50 text-base font-medium text-gray-900">Wellness Hub</Link>
                                     </div>
                                     <div className="mx-4 border-b border-gray-200"></div>
 
@@ -404,24 +375,22 @@ const Navbar = () => {
                                             <span className="text-[15px]">IN | EN | INR</span>
                                         </div>
 
-                                        {/* Logout Button */}
-                                        {user && (
-                                            <button onClick={() => { handleLogout(); setIsMobileMenuOpen(false); }} className="w-full mt-4 text-center py-2.5 bg-white border border-[#458500] text-[#458500] hover:bg-gray-50 font-bold rounded-md shadow-sm transition-colors text-[15px]">
-                                                Sign out
-                                            </button>
-                                        )}
                                     </div>
                                 </div>
                             </div>
 
-                            {/* Fixed Footer for Logged Out User */}
-                            {!user && (
-                                <div className="p-4 border-t border-gray-100 bg-white mt-auto shrink-0 shadow-[0_-4px_10px_-5px_rgba(0,0,0,0.1)]">
+                            {/* Fixed Footer */}
+                            <div className="p-4 border-t border-gray-100 bg-white mt-auto shrink-0 shadow-[0_-4px_10px_-5px_rgba(0,0,0,0.1)]">
+                                {!user ? (
                                     <Link href="/login" onClick={() => setIsMobileMenuOpen(false)} className="block text-center w-full bg-[#458500] hover:bg-[#366800] text-white py-2.5 rounded-md transition-colors font-bold text-[15px]">
                                         Sign in
                                     </Link>
-                                </div>
-                            )}
+                                ) : (
+                                    <button onClick={() => { handleLogout(); setIsMobileMenuOpen(false); }} className="w-full text-center py-2.5 bg-white border border-[#458500] text-[#458500] hover:bg-gray-50 font-bold rounded-md shadow-sm transition-colors text-[15px]">
+                                        Sign out
+                                    </button>
+                                )}
+                            </div>
                         </div>
                     </div>
                 )}

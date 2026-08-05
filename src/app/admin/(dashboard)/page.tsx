@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { getProducts, deleteProduct, updateProduct, reorderProducts } from '@/services/product';
@@ -8,6 +9,7 @@ import toast from 'react-hot-toast';
 import ConfirmModal from '@/components/ConfirmModal';
 import Spinner from '@/components/Spinner';
 import { formatDate } from '@/utils/formatDate';
+import CopyIcon from '@/components/CopyIcon';
 
 interface Product {
     _id: string;
@@ -24,9 +26,20 @@ export default function AdminDashboard() {
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(true);
     const [products, setProducts] = useState<Product[]>([]);
+    const [searchInput, setSearchInput] = useState('');
+    const [searchQuery, setSearchQuery] = useState('');
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 10;
+    const [portalNode, setPortalNode] = useState<HTMLElement | null>(null);
+
+    useEffect(() => {
+        setPortalNode(document.getElementById('products-topbar-portal'));
+    }, []);
     const [productToDelete, setProductToDelete] = useState<string | null>(null);
     const [viewImagesProduct, setViewImagesProduct] = useState<Product | null>(null);
+    const [draggableRowId, setDraggableRowId] = useState<string | null>(null);
     const imageScrollRef = useRef<HTMLDivElement>(null);
+
     const dragIndex = useRef<number | null>(null);
     const hoverIndex = useRef<number | null>(null);
 
@@ -43,9 +56,20 @@ export default function AdminDashboard() {
     const onDrop = async (e: React.DragEvent) => {
         e.preventDefault();
         if (dragIndex.current === null || hoverIndex.current === null || dragIndex.current === hoverIndex.current) return;
+
+        // Since we are using pagination and search, dragging should only work on the displayed subset or we need to map back to original array.
+        // For simplicity, we just swap the elements in the main array based on the paginated array's indices.
+        const draggedProduct = paginatedProducts[dragIndex.current];
+        const hoveredProduct = paginatedProducts[hoverIndex.current];
+
+        const realDragIndex = products.findIndex(p => p._id === draggedProduct._id);
+        const realHoverIndex = products.findIndex(p => p._id === hoveredProduct._id);
+
+        if (realDragIndex === -1 || realHoverIndex === -1) return;
+
         const updated = [...products];
-        const [moved] = updated.splice(dragIndex.current, 1);
-        updated.splice(hoverIndex.current, 0, moved);
+        const [moved] = updated.splice(realDragIndex, 1);
+        updated.splice(realHoverIndex, 0, moved);
         setProducts(updated);
         dragIndex.current = null;
         hoverIndex.current = null;
@@ -58,7 +82,38 @@ export default function AdminDashboard() {
         }
     };
 
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchQuery]);
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            if (searchInput.length >= 4 || searchInput.length === 0) {
+                setSearchQuery(searchInput);
+            }
+        }, 1000);
+        return () => clearTimeout(timer);
+    }, [searchInput]);
+
+    const filteredProducts = products; // Backend handles filtering now
+
+    const totalPages = Math.max(1, Math.ceil(filteredProducts.length / itemsPerPage));
+    const paginatedProducts = filteredProducts.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
     const fetched = useRef(false);
+
+    const fetchProducts = async (query: string = '') => {
+        setIsLoading(true);
+        try {
+            const { data } = await getProducts({ search: query });
+            setProducts(Array.isArray(data) ? data : data);
+        } catch (error) {
+            console.error('Failed to fetch products', error);
+            toast.error('Failed to load products');
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     useEffect(() => {
         if (fetched.current) return;
@@ -71,23 +126,18 @@ export default function AdminDashboard() {
                 return;
             }
 
-            fetchProducts();
+            fetchProducts(searchQuery);
         };
 
         checkAdmin();
     }, [router]);
 
-    const fetchProducts = async () => {
-        try {
-            const { data } = await getProducts();
-            setProducts(Array.isArray(data) ? data : data);
-        } catch (error) {
-            console.error('Failed to fetch products', error);
-            toast.error('Failed to load products');
-        } finally {
-            setIsLoading(false);
+    // Fetch when query changes after initial load
+    useEffect(() => {
+        if (fetched.current) {
+            fetchProducts(searchQuery);
         }
-    };
+    }, [searchQuery]);
 
     const toggleProductStatus = async (productId: string, currentStatus: boolean) => {
         try {
@@ -134,44 +184,81 @@ export default function AdminDashboard() {
     };
 
 
-    if (isLoading) {
-        return (
-            <div className="flex items-center justify-center h-full min-h-[400px]">
-                <Spinner className="w-8 h-8 sm:w-12 sm:h-12 text-green-600" />
-            </div>
-        );
-    }
+
 
     return (
-        <div className="p-2 sm:p-4 w-full mx-auto font-sans">
+        <div className="sm:p-4 w-full h-[calc(100vh-65px)] flex flex-col mx-auto font-sans">
+            {/* Mobile Controls */}
+            <div className="sm:hidden px-2 py-2 bg-gray-50 flex items-center justify-between gap-2 shrink-0 border-b border-gray-200">
+                <div className="relative flex items-center flex-1">
+                    <div className="absolute left-2.5 text-gray-800">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    </div>
+                    <input
+                        type="text"
+                        placeholder="Search by product id and title"
+                        value={searchInput}
+                        onChange={(e) => setSearchInput(e.target.value)}
+                        className="border border-gray-300 rounded-md pl-8 pr-8 h-[32px] text-[13px] outline-none focus:border-green-500 w-full transition-all bg-white"
+                    />
+                    {searchInput && (
+                        <button onClick={() => setSearchInput('')} className="absolute right-2 cursor-pointer w-5 h-5 bg-green-500 hover:bg-green-600 text-white rounded-full flex items-center justify-center transition-colors">
+                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12"></path></svg>
+                        </button>
+                    )}
+                </div>
+                <div className="flex items-center gap-1 bg-white border border-gray-300 rounded-md px-1 shadow-sm shrink-0 h-[32px]">
+                    <button
+                        onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                        disabled={currentPage === 1}
+                        className="px-2 py-1 text-sm text-gray-600 disabled:opacity-50 hover:bg-gray-100 rounded cursor-pointer"
+                    >
+                        &lt;
+                    </button>
+                    <span className="text-xs font-medium text-gray-700 min-w-[30px] text-center whitespace-nowrap">
+                        {currentPage}/{Math.max(1, totalPages)}
+                    </span>
+                    <button
+                        onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                        disabled={currentPage >= totalPages}
+                        className="px-2 py-1 text-sm text-gray-600 disabled:opacity-50 hover:bg-gray-100 rounded cursor-pointer"
+                    >
+                        &gt;
+                    </button>
+                </div>
+            </div>
 
-            <div className="bg-transparent sm:bg-white sm:border-1 sm:border-gray-300 sm:rounded-md overflow-hidden">
-                <div className="overflow-hidden sm:overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent pb-2">
-                    <table className="min-w-full divide-y divide-gray-200 block sm:table">
-                        <thead className="bg-green-600 hidden sm:table-header-group sticky top-0 z-10 shadow-[0_2px_4px_rgba(0,0,0,0.1)]">
-                            <tr>
-                                <th scope="col" className="px-3 py-3.5 w-8 border-b border-green-700"></th>
-                                <th scope="col" className="px-6 py-3.5 text-left text-[12px] sm:text-[13px] font-bold text-white uppercase tracking-wide whitespace-nowrap border-b border-green-700">Product</th>
-                                <th scope="col" className="px-6 py-3.5 text-center w-10 text-[12px] sm:text-[13px] font-bold text-white uppercase tracking-wide whitespace-nowrap border-b border-green-700">Price</th>
-                                <th scope="col" className="px-6 py-3.5 text-center w-10 text-[12px] sm:text-[13px] font-bold text-white uppercase tracking-wide whitespace-nowrap border-b border-green-700">Discount</th>
-                                <th scope="col" className="px-6 py-3.5 text-center w-10 text-[12px] sm:text-[13px] font-bold text-white uppercase tracking-wide whitespace-nowrap border-b border-green-700">D.Price</th>
-                                <th scope="col" className="px-6 py-3.5 text-center w-24 text-[12px] sm:text-[13px] font-bold text-white uppercase tracking-wide whitespace-nowrap border-b border-green-700">Created</th>
-                                <th scope="col" className="px-6 py-3.5 text-center w-24 text-[12px] sm:text-[13px] font-bold text-white uppercase tracking-wide whitespace-nowrap border-b border-green-700">Updated</th>
-                                <th scope="col" className="px-6 py-3.5 text-center w-20 text-[12px] sm:text-[13px] font-bold text-white uppercase tracking-wide whitespace-nowrap border-b border-green-700">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody className="bg-transparent sm:bg-white divide-y-0 sm:divide-y divide-gray-200 block sm:table-row-group">
-                            {products.length === 0 ? (
-                                <tr className="block sm:table-row bg-white rounded-lg shadow-sm sm:shadow-none sm:rounded-none">
-                                    <td colSpan={6} className="px-6 py-12 text-center text-gray-500 block sm:table-cell">
-                                        No products found. Start by adding one!
-                                    </td>
+            <div className="bg-transparent sm:bg-white sm:rounded-lg sm:shadow-sm sm:border border-gray-200 flex flex-col flex-1 min-h-0 overflow-hidden">
+                <div className="flex-1 overflow-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent px-2 py-2 sm:p-0 flex flex-col">
+                    {isLoading ? (
+                        <div className="p-10 text-center text-gray-500 flex justify-center items-center h-full min-h-[400px]">
+                            <Spinner className="w-8 h-8 sm:w-12 sm:h-12 text-green-600" />
+                        </div>
+                    ) : paginatedProducts.length === 0 ? (
+                        <div className="flex-1 flex flex-col items-center justify-center p-10 text-center text-gray-500 sm:bg-white sm:rounded-none">No products found.</div>
+                    ) : (
+                        <table className="min-w-full divide-y divide-gray-200 block sm:table">
+                            <thead className="bg-green-600 hidden sm:table-header-group sticky top-0 z-10 shadow-[0_2px_4px_rgba(0,0,0,0.1)]">
+                                <tr>
+                                    <th scope="col" className="px-3 py-3.5 w-8 border-b border-green-700"></th>
+                                    <th scope="col" className="px-6 py-3.5 text-left text-[12px] sm:text-[13px] font-bold text-white uppercase tracking-wide whitespace-nowrap border-b border-green-700">Product</th>
+                                    <th scope="col" className="px-6 py-3.5 text-center w-10 text-[12px] sm:text-[13px] font-bold text-white uppercase tracking-wide whitespace-nowrap border-b border-green-700">Price</th>
+                                    <th scope="col" className="px-6 py-3.5 text-center w-10 text-[12px] sm:text-[13px] font-bold text-white uppercase tracking-wide whitespace-nowrap border-b border-green-700">Discount</th>
+                                    <th scope="col" className="px-6 py-3.5 text-center w-10 text-[12px] sm:text-[13px] font-bold text-white uppercase tracking-wide whitespace-nowrap border-b border-green-700">D.Price</th>
+                                    <th scope="col" className="px-6 py-3.5 text-center w-24 text-[12px] sm:text-[13px] font-bold text-white uppercase tracking-wide whitespace-nowrap border-b border-green-700">Created</th>
+                                    <th scope="col" className="px-6 py-3.5 text-center w-24 text-[12px] sm:text-[13px] font-bold text-white uppercase tracking-wide whitespace-nowrap border-b border-green-700">Updated</th>
+                                    <th scope="col" className="px-6 py-3.5 text-center w-20 text-[12px] sm:text-[13px] font-bold text-white uppercase tracking-wide whitespace-nowrap border-b border-green-700">Actions</th>
                                 </tr>
-                            ) : (
-                                products.map((product, idx) => (
-                                    <tr key={product._id} draggable onDragStart={(e) => onDragStart(e, idx)} onDragOver={(e) => onDragOver(e, idx)} onDrop={onDrop} className="hover:bg-gray-50 transition-colors grid grid-cols-3 sm:table-row mb-2 sm:mb-0 bg-white border border-gray-200 sm:border-0 sm:border-b sm:border-gray-200 rounded-lg sm:rounded-none shadow-sm sm:shadow-none cursor-grab active:cursor-grabbing">
+                            </thead>
+                            <tbody className="bg-transparent sm:bg-white divide-y-0 sm:divide-y divide-gray-200 block sm:table-row-group">
+                                {paginatedProducts.map((product, idx) => (
+                                    <tr key={product._id} draggable={draggableRowId === product._id} onDragStart={(e) => onDragStart(e, idx)} onDragOver={(e) => onDragOver(e, idx)} onDrop={onDrop} className="hover:bg-gray-50 transition-colors grid grid-cols-3 sm:table-row mb-2 sm:mb-0 bg-white border border-gray-200 sm:border-0 sm:border-b sm:border-gray-200 rounded-lg sm:rounded-none shadow-sm sm:shadow-none">
                                         {/* Drag Handle - Desktop only */}
-                                        <td className="hidden sm:table-cell pl-3 px-2 py-2 border-b border-gray-200 w-8 text-gray-300 hover:text-gray-500">
+                                        <td 
+                                            className="hidden sm:table-cell pl-3 px-2 py-2 border-b border-gray-200 w-8 text-gray-300 hover:text-gray-500 cursor-move"
+                                            onMouseEnter={() => setDraggableRowId(product._id)}
+                                            onMouseLeave={() => setDraggableRowId(null)}
+                                        >
                                             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mx-auto" fill="currentColor" viewBox="0 0 24 24">
                                                 <path d="M8 6a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm0 6a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm0 6a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm8-12a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm0 6a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm0 6a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z" />
                                             </svg>
@@ -190,9 +277,15 @@ export default function AdminDashboard() {
                                                     )}
                                                 </div>
                                                 <div className="overflow-hidden flex-1 min-w-0">
-                                                    <div className="text-[12px] sm:text-sm font-semibold text-gray-900 line-clamp-2" title={product.name}>{product.name}</div>
+                                                    <div className="text-[12px] sm:text-sm font-semibold text-gray-900 flex items-start" title={product.name}>
+                                                        <span className="line-clamp-2">{product.name}</span>
+                                                        <CopyIcon text={product.name} label="Product Name" />
+                                                    </div>
                                                     <div className="flex items-center gap-1.5 justify-between flex-wrap mt-0.5 sm:mt-0">
-                                                        <div className="text-[10px] sm:text-xs text-gray-500 break-all sm:break-normal" title={product._id}>{product._id}</div>
+                                                        <div className="text-[10px] sm:text-xs text-gray-500 break-all sm:break-normal flex items-center" title={product._id}>
+                                                            <span>{product._id}</span>
+                                                            <CopyIcon text={product._id} label="Product ID" />
+                                                        </div>
                                                         {product.discount > 0 && (
                                                             <span className="sm:hidden inline-flex items-center px-1 py-0.5 rounded text-[10px] font-bold bg-green-100 text-green-800 flex-shrink-0">{product.discount}% OFF</span>
                                                         )}
@@ -295,10 +388,10 @@ export default function AdminDashboard() {
                                             </div>
                                         </td>
                                     </tr>
-                                ))
-                            )}
-                        </tbody>
-                    </table>
+                                ))}
+                            </tbody>
+                        </table>
+                    )}
                 </div>
             </div>
 
@@ -365,6 +458,48 @@ export default function AdminDashboard() {
                         )}
                     </div>
                 </div>
+            )}
+
+            {portalNode && createPortal(
+                <>
+                    <div className="hidden sm:flex relative items-center w-[350px] shrink min-w-[120px] mr-2">
+                        <div className="absolute left-2.5 text-gray-800">
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                        </div>
+                        <input
+                            type="text"
+                            placeholder="Search by product id and title"
+                            value={searchInput}
+                            onChange={(e) => setSearchInput(e.target.value)}
+                            className="border border-gray-300 rounded-md pl-8 pr-8 h-[32px] sm:h-[36px] text-[11px] sm:text-sm outline-none focus:border-green-500 w-full min-w-0 transition-all"
+                        />
+                        {searchInput && (
+                            <button onClick={() => setSearchInput('')} className="absolute right-1.5 cursor-pointer w-4 h-4 sm:w-5 sm:h-5 bg-green-600 hover:bg-green-700 text-white rounded-full flex items-center justify-center transition-colors">
+                                <svg className="w-2.5 h-2.5 sm:w-3 sm:h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12"></path></svg>
+                            </button>
+                        )}
+                    </div>
+                    <div className="flex items-center shrink-0">
+                        <div className="hidden sm:flex items-center gap-1 sm:gap-2 bg-white border sm:border-gray-300 border-gray-200 rounded-md px-1 sm:px-2 shadow-sm h-[32px] sm:h-[36px] shrink-0">
+                            <button
+                                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                                disabled={currentPage === 1}
+                                className="p-1 sm:p-1.5 rounded text-gray-500 hover:bg-gray-100 disabled:opacity-50 cursor-pointer text-xs sm:text-sm"
+                            >
+                                &lt;
+                            </button>
+                            <span className="text-[11px] sm:text-sm font-bold text-gray-700 px-1 whitespace-nowrap min-w-[40px] sm:min-w-[50px] text-center">{currentPage} / {Math.max(1, totalPages)}</span>
+                            <button
+                                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                                disabled={currentPage >= totalPages}
+                                className="p-1 sm:p-1.5 rounded text-gray-500 hover:bg-gray-100 disabled:opacity-50 cursor-pointer text-xs sm:text-sm"
+                            >
+                                &gt;
+                            </button>
+                        </div>
+                    </div>
+                </>,
+                portalNode
             )}
         </div>
     );

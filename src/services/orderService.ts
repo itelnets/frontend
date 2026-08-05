@@ -20,9 +20,9 @@ export const fetchOrderById = async (id: string) => {
     }
 };
 
-export const fetchAllOrders = async (page: number = 1, limit: number = 20, status: string = 'All', search: string = '') => {
+export const fetchAllOrders = async (page: number = 1, limit: number = 20, status: string = 'All', search: string = '', userId: string = '') => {
     try {
-        const response = await api.get('/orders/admin/all', { params: { page, limit, status, search } });
+        const response = await api.get('/orders/admin/all', { params: { page, limit, status, search, userId } });
         return response.data;
     } catch (error) {
         console.error('Error fetching all orders:', error);

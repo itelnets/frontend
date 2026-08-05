@@ -3,8 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Spinner from '@/components/Spinner';
-import { getProfile, updateProfile, requestEmailChange, verifyEmailChange, forgotPassword } from '@/services/user';
-import { fetchAddresses } from '@/services/addressService';
+import { getProfile, updateProfile, requestEmailChange, verifyEmailChange, forgotPassword, deleteAccount } from '@/services/user';
 import toast from 'react-hot-toast';
 
 export default function MyAccountPage() {
@@ -20,8 +19,29 @@ export default function MyAccountPage() {
     // OTP state for email change
     const [isAwaitingOtp, setIsAwaitingOtp] = useState(false);
     const [otpValue, setOtpValue] = useState('');
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
+    const [showResetModal, setShowResetModal] = useState(false);
+    const [isResetting, setIsResetting] = useState(false);
 
     const router = useRouter();
+
+    const handleDeleteAccount = async () => {
+        try {
+            setIsDeleting(true);
+            await deleteAccount();
+
+            localStorage.removeItem('userInfo');
+            window.dispatchEvent(new Event('userInfoUpdated'));
+            toast.success('Account deleted successfully');
+            router.push('/');
+        } catch (error: any) {
+            toast.error(error.response?.data?.message || error.message || 'Failed to delete account');
+        } finally {
+            setIsDeleting(false);
+            setShowDeleteModal(false);
+        }
+    };
 
     useEffect(() => {
         const loadProfileData = async () => {
@@ -77,6 +97,24 @@ export default function MyAccountPage() {
         return `${phone.slice(0, 5)}***${phone.slice(-3)}`;
     };
 
+    const handleConfirmReset = async () => {
+        try {
+            setIsResetting(true);
+            const promise = forgotPassword(user.email);
+            toast.promise(promise, {
+                loading: 'Sending password reset link',
+                success: 'Password reset link sent to your email!',
+                error: (err: any) => err.response?.data?.message || 'Failed to send reset link',
+            });
+            await promise;
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setIsResetting(false);
+            setShowResetModal(false);
+        }
+    };
+
     const handleEdit = async (section: any) => {
         if (!section.editable) return;
 
@@ -88,26 +126,19 @@ export default function MyAccountPage() {
 
         // Special case for password - trigger forgot password flow
         if (section.id === 'password') {
-            try {
-                const promise = forgotPassword(user.email);
-                toast.promise(promise, {
-                    loading: 'Sending password reset link',
-                    success: 'Password reset link sent to your email!',
-                    error: (err) => err.response?.data?.message || 'Failed to send reset link',
-                });
-            } catch (error) {
-                console.error(error);
-            }
+            setShowResetModal(true);
             return;
         }
 
         setEditingId(section.id);
         setIsAwaitingOtp(false);
         setOtpValue('');
-
         // Extract raw value for editing, not masked or formatted
         if (section.id === 'name') setEditValue(user.name || '');
-        else if (section.id === 'phone') setEditValue(user.mobileNumber || user.phone || '');
+        else if (section.id === 'phone') {
+            const rawPhone = user.mobileNumber || user.phone || '';
+            setEditValue(rawPhone.replace(/^\+?91\s*/, '').replace(/\D/g, ''));
+        }
         else if (section.id === 'email') setEditValue(user.email || '');
         else setEditValue('');
     };
@@ -126,8 +157,23 @@ export default function MyAccountPage() {
             }
 
             const payload: any = {};
-            if (id === 'name') payload.name = editValue;
-            if (id === 'phone') payload.mobileNumber = editValue;
+            if (id === 'name') {
+                if (editValue.trim().length < 10) {
+                    toast.error('Name must be at least 10 characters');
+                    setIsSaving(false);
+                    return;
+                }
+                payload.name = editValue.trim();
+            }
+            if (id === 'phone') {
+                const digits = editValue.replace(/\D/g, '');
+                if (digits.length !== 10) {
+                    toast.error('Mobile number must be exactly 10 digits');
+                    setIsSaving(false);
+                    return;
+                }
+                payload.mobileNumber = '+91 ' + digits;
+            }
 
             const updatedUser = await updateProfile(payload);
 
@@ -238,11 +284,11 @@ export default function MyAccountPage() {
             icon: <svg className="w-4 h-4 sm:w-5 sm:h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.242-4.243a8 8 0 1111.314 0z M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
         },
         {
-            id: 'payment',
-            title: 'Payment Methods',
+            id: 'delete_account',
+            title: 'Delete Account',
             value: '',
-            editable: false,
-            icon: <svg className="w-4 h-4 sm:w-5 sm:h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>
+            editable: true,
+            icon: <svg className="w-4 h-4 sm:w-5 sm:h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
         },
         {
             id: 'billing',
@@ -262,10 +308,10 @@ export default function MyAccountPage() {
                     return (
                         <div
                             key={section.id}
-                            className={`flex items-start justify-between py-2.5 px-2.5 sm:px-4 sm:py-3 sm:px-5 transition-colors ${section.editable ? 'hover:bg-gray-50' : 'cursor-not-allowed'} ${section.editable && section.id !== 'shipping' && section.id !== 'password' ? 'cursor-pointer group' : section.id === 'shipping' || section.id === 'password' ? 'group' : ''} ${idx !== profileSections.length - 1 ? 'border-b border-[#458500]/20' : ''}`}
+                            className={`flex items-start justify-between py-2.5 px-2.5 sm:px-4 sm:py-3 sm:px-5 transition-colors ${section.editable ? 'hover:bg-gray-50' : 'cursor-not-allowed'} ${section.editable && section.id !== 'shipping' && section.id !== 'password' && section.id !== 'delete_account' ? 'cursor-pointer group' : section.id === 'shipping' || section.id === 'password' || section.id === 'delete_account' ? 'group' : ''} ${idx !== profileSections.length - 1 ? 'border-b border-[#458500]/20' : ''}`}
                             onClick={() => {
-                                // Only trigger row click if it's not shipping or password
-                                if (!isEditing && section.id !== 'shipping' && section.id !== 'password') handleEdit(section);
+                                // Only trigger row click if it's not shipping, password, or delete_account
+                                if (!isEditing && section.id !== 'shipping' && section.id !== 'password' && section.id !== 'delete_account') handleEdit(section);
                             }}
                         >
                             <div className="flex items-start gap-2.5 sm:gap-5 w-full">
@@ -309,21 +355,56 @@ export default function MyAccountPage() {
                                                 </div>
                                             ) : (
                                                 <>
-                                                    <input
-                                                        autoFocus
-                                                        type="text"
-                                                        placeholder={`Enter ${section.title}`}
-                                                        value={editValue}
-                                                        onChange={(e) => setEditValue(e.target.value)}
-                                                        className="border border-gray-300 rounded-md h-[28px] sm:h-auto px-2 py-1 sm:px-3 sm:py-1.5 text-[12px] sm:text-sm w-full max-w-sm focus:outline-none focus:border-[#458500]"
-                                                        onClick={(e) => e.stopPropagation()}
-                                                    />
+                                                    {section.id === 'phone' ? (
+                                                        <div className="relative w-full max-w-sm flex items-center">
+                                                            <span className="absolute left-2 sm:left-3 text-[12px] sm:text-sm text-gray-500 font-medium">+91</span>
+                                                            <input
+                                                                autoFocus
+                                                                type="text"
+                                                                placeholder="Enter Mobile Number"
+                                                                value={editValue}
+                                                                onChange={(e) => {
+                                                                    let val = e.target.value.replace(/\D/g, '');
+                                                                    if (val.length > 10) val = val.slice(0, 10);
+                                                                    setEditValue(val);
+                                                                }}
+                                                                className="border border-gray-300 rounded-md h-[28px] sm:h-auto pl-[32px] sm:pl-[40px] pr-2 py-1 sm:pr-3 sm:py-1.5 text-[12px] sm:text-sm w-full focus:outline-none focus:border-[#458500]"
+                                                                onClick={(e) => e.stopPropagation()}
+                                                            />
+                                                        </div>
+                                                    ) : (
+                                                        <input
+                                                            autoFocus
+                                                            type="text"
+                                                            placeholder={`Enter ${section.title}`}
+                                                            value={editValue}
+                                                            onChange={(e) => {
+                                                                let val = e.target.value;
+                                                                if (section.id === 'name') {
+                                                                    val = val.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+                                                                }
+                                                                setEditValue(val);
+                                                            }}
+                                                            className="border border-gray-300 rounded-md h-[28px] sm:h-auto px-2 py-1 sm:px-3 sm:py-1.5 text-[12px] sm:text-sm w-full max-w-sm focus:outline-none focus:border-[#458500]"
+                                                            onClick={(e) => e.stopPropagation()}
+                                                        />
+                                                    )}
                                                     <button
                                                         onClick={(e) => { e.stopPropagation(); handleSave(section.id); }}
                                                         disabled={isSaving}
-                                                        className="bg-[#458500] text-white h-[28px] sm:h-auto px-3 py-1 sm:px-4 sm:py-1.5 rounded-md text-[12px] sm:text-sm font-medium hover:bg-[#366800] disabled:opacity-70 transition-colors shrink-0 whitespace-nowrap cursor-pointer"
+                                                        className="relative bg-[#458500] text-white h-[28px] sm:h-auto px-3 py-1 sm:px-4 sm:py-1.5 rounded-md text-[12px] sm:text-sm font-medium hover:bg-[#366800] disabled:opacity-70 transition-colors shrink-0 whitespace-nowrap cursor-pointer flex items-center justify-center"
                                                     >
-                                                        {isSaving ? 'Sending' : section.id === 'email' ? 'Send OTP' : 'Save'}
+                                                        <span className={isSaving ? "invisible" : ""}>
+                                                            {section.id === 'email' ? 'Send OTP' : 'Save'}
+                                                        </span>
+                                                        {isSaving && (
+                                                            <div className="absolute inset-0 flex items-center justify-center">
+                                                                <svg className="w-4 h-4 sm:w-5 sm:h-5 animate-spin text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                                </svg>
+                                                            </div>
+                                                        )}
                                                     </button>
                                                     <button
                                                         onClick={(e) => { e.stopPropagation(); setEditingId(null); setIsAwaitingOtp(false); }}
@@ -360,10 +441,19 @@ export default function MyAccountPage() {
                                         <button className="bg-[#458500] text-white h-[28px] sm:h-auto px-3 py-1 sm:px-4 sm:py-1.5 rounded-md text-[12px] sm:text-sm font-medium hover:bg-[#366800] transition-colors shrink-0 whitespace-nowrap cursor-pointer">
                                             Reset
                                         </button>
+                                    ) : section.id === 'delete_account' ? (
+                                        <button
+                                            onClick={(e) => { e.stopPropagation(); setShowDeleteModal(true); }}
+                                            className="bg-red-600 text-white h-[28px] sm:h-auto px-3 py-1 sm:px-4 sm:py-1.5 rounded-md text-[12px] sm:text-sm font-bold hover:bg-red-700 transition-colors shrink-0 whitespace-nowrap cursor-pointer">
+                                            Delete
+                                        </button>
                                     ) : (
-                                        <svg className="w-4 h-4 sm:w-[18px] sm:h-[18px] text-gray-400 group-hover:text-gray-600 transition-colors cursor-pointer" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                                        </svg>
+                                        <div className="flex items-center gap-4">
+                                            {section.id === 'name' && !user.name && <span className="w-2 h-2 rounded-full bg-[#458500]"></span>}
+                                            <svg className="w-4 h-4 sm:w-[18px] sm:h-[18px] text-gray-400 group-hover:text-gray-600 transition-colors cursor-pointer" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                            </svg>
+                                        </div>
                                     )}
                                 </div>
                             )}
@@ -371,6 +461,73 @@ export default function MyAccountPage() {
                     );
                 })}
             </div>
+
+            {/* Delete Account Modal */}
+            {showDeleteModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+                    <div className="bg-white rounded-lg shadow-xl w-[90%] max-w-sm sm:max-w-md mx-auto overflow-hidden">
+                        <div className="p-4 sm:p-6">
+                            <h3 className="text-base sm:text-xl font-bold text-gray-900 mb-1.5 sm:mb-2">Delete Account</h3>
+                            <p className="text-[12px] sm:text-[14px] text-gray-600 mb-4 sm:mb-6 leading-relaxed">
+                                Are you sure you want to delete your account? This action is permanently deleted your all your data.
+                            </p>
+                            <div className="flex gap-2 sm:gap-3 justify-end">
+                                <button
+                                    onClick={() => setShowDeleteModal(false)}
+                                    disabled={isDeleting}
+                                    className="px-3 sm:px-4 py-1.5 sm:py-2 text-[12px] sm:text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors cursor-pointer"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={handleDeleteAccount}
+                                    disabled={isDeleting}
+                                    className="px-3 sm:px-4 py-1.5 sm:py-2 text-[12px] sm:text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-md transition-colors flex items-center justify-center min-w-[70px] sm:min-w-[80px] cursor-pointer"
+                                >
+                                    {isDeleting ? (
+                                        <svg className="w-4 h-4 animate-spin text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                    ) : (
+                                        'Confirm'
+                                    )}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {/* Reset Password Modal */}
+            {showResetModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+                    <div className="bg-white rounded-lg shadow-xl w-[90%] max-w-sm sm:max-w-md mx-auto overflow-hidden">
+                        <div className="p-4 sm:p-6">
+                            <h3 className="text-base sm:text-xl font-bold text-gray-900 mb-1.5 sm:mb-2">Reset Password</h3>
+                            <p className="text-[12px] sm:text-[14px] text-gray-600 mb-4 sm:mb-6 leading-relaxed">
+                                Are you sure you want to send a password reset link to <strong>{user.email}</strong>?
+                            </p>
+                            <div className="flex gap-2 sm:gap-3 justify-end">
+                                <button
+                                    onClick={() => setShowResetModal(false)}
+                                    disabled={isResetting}
+                                    className="px-3 sm:px-4 py-1.5 sm:py-2 text-[12px] sm:text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors cursor-pointer"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={handleConfirmReset}
+                                    disabled={isResetting}
+                                    className="px-3 sm:px-4 py-1.5 sm:py-2 text-[12px] sm:text-sm font-medium text-white bg-[#458500] hover:bg-[#366800] rounded-md transition-colors flex items-center justify-center min-w-[70px] sm:min-w-[80px] cursor-pointer"
+                                >
+                                    {isResetting ? (
+                                        <svg className="w-4 h-4 animate-spin text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                    ) : (
+                                        'Send Link'
+                                    )}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

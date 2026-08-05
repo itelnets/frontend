@@ -76,10 +76,17 @@ api.interceptors.response.use(
 
             try {
                 const { data } = await api.post('/auth/refresh');
-                // 3. Update default headers or original request headers
-                axios.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
-                originalRequest.headers['Authorization'] = `Bearer ${data.token}`;
+                // Update storage if needed
+                const isAdminRoute = window.location.pathname.startsWith('/admin');
+                const storageKey = isAdminRoute ? 'adminInfo' : 'userInfo';
+                const infoStr = localStorage.getItem(storageKey);
+                if (infoStr) {
+                    const info = JSON.parse(infoStr);
+                    info.token = data.token;
+                    localStorage.setItem(storageKey, JSON.stringify(info));
+                }
 
+                originalRequest.headers['Authorization'] = `Bearer ${data.token}`;
                 return api(originalRequest);
             } catch (refreshError) {
                 return Promise.reject(refreshError);

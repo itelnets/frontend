@@ -1,16 +1,17 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, Suspense } from 'react';
 import { createPortal } from 'react-dom';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { fetchAllOrders } from '@/services/orderService';
 import { refundOrder } from '@/services/paymentService';
 import SortDropdown from '@/components/SortDropdown';
 import ConfirmModal from '@/components/ConfirmModal';
 import { formatDate } from '@/utils/formatDate';
 import toast from 'react-hot-toast';
+import CopyIcon from '@/components/CopyIcon';
 
-export default function AdminOrdersPage() {
+function AdminOrdersContent() {
     const router = useRouter();
     const [orders, setOrders] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -18,6 +19,8 @@ export default function AdminOrdersPage() {
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [searchInput, setSearchInput] = useState<string>('');
     const [searchQuery, setSearchQuery] = useState<string>('');
+    const searchParams = useSearchParams();
+    const userId = searchParams.get('userId') || '';
     const [totalPages, setTotalPages] = useState<number>(1);
     const [totalOrders, setTotalOrders] = useState<number>(0);
     const [selectedOrder, setSelectedOrder] = useState<any>(null);
@@ -38,8 +41,8 @@ export default function AdminOrdersPage() {
         const loadOrders = async () => {
             setIsLoading(true);
             try {
-                const statusParam = activeTab === 'Return' ? 'Return Requested' : activeTab === 'All status' ? 'All' : activeTab;
-                const data = await fetchAllOrders(currentPage, 20, statusParam, searchQuery);
+                const statusParam = activeTab === 'Return' ? 'Refund Requested' : activeTab === 'All status' ? 'All' : activeTab;
+                const data = await fetchAllOrders(currentPage, 20, statusParam, searchQuery, userId);
                 setOrders(data.orders || []);
                 setTotalPages(data.totalPages || 1);
                 setTotalOrders(data.totalOrders || 0);
@@ -50,7 +53,7 @@ export default function AdminOrdersPage() {
             }
         };
         loadOrders();
-    }, [activeTab, currentPage, searchQuery]);
+    }, [activeTab, currentPage, searchQuery, userId]);
 
     const tabs = ['All status', 'Return', 'Refunded', 'Captured', 'Shipped', 'Delivered', 'Cancelled'];
 
@@ -58,41 +61,15 @@ export default function AdminOrdersPage() {
         setCurrentPage(1);
     }, [activeTab, searchQuery]);
 
-    const copyToClipboard = (text: string, label: string) => {
-        navigator.clipboard.writeText(text);
-        toast.success(`${label} copied!`);
-    };
-
-    const CopyIcon = ({ text, label }: { text: string, label: string }) => {
-        const [copied, setCopied] = useState(false);
-        const handleCopy = () => {
-            copyToClipboard(text, label);
-            setCopied(true);
-            setTimeout(() => setCopied(false), 2000);
-        };
-        return (
-            <div onClick={handleCopy} className="inline ml-1.5 cursor-pointer flex-shrink-0">
-                {copied ? (
-                    <svg className="w-4 h-4 text-green-600 inline transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                    </svg>
-                ) : (
-                    <svg className="w-3.5 h-3.5 text-gray-400 hover:text-gray-600 inline transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
-                    </svg>
-                )}
-            </div>
-        );
-    };
-
     const handleApproveRefund = async (orderId: string) => {
         setIsRefunding(true);
         try {
             const res = await refundOrder(orderId);
             const newStatus = res?.status || 'Refunded';
-            setOrders(orders.map(o => o._id === orderId ? { ...o, status: newStatus } : o));
+            const newRefundStatus = res?.refund?.status || 'processed';
+            setOrders(orders.map(o => o._id === orderId ? { ...o, status: newStatus, refundStatus: newRefundStatus } : o));
             if (selectedOrder && selectedOrder._id === orderId) {
-                setSelectedOrder({ ...selectedOrder, status: newStatus });
+                setSelectedOrder({ ...selectedOrder, status: newStatus, refundStatus: newRefundStatus });
             }
             setShowRefundConfirm(null);
             toast.success('Refund processed successfully!');
@@ -120,7 +97,7 @@ export default function AdminOrdersPage() {
                         className="border border-gray-300 rounded-md pl-8 pr-8 h-[32px] text-[13px] outline-none focus:border-green-500 w-full transition-all bg-white"
                     />
                     {searchInput && (
-                        <button onClick={() => setSearchInput('')} className="absolute right-2 cursor-pointer w-5 h-5 bg-[#458500] hover:bg-[#3b7100] text-white rounded-full flex items-center justify-center transition-colors">
+                        <button onClick={() => setSearchInput('')} className="absolute right-2 cursor-pointer w-5 h-5 bg-green-600 hover:bg-green-700 text-white rounded-full flex items-center justify-center transition-colors">
                             <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12"></path></svg>
                         </button>
                     )}
@@ -134,7 +111,7 @@ export default function AdminOrdersPage() {
                     >
                         &lt;
                     </button>
-                    <span className="text-xs font-medium text-gray-700 min-w-[3ch] text-center">
+                    <span className="text-xs font-medium text-gray-700 min-w-[30px] text-center whitespace-nowrap">
                         {currentPage}/{totalPages}
                     </span>
                     <button
@@ -175,12 +152,10 @@ export default function AdminOrdersPage() {
                                         {/* Desktop Columns */}
                                         <td className="hidden sm:table-cell px-3 sm:px-4 py-2.5 whitespace-nowrap text-left">
                                             <div className="text-[14px] sm:text-[15px] font-medium text-gray-900 flex items-center">
-                                                <span className="truncate max-w-[150px] sm:max-w-[180px]">{order.user?.name || 'Unknown'}</span>
-                                                {order.user?.name && <CopyIcon text={order.user?.name} label="Name" />}
+                                                <span className="break-words">{order.user?.name || 'Unknown'}</span>
                                             </div>
                                             <div className="text-[12px] sm:text-[13px] font-medium text-gray-500 flex items-center mt-0.5">
-                                                <span className="truncate max-w-[150px] sm:max-w-[180px]">{order.user?.email}</span>
-                                                {order.user?.email && <CopyIcon text={order.user?.email} label="Email" />}
+                                                <span className="break-words">{order.user?.email}</span>
                                             </div>
                                         </td>
                                         <td className="hidden sm:table-cell px-3 sm:px-4 py-2.5 whitespace-nowrap text-center">
@@ -199,17 +174,17 @@ export default function AdminOrdersPage() {
                                             <div className="text-[13px] sm:text-[14px] font-bold text-gray-900">₹{order.totalPrice.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</div>
                                         </td>
                                         <td className="hidden sm:table-cell px-3 sm:px-4 py-2.5 whitespace-nowrap text-center">
-                                            <span className={`inline-flex items-center justify-center text-[13px] sm:text-[14px] font-bold ${order.status === 'Return Requested' ? 'text-blue-600' :
+                                            <span className={`inline-flex items-center justify-center text-[13px] sm:text-[14px] font-bold ${order.status === 'Refund Requested' ? 'text-blue-600' :
                                                 order.status === 'Captured' ? 'text-green-600' :
                                                     order.status === 'Refunded' ? 'text-orange-600' :
-                                                        order.status === 'Cancelled' ? 'text-red-600' :
+                                                        (order.status === 'Cancelled' || order.status === 'Refund Failed') ? 'text-red-600' :
                                                             'text-yellow-600'
                                                 }`}>
                                                 {order.status === 'Captured' ? 'Paid' : order.status}
                                             </span>
                                         </td>
                                         <td className="hidden sm:table-cell px-3 sm:px-4 py-2.5 text-center font-medium whitespace-nowrap">
-                                            {order.status === 'Return Requested' && (
+                                            {order.status === 'Refund Requested' && (
                                                 <button
                                                     onClick={() => setShowRefundConfirm(order._id)}
                                                     disabled={isRefunding && showRefundConfirm === order._id}
@@ -230,19 +205,17 @@ export default function AdminOrdersPage() {
                                             <div className="flex justify-between items-start mb-2">
                                                 <div className="flex-1 pr-2">
                                                     <div className="text-[13px] sm:text-[14px] font-bold text-gray-900 flex items-center">
-                                                        <span className="truncate max-w-[180px]">{order.user?.name || 'Unknown'}</span>
-                                                        {order.user?.name && <CopyIcon text={order.user?.name} label="Name" />}
+                                                        <span className="break-words">{order.user?.name || 'Unknown'}</span>
                                                     </div>
                                                     <div className="text-[11px] sm:text-[12px] text-gray-500 flex items-center mt-0.5">
-                                                        <span className="truncate max-w-[180px]">{order.user?.email}</span>
-                                                        {order.user?.email && <CopyIcon text={order.user?.email} label="Email" />}
+                                                        <span className="break-words">{order.user?.email}</span>
                                                     </div>
                                                 </div>
                                                 <div className="flex-shrink-0">
-                                                    <span className={`inline-flex items-center text-[12px] sm:text-[13px] font-bold ${order.status === 'Return Requested' ? 'text-blue-600' :
+                                                    <span className={`inline-flex items-center text-[12px] sm:text-[13px] font-bold ${order.status === 'Refund Requested' ? 'text-blue-600' :
                                                         order.status === 'Captured' ? 'text-green-600' :
                                                             order.status === 'Refunded' ? 'text-orange-600' :
-                                                                order.status === 'Cancelled' ? 'text-red-600' :
+                                                                (order.status === 'Cancelled' || order.status === 'Refund Failed') ? 'text-red-600' :
                                                                     'text-yellow-600'
                                                         }`}>
                                                         {order.status === 'Captured' ? 'Paid' : order.status}
@@ -264,7 +237,7 @@ export default function AdminOrdersPage() {
                                                     <div className="text-[13px] sm:text-[14px] font-bold text-gray-900">₹{order.totalPrice.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</div>
                                                 </div>
                                                 <div>
-                                                    {order.status === 'Return Requested' && (
+                                                    {order.status === 'Refund Requested' && (
                                                         <button
                                                             onClick={() => setShowRefundConfirm(order._id)}
                                                             disabled={isRefunding && showRefundConfirm === order._id}
@@ -315,14 +288,15 @@ export default function AdminOrdersPage() {
                             className="border border-gray-300 rounded-md pl-8 pr-8 h-[32px] sm:h-[36px] text-[11px] sm:text-sm outline-none focus:border-green-500 w-full min-w-0 transition-all"
                         />
                         {searchInput && (
-                            <button onClick={() => setSearchInput('')} className="absolute right-1.5 cursor-pointer w-4 h-4 sm:w-5 sm:h-5 bg-[#458500] hover:bg-[#3b7100] text-white rounded-full flex items-center justify-center transition-colors">
+                            <button onClick={() => setSearchInput('')} className="absolute right-1.5 cursor-pointer w-4 h-4 sm:w-5 sm:h-5 bg-green-500 hover:bg-green-600 text-white rounded-full flex items-center justify-center transition-colors">
                                 <svg className="w-2.5 h-2.5 sm:w-3 sm:h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12"></path></svg>
                             </button>
                         )}
                     </div>
                     <div className="flex items-center gap-2 sm:gap-3 shrink-0">
                         <SortDropdown
-                            options={tabs}
+                            isAdmin={true}
+                            options={['All status', 'Pending', 'Captured', 'Shipped', 'Delivered', 'Cancelled', 'Return']}
                             value={activeTab}
                             onChange={(val) => setActiveTab(val)}
                             className="z-30 w-[100px] sm:w-[120px]"
@@ -337,7 +311,7 @@ export default function AdminOrdersPage() {
                             >
                                 &lt;
                             </button>
-                            <span className="text-[11px] sm:text-sm font-bold text-gray-700 px-1 whitespace-nowrap">{currentPage} / {Math.max(1, totalPages)}</span>
+                            <span className="text-[11px] sm:text-sm font-bold text-gray-700 px-1 whitespace-nowrap min-w-[40px] sm:min-w-[50px] text-center">{currentPage} / {Math.max(1, totalPages)}</span>
                             <button
                                 onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                                 disabled={currentPage >= totalPages}
@@ -351,5 +325,13 @@ export default function AdminOrdersPage() {
                 portalNode
             )}
         </div>
+    );
+}
+
+export default function AdminOrdersPage() {
+    return (
+        <Suspense fallback={<div className="p-10 text-center">Loading orders...</div>}>
+            <AdminOrdersContent />
+        </Suspense>
     );
 }

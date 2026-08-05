@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 
@@ -11,6 +11,14 @@ export default function UserLayout({
 }) {
     const pathname = usePathname();
     const router = useRouter();
+    const [user, setUser] = useState<any>(undefined);
+
+    useEffect(() => {
+        const userInfo = localStorage.getItem('userInfo');
+        if (userInfo) {
+            setUser(JSON.parse(userInfo));
+        }
+    }, [pathname]);
 
     const allLinks = [
         { name: 'Profile', href: '/user/myaccount', icon: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z' },
@@ -55,6 +63,7 @@ export default function UserLayout({
                                             <span className="text-[14px] sm:text-[15px] font-medium">{link.name}</span>
                                         </div>
                                         <div className="flex items-center gap-2">
+                                            {link.name === 'Profile' && user && !user.name && <span className={`w-2 h-2 rounded-full ${isActive ? 'bg-white' : 'bg-[#458500]'}`}></span>}
                                             <svg className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${isActive ? 'text-white' : 'text-gray-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
                                         </div>
                                     </Link>

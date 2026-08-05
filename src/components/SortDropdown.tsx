@@ -9,9 +9,10 @@ type Props = {
     className?: string;
     buttonClassName?: string;
     menuClassName?: string;
+    isAdmin?: boolean;
 };
 
-export default function SortDropdown({ options, value, onChange, className = '', buttonClassName, menuClassName }: Props) {
+export default function SortDropdown({ options, value, onChange, className = '', buttonClassName, menuClassName, isAdmin = false }: Props) {
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -35,7 +36,7 @@ export default function SortDropdown({ options, value, onChange, className = '',
             <button
                 type="button"
                 onClick={() => setIsOpen(!isOpen)}
-                className={`w-full flex items-center justify-between bg-white border ${isOpen ? 'border-[#458500]' : 'border-gray-300'} text-gray-800 py-1.5 sm:py-[7px] px-2 sm:px-3 rounded-lg text-[12px] sm:text-sm font-bold focus:outline-none transition-colors cursor-pointer select-none shadow-sm ${buttonClassName || 'min-w-[200px] sm:min-w-[220px]'}`}
+                className={`w-full flex items-center justify-between bg-white border ${isOpen ? (isAdmin ? 'border-green-500' : 'border-[#458500]') : (isAdmin ? 'border-gray-300 hover:border-gray-400 focus:border-green-500' : 'border-gray-300 hover:border-gray-400 focus:border-[#458500]')} text-gray-800 py-1.5 sm:py-[7px] px-2 sm:px-3 rounded-lg text-[12px] sm:text-sm font-bold focus:outline-none transition-colors cursor-pointer select-none shadow-sm ${buttonClassName || 'min-w-[200px] sm:min-w-[220px]'}`}
             >
                 <span className="truncate">{value}</span>
                 <svg
@@ -61,7 +62,7 @@ export default function SortDropdown({ options, value, onChange, className = '',
                                     type="button"
                                     onClick={() => handleSelect(option)}
                                     className={`w-full text-left px-2 sm:px-3 py-1 sm:py-1.5 text-[12px] sm:text-sm transition-colors cursor-pointer block rounded-md mb-0.5 ${isSelected
-                                        ? 'bg-[#e2f0d9] text-[#458500] font-bold'
+                                        ? (isAdmin ? 'bg-green-600 text-white font-bold' : 'bg-[#458500] text-white font-bold')
                                         : 'text-gray-700 hover:bg-gray-100 font-medium'
                                         }`}
                                 >

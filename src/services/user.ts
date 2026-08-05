@@ -25,3 +25,8 @@ export const forgotPassword = async (email: string) => {
     const { data } = await api.post('/auth/forgot-password', { email }, { timeout: 15000 });
     return data;
 };
+
+export const deleteAccount = async () => {
+    const { data } = await api.delete('/users/profile');
+    return data;
+};

@@ -83,7 +83,8 @@ export default function OrdersPage() {
 
     const canRequestReturn = (order: any) => {
         if (!order.isPaid || !order.paidAt) return false;
-        if (order.status === 'Cancelled' || order.status === 'Refunded' || order.status === 'Refund Initiated' || order.status === 'Return Requested') return false;
+        if (order.status === 'Cancelled' || order.status === 'Refunded' || order.status === 'Refund Initiated' || order.status === 'Refund Requested' || order.status === 'Refund Failed') return false;
+        if (order.refundStatus && order.refundStatus !== 'NONE') return false;
         const fortyEightHours = 2 * 24 * 60 * 60 * 1000;
         return Date.now() - new Date(order.paidAt).getTime() <= fortyEightHours;
     };
@@ -92,8 +93,9 @@ export default function OrdersPage() {
         setIsRefunding(true);
         try {
             const res = await requestReturn(orderId);
-            const newStatus = res?.order?.status || 'Return Requested';
-            setOrders(orders.map(o => o._id === orderId ? { ...o, status: newStatus } : o));
+            const newStatus = res?.order?.status || 'Refund Requested';
+            const newRefundStatus = res?.order?.refundStatus || 'requested';
+            setOrders(orders.map(o => o._id === orderId ? { ...o, status: newStatus, refundStatus: newRefundStatus } : o));
             setSelectedOrder(null);
             setShowRefundConfirm(null);
             toast.success('Your return request sent');
@@ -192,8 +194,8 @@ export default function OrdersPage() {
                                                 <div className="flex justify-between items-center gap-2">
                                                     <span className={`inline-flex items-center text-[13px] font-bold ${order.status === 'Delivered' || order.status === 'Refunded' ? 'text-green-700' :
                                                         order.status === 'Captured' ? 'text-green-700' :
-                                                            (order.status === 'Cancelled' || order.status === 'Pending') ? 'text-red-800' :
-                                                                order.status === 'Return Requested' ? 'text-blue-700' :
+                                                            (order.status === 'Cancelled' || order.status === 'Pending' || order.status === 'Refund Failed') ? 'text-red-800' :
+                                                                (order.status === 'Refund Requested' || order.refundStatus === 'requested') ? 'text-blue-700' :
                                                                     'text-yellow-800'
                                                         }`}>
                                                         {(order.status === 'Cancelled' || order.status === 'Pending') ? 'Failed' : order.status === 'Captured' ? 'Success' : order.status}

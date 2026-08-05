@@ -131,11 +131,13 @@ export default function OrderDetailsModal({
                         </div>
                     </div>
 
+
+
                     {/* Payment details */}
                     <div className="bg-white p-2.5 sm:p-4 pb-4 sm:pb-4 sm:rounded-lg sm:border sm:border-gray-200">
                         <div className="flex justify-between items-center mb-3 sm:mb-4">
                             <h3 className="text-[15px] font-bold text-gray-900">Payment details</h3>
-                            {selectedOrder.isPaid && selectedOrder.status !== 'Cancelled' && selectedOrder.status !== 'Refunded' && selectedOrder.status !== 'Refund Initiated' && selectedOrder.status !== 'Return Requested' && (
+                            {selectedOrder.isPaid && selectedOrder.status !== 'Cancelled' && (
                                 <div className="px-2 sm:px-3 py-1 sm:py-1.5 rounded-md text-[12px] sm:text-[13px] font-bold cursor-default bg-green-50 text-green-700">
                                     Payment Successful
                                 </div>
@@ -184,12 +186,12 @@ export default function OrderDetailsModal({
                                 <div
                                     title="Not allowed"
                                     className={`px-2 sm:px-4 py-1.5 sm:py-2 rounded-md text-[12.5px] sm:text-[13px] font-bold cursor-not-allowed ${(selectedOrder.status === 'Cancelled' || selectedOrder.status === 'Pending') ? 'bg-red-50 text-red-600' :
-                                        selectedOrder.status === 'Return Requested' ? 'bg-blue-50 text-blue-700' :
+                                        selectedOrder.refundStatus === 'requested' ? 'bg-blue-50 text-blue-700' :
                                             'bg-gray-100 text-gray-500'
                                         }`}>
                                     {(selectedOrder.status === 'Cancelled' || selectedOrder.status === 'Pending') ? 'Payment Failed' :
-                                        selectedOrder.status === 'Refunded' ? 'Already Refunded' :
-                                            selectedOrder.status === 'Return Requested' ? 'Return Requested' :
+                                        (selectedOrder.refundStatus === 'processed' || selectedOrder.refundStatus === 'pending') ? 'Already Refunded' :
+                                            selectedOrder.refundStatus === 'requested' ? 'Refund Requested' :
                                                 'Return Closed'
                                     }
                                 </div>

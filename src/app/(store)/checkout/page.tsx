@@ -46,6 +46,7 @@ function CheckoutContent() {
         isDefault: false
     });
     const [userEmail, setUserEmail] = useState<string>('');
+    const [userName, setUserName] = useState<string>('');
     const [infoModal, setInfoModal] = useState<string | null>(null);
 
     const router = useRouter();
@@ -63,6 +64,7 @@ function CheckoutContent() {
         try {
             const parsed = JSON.parse(userInfo);
             setUserEmail(parsed.email || '');
+            setUserName(parsed.name || '');
         } catch (e) {
             console.error("Error parsing user info:", e);
         }
@@ -581,7 +583,7 @@ function CheckoutContent() {
                                 activeAddress={activeAddress}
                                 showCardError={showCardError}
                                 isProcessingGPay={isProcessingGPay}
-                                isPreparingGPay={isPreparingGPay}
+                                isPreparingGPay={isPreparingGPay || isProcessingPayment}
                                 onProcessGPay={handleGPayProcess}
                             />
                         </>
@@ -635,6 +637,10 @@ function CheckoutContent() {
                                     e.preventDefault();
                                     if (cartItems.length === 0) {
                                         router.push('/');
+                                        return;
+                                    }
+                                    if (!userName) {
+                                        toast.error('Please complete your profile');
                                         return;
                                     }
                                     if (checkoutStep === 1) {

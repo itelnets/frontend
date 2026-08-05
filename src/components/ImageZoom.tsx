@@ -54,7 +54,7 @@ export default function ImageZoom({ src, alt, onHeartClick, isHeartFilled }: Ima
     }, [showShare]);
 
     return (
-        <div className="relative h-auto sm:w-[400px] sm:h-[400px] bg-white rounded-xl p-2 group mx-auto">
+        <div className="relative aspect-square w-full sm:aspect-auto sm:w-[400px] sm:h-[400px] bg-white rounded-xl p-2 group mx-auto">
             {/* Main Image */}
             <div
                 className="w-full h-full cursor-pointer relative"

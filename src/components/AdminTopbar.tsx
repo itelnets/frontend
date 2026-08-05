@@ -23,7 +23,7 @@ export default function AdminTopbar({ onMenuClick }: AdminTopbarProps) {
         router.push('/admin');
     };
 
-    let pageTitle = 'Dashboard';
+    let pageTitle = 'Products';
     if (pathname.includes('/products/add')) {
         pageTitle = 'Add Product';
     } else if (pathname.includes('/products/edit')) {
@@ -32,6 +32,8 @@ export default function AdminTopbar({ onMenuClick }: AdminTopbarProps) {
         pageTitle = 'Products';
     } else if (pathname.includes('/orders')) {
         pageTitle = 'Orders';
+    } else if (pathname.includes('/users')) {
+        pageTitle = 'Users';
     }
 
     return (
@@ -52,13 +54,14 @@ export default function AdminTopbar({ onMenuClick }: AdminTopbarProps) {
                     <h1 className="text-base sm:text-xl font-bold text-gray-900 tracking-tight">{pageTitle}</h1>
                 </div>
 
-                {!pathname.includes('/products/add') && !pathname.includes('/products/edit') && !pathname.includes('/orders') ? (
-                    <div className="flex items-center gap-4">
-                        <Link href="/admin/products/add" className="bg-green-600 cursor-pointer hover:bg-green-700 text-white px-2 sm:px-4 py-1 sm:py-1.5 border border-transparent rounded-md text-[13px] sm:text-sm font-medium transition-colors">
+                {!pathname.includes('/products/add') && !pathname.includes('/products/edit') && !pathname.includes('/orders') && !pathname.includes('/users') ? (
+                    <div className="flex items-center gap-2 sm:gap-4 flex-1 justify-end">
+                        <div id="products-topbar-portal" className="contents"></div>
+                        <Link href="/admin/products/add" className="bg-green-600 cursor-pointer hover:bg-green-700 text-white px-2 sm:px-4 py-1 sm:py-1.5 border border-transparent rounded-md text-[13px] sm:text-sm font-medium transition-colors shrink-0">
                             Add Product
                         </Link>
                     </div>
-                ) : pathname.includes('/orders') ? (
+                ) : pathname.includes('/orders') || pathname.includes('/users') ? (
                     <div id="orders-topbar-portal" className="contents"></div>
                 ) : (
                     <div className="flex items-center gap-4">

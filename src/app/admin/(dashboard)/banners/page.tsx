@@ -3,11 +3,10 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { getBanners, createBanner, deleteBanner, BannerItem, updateBanner, reorderBanners } from '../../../../services/banner';
+import { getBanners, createBanner, deleteBanner, BannerItem, reorderBanners } from '../../../../services/banner';
 import toast from 'react-hot-toast';
 import ConfirmModal from '@/components/ConfirmModal';
 import Spinner from '@/components/Spinner';
-import PageLoader from '@/components/PageLoader';
 
 import { formatDate } from '@/utils/formatDate';
 
@@ -223,8 +222,12 @@ export default function BannersPage() {
         return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
     };
 
-    if (isLoading || isUploading) {
-        return <PageLoader />;
+    if (isLoading) {
+        return (
+            <div className="flex items-center justify-center min-h-[50vh]">
+                <Spinner className="w-8 h-8 text-green-600 animate-spin" />
+            </div>
+        );
     }
 
     return (
