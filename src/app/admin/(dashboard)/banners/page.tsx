@@ -34,7 +34,7 @@ export default function BannersPage() {
     useEffect(() => {
         const userInfo = localStorage.getItem('adminInfo');
         if (!userInfo || JSON.parse(userInfo).role !== 'admin') {
-            router.push('/login');
+            router.push('/admin/login');
             return;
         }
         loadBanners();

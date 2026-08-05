@@ -73,7 +73,6 @@ export default function LoginPage() {
         setIsLoading(true);
         try {
             const { data } = await api.post('/auth/login', { email, password });
-            console.log('Login success:', data);
             localStorage.setItem('userInfo', JSON.stringify(data));
             document.cookie = "isLoggedIn=true; path=/; max-age=2592000"; // 30 days
 
@@ -84,7 +83,7 @@ export default function LoginPage() {
             toast.success(data.message);
 
             if (data.role === 'admin') {
-                router.push('/admin');
+                router.push('/admin/users');
             } else {
                 router.push('/');
             }

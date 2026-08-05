@@ -20,7 +20,7 @@ export default function AdminTopbar({ onMenuClick }: AdminTopbarProps) {
 
     const handleCancel = () => {
         setIsCancelling(true);
-        router.push('/admin');
+        router.push('/admin/products');
     };
 
     let pageTitle = 'Products';

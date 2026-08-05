@@ -14,10 +14,19 @@ export default function UserLayout({
     const [user, setUser] = useState<any>(undefined);
 
     useEffect(() => {
-        const userInfo = localStorage.getItem('userInfo');
-        if (userInfo) {
-            setUser(JSON.parse(userInfo));
-        }
+        const checkAuth = () => {
+            const userInfo = localStorage.getItem('userInfo');
+            if (userInfo) {
+                setUser(JSON.parse(userInfo));
+            }
+        };
+
+        checkAuth();
+        window.addEventListener('userInfoUpdated', checkAuth);
+
+        return () => {
+            window.removeEventListener('userInfoUpdated', checkAuth);
+        };
     }, [pathname]);
 
     const allLinks = [

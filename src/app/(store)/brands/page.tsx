@@ -56,9 +56,9 @@ export default function BrandsPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 py-4 sm:py-8 px-4 sm:px-6 lg:px-8">
-            <div className="max-w-[1400px] mx-auto bg-white rounded-xl border border-gray-200 p-6 sm:p-10 shadow-sm">
-                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6 sm:mb-8">Brands A-Z</h1>
+        <div className="min-h-screen bg-gray-50 py-2 sm:py-6 px-4 sm:px-6 lg:px-6">
+            <div className="max-w-[1400px] mx-auto bg-white rounded-xl border border-gray-200 p-4 sm:p-5 shadow-sm">
+                <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2 sm:mb-4">Brands A-Z</h1>
 
                 {/* Jump Links */}
                 <div className="sticky top-[80px] sm:top-[120px] bg-white z-10 py-3 sm:py-4 border-t border-b border-gray-200 mb-10 flex flex-wrap gap-x-3 gap-y-3 justify-center sm:justify-between text-[#d98324] font-semibold text-sm sm:text-base px-2 shadow-sm">

@@ -19,7 +19,7 @@ export default function AdminSidebar({ isOpen, setIsOpen }: AdminSidebarProps) {
 
     const menuItems = [
         { name: 'Users', path: '/admin/users', icon: 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z' },
-        { name: 'Products', path: '/admin', icon: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6' },
+        { name: 'Products', path: '/admin/products', icon: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6' },
         { name: 'Add Products', path: '/admin/products/add', icon: 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4' },
         { name: 'Banners', path: '/admin/banners', icon: 'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z' },
         { name: 'Orders', path: '/admin/orders', icon: 'M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z' },
@@ -52,7 +52,13 @@ export default function AdminSidebar({ isOpen, setIsOpen }: AdminSidebarProps) {
                 <nav className="flex-1 overflow-y-auto pt-2 sm:pt-3 pb-3 px-2 space-y-1">
 
                     {menuItems.map((item) => {
-                        const isActive = pathname === item.path || (item.path !== '/admin' && item.path !== '/' && pathname?.startsWith(item.path));
+                        let isActive = pathname === item.path;
+                        if (!isActive && item.path !== '/admin' && item.path !== '/') {
+                            const isExactMatchForAnother = menuItems.some(m => m.path === pathname);
+                            if (pathname?.startsWith(item.path + '/') && !isExactMatchForAnother) {
+                                isActive = true;
+                            }
+                        }
                         return (
                             <Link
                                 key={item.name}

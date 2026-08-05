@@ -4,7 +4,6 @@ import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useCart } from '@/context/CartContext';
 import { fetchAddresses, addAddress, updateAddress, removeAddress } from '@/services/addressService';
-import PageLoader from '@/components/PageLoader';
 import ConfirmModal from '@/components/ConfirmModal';
 import toast from 'react-hot-toast';
 import PaymentMethod from '@/components/PaymentMethod';
@@ -17,7 +16,6 @@ const toTitleCase = (str: string) => {
 function CheckoutContent() {
     const { cartItems, cartCount, updateQuantity, removeFromCart, moveToList, clearCart } = useCart();
     const [showErrors, setShowErrors] = useState(false);
-
     const [savedAddresses, setSavedAddresses] = useState<any[]>([]);
     const [isLoadingAddresses, setIsLoadingAddresses] = useState(true);
     const [isCartExpanded, setIsCartExpanded] = useState(false);
@@ -523,7 +521,13 @@ function CheckoutContent() {
         </div>
     );
     if (isLoadingAddresses) {
-        return <PageLoader />;
+        return (
+            <div className="flex-1 min-h-[100vh] bg-[#f5f5f5]">
+                <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[60]">
+                    <svg className="animate-spin h-8 w-8 sm:h-10 sm:w-10 text-[#458500]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                </div>
+            </div>
+        );
     }
 
     return (
@@ -580,8 +584,6 @@ function CheckoutContent() {
                                     setIsProcessingGPay(false);
                                     setIsPreparingGPay(false);
                                 }}
-                                activeAddress={activeAddress}
-                                showCardError={showCardError}
                                 isProcessingGPay={isProcessingGPay}
                                 isPreparingGPay={isPreparingGPay || isProcessingPayment}
                                 onProcessGPay={handleGPayProcess}
@@ -751,7 +753,13 @@ function CheckoutContent() {
 
 export default function CheckoutPage() {
     return (
-        <Suspense fallback={<div className="min-h-screen bg-[#f5f5f5] flex items-center justify-center">Loading...</div>}>
+        <Suspense fallback={
+            <div className="flex-1 min-h-[100vh] bg-[#f5f5f5]">
+                <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[60]">
+                    <svg className="animate-spin h-8 w-8 sm:h-10 sm:w-10 text-[#458500]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                </div>
+            </div>
+        }>
             <CheckoutContent />
         </Suspense>
     );

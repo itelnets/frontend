@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import AdminSidebar from '@/components/AdminSidebar';
 import AdminTopbar from '@/components/AdminTopbar';
 
@@ -10,6 +11,21 @@ export default function AdminDashboardLayout({
     children: React.ReactNode;
 }) {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const router = useRouter();
+
+    useEffect(() => {
+        const adminInfo = localStorage.getItem('adminInfo');
+        if (!adminInfo) {
+            router.replace('/admin/login');
+        } else {
+            setIsAuthenticated(true);
+        }
+    }, [router]);
+
+    if (!isAuthenticated) {
+        return <div className="h-screen w-screen bg-gray-50 flex items-center justify-center"></div>;
+    }
 
     return (
         <div className="flex h-screen overflow-hidden bg-gray-50 font-sans">

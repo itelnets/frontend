@@ -176,8 +176,13 @@ export default function MyAccountPage() {
             }
 
             const updatedUser = await updateProfile(payload);
+            console.log("updatedUser from API:", updatedUser);
 
             const newUserInfo = { ...user, ...updatedUser, token: user.token };
+            if (payload.name) newUserInfo.name = payload.name;
+            if (payload.mobileNumber) newUserInfo.mobileNumber = payload.mobileNumber;
+            
+            console.log("newUserInfo before set:", newUserInfo);
             setUser(newUserInfo);
             localStorage.setItem('userInfo', JSON.stringify(newUserInfo));
             window.dispatchEvent(new Event('userInfoUpdated'));

@@ -200,7 +200,7 @@ export default function CartPage() {
                                         <div className="relative" ref={addressDropdownRef}>
                                             <span
                                                 onClick={() => setIsAddressDropdownOpen(!isAddressDropdownOpen)}
-                                                className="text-[11px] sm:text-[13px] font-semibold text-gray-900 bg-gray-100 px-2 py-1 sm:px-3 sm:py-1.5 rounded-full flex items-center gap-1 sm:gap-1.5 cursor-pointer hover:bg-gray-200 transition-colors max-w-[180px] sm:max-w-[350px]"
+                                                className="text-[11px] sm:text-[13px] font-semibold text-gray-900 bg-gray-100 px-2 py-1 sm:px-3 sm:py-1.5 rounded-full flex items-center gap-1 sm:gap-1.5 cursor-pointer hover:bg-gray-200 transition-colors max-w-[180px] sm:max-w-[300px]"
                                             >
                                                 <svg className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0 text-gray-900" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" /></svg>
                                                 <span className="truncate">

@@ -40,7 +40,7 @@ export default function AdminLoginPage() {
 
             toast.success('Admin login successful');
             await new Promise(resolve => setTimeout(resolve, 1500));
-            router.push('/admin');
+            router.push('/admin/users');
             // Do not set isLoading to false here, let the page transition happen
         } catch (err: any) {
             const errorMessage = err.response?.data?.message || 'Login failed';

@@ -15,7 +15,7 @@ export default function AddProductPage() {
 
     const handleCancel = () => {
         setIsCancelling(true);
-        router.push('/admin');
+        router.push('/admin/products');
     };
 
     const generateObjectId = () => {
@@ -27,7 +27,7 @@ export default function AddProductPage() {
     useEffect(() => {
         const userInfo = localStorage.getItem('adminInfo');
         if (!userInfo || JSON.parse(userInfo).role !== 'admin') {
-            router.push('/login');
+            router.push('/admin/login');
         }
     }, [router]);
 
@@ -256,7 +256,7 @@ export default function AddProductPage() {
 
             await createProduct(productData);
             toast.success('Product created successfully!');
-            router.push('/admin'); // Redirect to admin dashboard
+            router.push('/admin/products'); // Redirect to admin dashboard
         } catch (err: any) {
             console.error('Submission error:', err);
             toast.error(err.message || err.response?.data?.message || 'Failed to create product');

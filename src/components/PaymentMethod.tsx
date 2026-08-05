@@ -1,10 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 
 interface PaymentMethodProps {
     selectedPaymentMethod: string | null;
     setSelectedPaymentMethod: (method: string) => void;
-    activeAddress: any;
-    showCardError?: boolean;
     isProcessingGPay?: boolean;
     isPreparingGPay?: boolean;
     onProcessGPay?: () => void;
@@ -13,59 +11,10 @@ interface PaymentMethodProps {
 export default function PaymentMethod({
     selectedPaymentMethod,
     setSelectedPaymentMethod,
-    activeAddress,
-    showCardError,
     isProcessingGPay,
     isPreparingGPay,
     onProcessGPay
 }: PaymentMethodProps) {
-    const [localShowCardError, setLocalShowCardError] = useState(showCardError || false);
-    const [cardNumber, setCardNumber] = useState('');
-    const [expiryDate, setExpiryDate] = useState('');
-    const [securityCode, setSecurityCode] = useState('');
-    const [nameOnCard, setNameOnCard] = useState(activeAddress?.fullName || '');
-
-    const handleCardNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const val = e.target.value.replace(/\D/g, '').slice(0, 16);
-        const formatted = val.replace(/(\d{4})(?=\d)/g, '$1 ').trim();
-        setCardNumber(formatted);
-    };
-
-    const handleExpiryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        let val = e.target.value.replace(/\D/g, '');
-        if (val.length > 4) val = val.slice(0, 4);
-
-        if (val.length >= 3) {
-            val = val.slice(0, 2) + '/' + val.slice(2);
-        } else if (val.length === 2 && e.target.value.endsWith('/')) {
-            val = val + '/';
-        } else if (val.length === 2 && expiryDate.length === 3) {
-            val = val.slice(0, 1);
-        } else if (val.length === 2) {
-            val = val + '/';
-        }
-
-        setExpiryDate(val);
-    };
-
-    const handleSecurityCodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setSecurityCode(e.target.value.replace(/\D/g, '').slice(0, 3));
-    };
-
-    const validateAndContinue = () => {
-        if (cardNumber.replace(/\s/g, '').length === 16 && expiryDate.length === 5 && securityCode.length === 3 && nameOnCard.trim()) {
-            setLocalShowCardError(false);
-            console.log('Proceeding with payment...');
-        } else {
-            setLocalShowCardError(true);
-        }
-    };
-
-    useEffect(() => {
-        if (cardNumber.replace(/\s/g, '').length === 16 && expiryDate.length === 5 && securityCode.length === 3 && nameOnCard.trim()) {
-            setLocalShowCardError(false);
-        }
-    }, [cardNumber, expiryDate, securityCode, nameOnCard]);
 
     return (
         <div className="bg-white rounded shadow-sm">

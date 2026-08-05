@@ -23,7 +23,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
 
     const handleCancel = () => {
         setIsCancelling(true);
-        router.push('/admin');
+        router.push('/admin/products');
     };
 
     // Detailed state for form fields
@@ -107,7 +107,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
 
         const userInfo = localStorage.getItem('adminInfo');
         if (!userInfo || JSON.parse(userInfo).role !== 'admin') {
-            router.push('/login');
+            router.push('/admin/login');
             return;
         }
 
@@ -167,7 +167,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
         } catch (error) {
             console.error('Failed to fetch product', error);
             toast.error('Failed to load product details');
-            router.push('/admin');
+            router.push('/admin/products');
         } finally {
             setIsLoading(false);
         }
@@ -330,7 +330,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
 
             await updateProduct(productId, productData);
             toast.success('Product updated successfully!');
-            router.push('/admin'); // Redirect to admin dashboard
+            router.push('/admin/products'); // Redirect to admin dashboard
         } catch (err: any) {
             console.error('Submission error:', err);
             toast.error(err.message || err.response?.data?.message || 'Failed to update product');

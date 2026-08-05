@@ -26,7 +26,7 @@ export default function EditBannerPage({ params }: { params: Promise<{ id: strin
     useEffect(() => {
         const userInfo = localStorage.getItem('adminInfo');
         if (!userInfo || JSON.parse(userInfo).role !== 'admin') {
-            router.push('/login');
+            router.push('/admin/login');
             return;
         }
         loadBanner();
