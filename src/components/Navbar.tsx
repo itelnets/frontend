@@ -214,7 +214,7 @@ const Navbar = () => {
                                                         <svg className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
                                                         My Account
                                                     </Link>
-                                                    <Link href="#" className="flex items-center gap-2 sm:gap-3 text-sm sm:text-[15px] text-gray-800 hover:bg-[#eef6e6] px-3 py-1.5 sm:py-2.5 rounded-md transition-colors">
+                                                    <Link href="/user/orders" className="flex items-center gap-2 sm:gap-3 text-sm sm:text-[15px] text-gray-800 hover:bg-[#eef6e6] px-3 py-1.5 sm:py-2.5 rounded-md transition-colors">
                                                         <svg className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
                                                         Orders
                                                     </Link>
@@ -222,18 +222,23 @@ const Navbar = () => {
                                                         <svg className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
                                                         My Lists
                                                     </Link>
-                                                    <Link href="#" className="flex items-center gap-2 sm:gap-3 text-sm sm:text-[15px] text-gray-800 hover:bg-[#eef6e6] px-3 py-1.5 sm:py-2.5 rounded-md transition-colors">
-                                                        <svg className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                                        Rewards Credit
-                                                    </Link>
-                                                    <Link href="#" className="flex items-center gap-2 sm:gap-3 text-sm sm:text-[15px] text-gray-800 hover:bg-[#eef6e6] px-3 py-1.5 sm:py-2.5 rounded-md transition-colors">
-                                                        <svg className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
-                                                        My Reviews
-                                                    </Link>
-                                                    <Link href="#" className="flex items-center gap-2 sm:gap-3 text-sm sm:text-[15px] text-gray-800 hover:bg-[#eef6e6] px-3 py-1.5 sm:py-2.5 rounded-md transition-colors">
+                                                    <Link href="https://wa.me/9558688770" target="_blank" className="flex items-center gap-2 sm:gap-3 text-sm sm:text-[15px] text-gray-800 hover:bg-[#eef6e6] px-3 py-1.5 sm:py-2.5 rounded-md transition-colors">
                                                         <svg className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" /></svg>
                                                         Messages
                                                     </Link>
+                                                    <Link href="/user/address" className="flex items-center gap-2 sm:gap-3 text-sm sm:text-[15px] text-gray-800 hover:bg-[#eef6e6] px-3 py-1.5 sm:py-2.5 rounded-md transition-colors">
+                                                        <svg className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.242-4.243a8 8 0 1111.314 0z M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                        </svg>
+                                                        My Address
+                                                    </Link>
+                                                    <Link href="/user/terms-and-conditions" className="flex items-center gap-2 sm:gap-3 text-sm sm:text-[15px] text-gray-800 hover:bg-[#eef6e6] px-3 py-1.5 sm:py-2.5 rounded-md transition-colors">
+                                                        <svg className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                                        </svg>
+                                                        Terms & Conditions
+                                                    </Link>
+
                                                 </div>
 
                                                 <button onClick={handleLogout} className="w-full text-center py-2 sm:py-2.5 bg-white border border-[#458500] cursor-pointer text-[#458500] hover:bg-gray-50 font-bold rounded-md shadow-sm transition-colors text-sm mt-auto">
@@ -257,14 +262,14 @@ const Navbar = () => {
                     <div className="max-w-[1400px] mx-auto px-2 sm:px-4">
                         <div className="flex items-center justify-between h-8 sm:h-12 overflow-x-auto whitespace-nowrap text-[12px] sm:text-sm font-semibold text-gray-700 hide-scrollbar">
                             <div className="flex items-center gap-6">
-                                <Link href="/type/Supplements" className="hover:text-[#458500]">Supplements</Link>
-                                <Link href="/type/Sports" className="hover:text-[#458500]">Sports</Link>
-                                <Link href="/type/Bath" className="hover:text-[#458500]">Bath</Link>
-                                <Link href="/type/Beauty" className="hover:text-[#458500]">Beauty</Link>
-                                <Link href="/type/Grocery" className="hover:text-[#458500]">Grocery</Link>
-                                <Link href="/type/Home" className="hover:text-[#458500]">Home</Link>
-                                <Link href="/type/Baby" className="hover:text-[#458500]">Baby</Link>
-                                <Link href="/type/Pets" className="hover:text-[#458500]">Pets</Link>
+                                <Link href="/type/supplements" className="hover:text-[#458500]">Supplements</Link>
+                                <Link href="/type/sports" className="hover:text-[#458500]">Sports</Link>
+                                <Link href="/type/bath" className="hover:text-[#458500]">Bath</Link>
+                                <Link href="/type/beauty" className="hover:text-[#458500]">Beauty</Link>
+                                <Link href="/type/grocery" className="hover:text-[#458500]">Grocery</Link>
+                                <Link href="/type/home" className="hover:text-[#458500]">Home</Link>
+                                <Link href="/type/baby" className="hover:text-[#458500]">Baby</Link>
+                                <Link href="/type/pets" className="hover:text-[#458500]">Pets</Link>
                                 <Link href="/brands" className="hover:text-[#458500] ml-4 text-gray-400">Brands A-Z</Link>
                                 <Link href="/products" className="hover:text-[#458500] text-gray-400">Health Topics</Link>
                             </div>
@@ -320,7 +325,7 @@ const Navbar = () => {
                                                     <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
                                                     My Account
                                                 </Link>
-                                                <Link href="#" className="flex items-center gap-3 text-[14px] text-[#333] hover:bg-gray-50 px-2.5 py-1.5 transition-colors">
+                                                <Link href="/user/orders" className="flex items-center gap-3 text-[14px] text-[#333] hover:bg-gray-50 px-2.5 py-1.5 transition-colors">
                                                     <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
                                                     Orders
                                                 </Link>
@@ -346,8 +351,8 @@ const Navbar = () => {
                                     )}
                                     {/* Main Categories */}
                                     <div className="flex flex-col">
-                                        {['Supplements', 'Sports', 'Bath', 'Beauty', 'Grocery', 'Home', 'Baby', 'Pets'].map(cat => (
-                                            <Link key={cat} href={`/type/${cat}`} className="flex items-center justify-between px-4 py-3.5 hover:bg-gray-50 border-b border-gray-50">
+                                        {['Supplements', 'Sports', 'Bath', 'Beauty', 'Grocery', 'Home', 'Baby', 'Pets'].map((cat) => (
+                                            <Link key={cat} href={`/type/${cat.toLowerCase()}`} className="flex items-center justify-between px-4 py-3.5 hover:bg-gray-50 border-b border-gray-50">
                                                 <span className="text-base font-medium text-gray-900">{cat}</span>
                                                 <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
                                             </Link>

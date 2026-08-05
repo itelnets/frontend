@@ -56,7 +56,7 @@ export default function CartPage() {
     // Total calculation
     const subtotal = cartItems.reduce((acc, item) => acc + (item.product.discount > 0 ? Math.round(item.product.price * (1 - item.product.discount / 100)) : item.product.price) * item.quantity, 0);
     const shipping = subtotal > 1000 ? 0 : 99;
-    const taxes = Math.round(subtotal * 0.05); // 5% taxes
+    const taxes = subtotal * 0.05; // 5% taxes
     const total = subtotal + (cartItems.length > 0 ? shipping + taxes : 0);
 
     useEffect(() => {
@@ -289,7 +289,6 @@ export default function CartPage() {
                                                         ₹{((item.product.discount > 0 ? Math.round(item.product.price * (1 - item.product.discount / 100)) : item.product.price) * item.quantity).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                                                     </div>
                                                 </div>
-                                                <div className="text-[11px] sm:text-[12px] text-gray-500 mb-1.5">180 count &gt;</div>
                                                 <div className="text-[11px] sm:text-[12px] text-gray-500 mb-4 flex items-center gap-1">
                                                     <span className="w-1 h-1 bg-gray-500 rounded-full inline-block"></span>
                                                     Product code: {item.product?._id ? item.product._id.substring(0, 8).toUpperCase() : 'N/A'}

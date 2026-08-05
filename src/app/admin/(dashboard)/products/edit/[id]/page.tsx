@@ -42,6 +42,9 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
         manufacturer: '',
         inStock: '',
         bestSeller: '',
+        hsn: '',
+        batchNo: '',
+        expiredOn: '',
     });
 
     // State for Unified Images
@@ -129,6 +132,9 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                 manufacturer: data.manufacturer || "",
                 inStock: data.inStock || "Yes",
                 bestSeller: data.bestSeller || "No",
+                hsn: data.hsn || '',
+                batchNo: data.batchNo || '',
+                expiredOn: data.expiredOn || '',
             });
             const existingMapped: ImageItem[] = (data.images || []).map((img: string) => ({
                 type: 'existing',
@@ -430,10 +436,10 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                         </div>
 
                         {/* Moved Fields */}
-                        <div className="space-y-4 mt-6 pt-6 border-t-2 border-green-200">
+                        <div className="space-y-4 sm:space-y-6 mt-6 pt-6 border-t-2 border-green-200">
                             <div>
                                 <label className="block text-sm font-semibold text-gray-700 mb-2">Product Name</label>
-                                <input name="name" value={formData.name} onChange={handleChange} className="w-full px-3 py-2 text-sm bg-white/50 border border-gray-200 rounded-md focus:outline-none focus:border-green-600 transition-all outline-none placeholder-gray-400" placeholder="e.g. Premium Widget" />
+                                <input name="name" value={formData.name} onChange={handleChange} className="w-full px-3 py-2 text-sm bg-white/50 border border-gray-200 rounded-md focus:outline-none focus:border-green-600 transition-all outline-none placeholder-gray600" placeholder="e.g. Premium Widget" />
                             </div>
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -447,7 +453,8 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                                 <div>
                                     <label className="block text-sm font-semibold text-gray-700 mb-2">Price (₹)</label>
                                     <input name="price" value={formData.price} type="number" onChange={handleChange} className="w-full px-3 py-2 text-sm bg-white/50 border border-gray-200 rounded-md focus:outline-none focus:border-green-600 transition-all outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" placeholder="0.00" />
@@ -456,9 +463,6 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                                     <label className="block text-sm font-semibold text-gray-700 mb-2">Discount (%)</label>
                                     <input name="discount" value={formData.discount} type="number" onChange={handleChange} className="w-full px-3 py-2 text-sm bg-white/50 border border-gray-200 rounded-md focus:outline-none focus:border-green-600 transition-all outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" placeholder="10" />
                                 </div>
-                            </div>
-
-                            <div className="mb-4">
                                 <div>
                                     <label className="block text-sm font-semibold text-gray-700 mb-2">In Stock</label>
                                     <div className="flex items-center gap-6 px-1 py-1">
@@ -471,29 +475,59 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                                     </div>
                                 </div>
                             </div>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-semibold text-gray-700 mb-2">HSN Code</label>
+                                    <input name="hsn" value={formData.hsn} onChange={handleChange} className="w-full px-3 py-2 text-sm bg-white/50 border border-gray-200 rounded-md focus:outline-none focus:border-green-600 transition-all outline-none placeholder-gray-400 h-[38px]" placeholder="e.g. 123456" />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-semibold text-gray-700 mb-2">Batch No.</label>
+                                    <input name="batchNo" value={formData.batchNo} onChange={handleChange} className="w-full px-3 py-2 text-sm bg-white/50 border border-gray-200 rounded-md focus:outline-none focus:border-green-600 transition-all outline-none placeholder-gray-400 h-[38px]" placeholder="e.g. BATCH-001" />
+                                </div>
+                            </div>
                         </div>
                     </div>
 
                     {/* Right Column - Overview, Details, etc */}
                     <div className="w-full lg:w-7/12 space-y-4 lg:h-full lg:overflow-y-auto lg:pr-2 lg:pb-10 scrollbar-thin scrollbar-thumb-gray-200">
-                        <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-2">Product Type</label>
-                            <CustomDropdown
-                                options={[
-                                    { label: 'Supplements', value: 'Supplements' },
-                                    { label: 'Sports', value: 'Sports' },
-                                    { label: 'Bath', value: 'Bath' },
-                                    { label: 'Beauty', value: 'Beauty' },
-                                    { label: 'Grocery', value: 'Grocery' },
-                                    { label: 'Home', value: 'Home' },
-                                    { label: 'Baby', value: 'Baby' },
-                                    { label: 'Pets', value: 'Pets' }
-                                ]}
-                                value={formData.type || ''}
-                                onChange={(val) => setFormData({ ...formData, type: val })}
-                                placeholder="Select Product Type"
-                                className="w-full h-[38px]"
-                            />
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-sm font-semibold text-gray-700 mb-2">Product Type</label>
+                                <CustomDropdown
+                                    options={[
+                                        { label: 'Supplements', value: 'Supplements' },
+                                        { label: 'Sports', value: 'Sports' },
+                                        { label: 'Bath', value: 'Bath' },
+                                        { label: 'Beauty', value: 'Beauty' },
+                                        { label: 'Grocery', value: 'Grocery' },
+                                        { label: 'Home', value: 'Home' },
+                                        { label: 'Baby', value: 'Baby' },
+                                        { label: 'Pets', value: 'Pets' }
+                                    ]}
+                                    value={formData.type || ''}
+                                    onChange={(val) => setFormData({ ...formData, type: val })}
+                                    placeholder="Select Product Type"
+                                    className="w-full h-[38px]"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-semibold text-gray-700 mb-2">Expired On</label>
+                                <input
+                                    name="expiredOn"
+                                    value={formData.expiredOn || ''}
+                                    onChange={(e) => {
+                                        let val = e.target.value.replace(/\D/g, '');
+                                        if (val.length >= 3) {
+                                            val = val.substring(0, 2) + '-' + val.substring(2, 6);
+                                        }
+                                        setFormData({ ...formData, expiredOn: val });
+                                    }}
+                                    className="w-full px-3 py-2 text-sm bg-white/50 border border-gray-200 rounded-md focus:outline-none focus:border-green-600 transition-all outline-none placeholder-gray-400 h-[38px]"
+                                    placeholder="08-2026"
+                                    maxLength={7}
+                                />
+                            </div>
                         </div>
 
                         <div>

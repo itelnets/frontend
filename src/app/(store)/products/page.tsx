@@ -140,7 +140,7 @@ export default function ProductsPage() {
                                         className="text-[#458500] focus:ring-[#458500] rounded accent-[#458500] w-4 h-4 cursor-pointer border-gray-300"
                                         checked={filters.price.includes(priceOption)}
                                         onChange={(e) => {
-                                            const newPrice = e.target.checked 
+                                            const newPrice = e.target.checked
                                                 ? [...filters.price, priceOption]
                                                 : filters.price.filter(p => p !== priceOption);
                                             setFilters({ ...filters, price: newPrice });
@@ -162,7 +162,7 @@ export default function ProductsPage() {
                                         className="text-[#458500] focus:ring-[#458500] rounded accent-[#458500] w-4 h-4 cursor-pointer border-gray-300"
                                         checked={filters.rating.includes(ratingOption)}
                                         onChange={(e) => {
-                                            const newRating = e.target.checked 
+                                            const newRating = e.target.checked
                                                 ? [...filters.rating, ratingOption]
                                                 : filters.rating.filter(r => r !== ratingOption);
                                             setFilters({ ...filters, rating: newRating });
@@ -236,6 +236,8 @@ export default function ProductsPage() {
                                 value={sortOption}
                                 onChange={setSortOption}
                                 className="w-auto z-[90]"
+                                buttonClassName="!w-[170px] !min-w-[170px]"
+                                menuClassName="!w-[170px] !min-w-[170px] [&>div]:!max-h-[200px]"
                             />
                         </div>
 
@@ -255,8 +257,8 @@ export default function ProductsPage() {
                     </div>
 
                     {isLoading ? (
-                        <div className="w-full flex items-center justify-center py-20">
-                            <Spinner className="w-8 h-8 text-green-700" />
+                        <div className="w-full flex items-center justify-center min-h-[50vh]">
+                            <Spinner className="w-8 h-8 sm:w-12 sm:h-12 text-[#458500]" />
                         </div>
                     ) : (
                         <>

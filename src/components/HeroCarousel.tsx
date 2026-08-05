@@ -59,10 +59,10 @@ export default function HeroCarousel() {
         const fetchBanners = async () => {
             try {
                 const data = await getBanners();
-                // Map banners sorted by createdAt
                 setBanners(data);
             } catch (error) {
                 console.error('Failed to load banners:', error);
+                setBanners([]); // Fallback to static slides if api fails
             }
         };
         fetchBanners();

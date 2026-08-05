@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { getProducts, deleteProduct, updateProduct, reorderProducts } from '@/services/product';
 import toast from 'react-hot-toast';
 import ConfirmModal from '@/components/ConfirmModal';
-import PageLoader from '@/components/PageLoader';
+import Spinner from '@/components/Spinner';
 import { formatDate } from '@/utils/formatDate';
 
 interface Product {
@@ -135,7 +135,11 @@ export default function AdminDashboard() {
 
 
     if (isLoading) {
-        return <PageLoader />;
+        return (
+            <div className="flex items-center justify-center h-full min-h-[400px]">
+                <Spinner className="w-8 h-8 sm:w-12 sm:h-12 text-green-600" />
+            </div>
+        );
     }
 
     return (
@@ -144,16 +148,16 @@ export default function AdminDashboard() {
             <div className="bg-transparent sm:bg-white sm:border-1 sm:border-gray-300 sm:rounded-md overflow-hidden">
                 <div className="overflow-hidden sm:overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent pb-2">
                     <table className="min-w-full divide-y divide-gray-200 block sm:table">
-                        <thead className="bg-gray-100 hidden sm:table-header-group">
+                        <thead className="bg-green-600 hidden sm:table-header-group sticky top-0 z-10 shadow-[0_2px_4px_rgba(0,0,0,0.1)]">
                             <tr>
-                                <th scope="col" className="px-3 py-4 w-8"></th>
-                                <th scope="col" className="px-6 py-4 text-left text-[16px] font-bold text-green-900">Product</th>
-                                <th scope="col" className="px-6 py-4 text-center w-10 text-[16px] font-bold text-green-900">Price</th>
-                                <th scope="col" className="px-6 py-4 text-center w-10 text-[16px] font-bold text-green-900">Discount</th>
-                                <th scope="col" className="px-6 py-4 text-center w-10 text-[16px] font-bold text-green-900">D.Price</th>
-                                <th scope="col" className="px-6 py-4 text-center w-24 text-[16px] font-bold text-green-900">Created</th>
-                                <th scope="col" className="px-6 py-4 text-center w-24 text-[16px] font-bold text-green-900">Updated</th>
-                                <th scope="col" className="px-6 py-4 text-center w-20 text-[16px] font-bold text-green-900">Actions</th>
+                                <th scope="col" className="px-3 py-3.5 w-8 border-b border-green-700"></th>
+                                <th scope="col" className="px-6 py-3.5 text-left text-[12px] sm:text-[13px] font-bold text-white uppercase tracking-wide whitespace-nowrap border-b border-green-700">Product</th>
+                                <th scope="col" className="px-6 py-3.5 text-center w-10 text-[12px] sm:text-[13px] font-bold text-white uppercase tracking-wide whitespace-nowrap border-b border-green-700">Price</th>
+                                <th scope="col" className="px-6 py-3.5 text-center w-10 text-[12px] sm:text-[13px] font-bold text-white uppercase tracking-wide whitespace-nowrap border-b border-green-700">Discount</th>
+                                <th scope="col" className="px-6 py-3.5 text-center w-10 text-[12px] sm:text-[13px] font-bold text-white uppercase tracking-wide whitespace-nowrap border-b border-green-700">D.Price</th>
+                                <th scope="col" className="px-6 py-3.5 text-center w-24 text-[12px] sm:text-[13px] font-bold text-white uppercase tracking-wide whitespace-nowrap border-b border-green-700">Created</th>
+                                <th scope="col" className="px-6 py-3.5 text-center w-24 text-[12px] sm:text-[13px] font-bold text-white uppercase tracking-wide whitespace-nowrap border-b border-green-700">Updated</th>
+                                <th scope="col" className="px-6 py-3.5 text-center w-20 text-[12px] sm:text-[13px] font-bold text-white uppercase tracking-wide whitespace-nowrap border-b border-green-700">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="bg-transparent sm:bg-white divide-y-0 sm:divide-y divide-gray-200 block sm:table-row-group">
@@ -222,7 +226,7 @@ export default function AdminDashboard() {
                                         </td>
                                         {/* Actions */}
                                         <td className="p-0 sm:px-4 sm:py-2 sm:table-cell sm:border-b sm:border-gray-200 sm:whitespace-nowrap sm:text-right hidden">
-                                            <div className="flex items-center justify-end gap-2.5">
+                                            <div className="flex items-center justify-end gap-4">
                                                 <button
                                                     onClick={() => toggleProductStatus(product._id, product.isActive !== false)}
                                                     className={`cursor-pointer relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${product.isActive !== false ? 'bg-green-600' : 'bg-gray-300'}`}
@@ -314,19 +318,14 @@ export default function AdminDashboard() {
                 <div className="fixed inset-0 bg-slate-900/60 flex items-center justify-center z-[60] p-4 backdrop-blur-sm transition-all duration-300" onClick={() => setViewImagesProduct(null)}>
                     <div className="bg-white rounded-lg shadow-2xl max-w-4xl w-full p-3 sm:p-6 flex flex-col gap-1 sm:gap-4 animate-in fade-in zoom-in duration-300" onClick={(e) => e.stopPropagation()}>
                         <div className="flex justify-between items-start border-b border-gray-100 pb-3 gap-2">
-                            <h3 className="text-sm sm:text-lg font-bold text-gray-800 line-clamp-2">{viewImagesProduct.name}</h3>
-                            <button onClick={() => setViewImagesProduct(null)} className="flex-shrink-0 text-white bg-red-500 hover:bg-red-600 rounded-full p-1.5 transition-colors cursor-pointer mt-0.5">
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-4.5 sm:w-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                            </button>
+                            <h3 className="text-[12px] sm:text-[16px] font-bold text-gray-800 line-clamp-2">{viewImagesProduct.name}</h3>
                         </div>
                         {viewImagesProduct.images && viewImagesProduct.images.length > 0 ? (
                             <div className="relative group flex items-center justify-center w-full">
                                 {viewImagesProduct.images.length > 1 && (
                                     <button
                                         onClick={() => scrollByOneImage('left')}
-                                        className="absolute left-[2px] sm:left-[-14px] z-10 p-1.5 sm:p-2 rounded-full bg-white hover:bg-gray-100 shadow-md text-gray-800 border border-gray-200 cursor-pointer transition-colors"
+                                        className="absolute left-[-10px] sm:left-[-14px] z-10 p-1 sm:p-1.5 rounded-full bg-white hover:bg-gray-100 shadow-md text-gray-800 border border-gray-200 cursor-pointer transition-colors"
                                     >
                                         <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -353,7 +352,7 @@ export default function AdminDashboard() {
                                 {viewImagesProduct.images.length > 1 && (
                                     <button
                                         onClick={() => scrollByOneImage('right')}
-                                        className="absolute right-[2px] sm:right-[-14px] z-10 p-1.5 sm:p-2 rounded-full bg-white hover:bg-gray-100 shadow-md text-gray-800 border border-gray-200 cursor-pointer transition-colors"
+                                        className="absolute right-[-10px] sm:right-[-14px] z-10 p-1 sm:p-1.5 rounded-full bg-white hover:bg-gray-100 shadow-md text-gray-800 border border-gray-200 cursor-pointer transition-colors"
                                     >
                                         <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />

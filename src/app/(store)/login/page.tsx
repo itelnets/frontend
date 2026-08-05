@@ -57,7 +57,7 @@ export default function LoginPage() {
 
             setIsLoading(true);
             try {
-                const { data } = await api.post('/auth/forgot-password', { email });
+                const { data } = await api.post('/auth/forgot-password', { email }, { timeout: 15000 });
                 localStorage.setItem(`reset_sent_${email}`, Date.now().toString());
                 toast.success(data.message);
                 await new Promise(resolve => setTimeout(resolve, 1500));
@@ -81,7 +81,6 @@ export default function LoginPage() {
                 api.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
             }
 
-            setIsLoading(false);
             toast.success(data.message);
 
             if (data.role === 'admin') {
@@ -89,6 +88,7 @@ export default function LoginPage() {
             } else {
                 router.push('/');
             }
+            // Intentionally not setting isLoading to false here so the spinner stays active while redirecting
         } catch (err: any) {
             const errorMessage = err.response?.data?.message || 'Login failed';
             toast.error(errorMessage);

@@ -22,6 +22,6 @@ export const verifyEmailChange = async (otp: string) => {
 };
 
 export const forgotPassword = async (email: string) => {
-    const { data } = await api.post('/auth/forgot-password', { email });
+    const { data } = await api.post('/auth/forgot-password', { email }, { timeout: 15000 });
     return data;
 };

@@ -191,12 +191,9 @@ export default function MyAccountPage() {
                             <span className="absolute bottom-2.5 sm:bottom-3 right-2.5 sm:right-3 text-[10px] font-bold bg-white text-[#458500] border border-[#d4e5c5] px-2 py-1.5 rounded-md">DEFAULT</span>
                         )}
                         <div className="font-semibold text-[12px] sm:text-[14px] text-gray-800 mb-0.5 sm:mb-1">{address.fullName}</div>
-                        <div>
-                            {address.addressLine1} {address.addressLine2 ? `, ${address.addressLine2}` : ''}
-                            {address.landmark ? `, ${address.landmark}` : ''}
-                        </div>
-                        <div>{address.city}, {address.state} {address.zip}</div>
-                        <div>Phone: {address.phone}</div>
+                        <div>{address.addressLine1},</div>
+                        <div>{address.addressLine2}{address.addressLine2 ? ' - ' : ''}{address.zip},</div>
+                        <div>{address.landmark ? address.landmark + ', ' : ''}{address.city}, {address.state}, India</div>
                     </div>
                 ))}
             </div>

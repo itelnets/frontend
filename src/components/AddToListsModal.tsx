@@ -22,12 +22,12 @@ export default function AddToListsModal({ product, isOpen, isAlreadyAdded, onClo
         setMounted(true);
     }, []);
 
-    // When modal opens, pre-check My List if already added
+    // When modal opens, pre-check My List by default
     useEffect(() => {
         if (isOpen) {
-            setMyListChecked(!!isAlreadyAdded);
+            setMyListChecked(true);
         }
-    }, [isOpen, isAlreadyAdded]);
+    }, [isOpen]);
 
     const handleDone = () => {
         if (myListChecked && !isAlreadyAdded) {

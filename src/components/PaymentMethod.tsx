@@ -84,7 +84,7 @@ export default function PaymentMethod({
                                 <div className={`w-4 h-4 sm:w-5 sm:h-5 shrink-0 rounded-full border-2 flex items-center justify-center ${selectedPaymentMethod === 'card' ? 'border-[#458500]' : 'border-gray-300'}`}>
                                     {selectedPaymentMethod === 'card' && <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-[#458500]" />}
                                 </div>
-                                <span className="font-bold text-[14px] sm:text-[15px] text-gray-900 flex-1">Add a Credit / Debit Card</span>
+                                <span className="font-bold text-[14px] sm:text-[15px] text-gray-900 flex-1">Pay Securely with Razorpay (Cards, UPI, Netbanking)</span>
                             </div>
                             <div className="pl-8 flex gap-1.5 sm:gap-2 mt-2">
                                 <div className="h-6 w-10 sm:h-8 sm:w-14 bg-white border cursor-disable border-gray-200 rounded flex items-center justify-center">
@@ -99,87 +99,7 @@ export default function PaymentMethod({
                             </div>
                         </div>
 
-                        {selectedPaymentMethod === 'card' && (
-                            <div className="px-3 sm:px-12 pb-4 pt-2">
-                                <div className="space-y-4">
-                                    {localShowCardError && (
-                                        <div className="bg-[#fff1f2] border border-[#fecdd3] text-[#be123c] px-4 py-3 rounded text-[14px] flex items-center gap-2 mb-2">
-                                            <div className="w-5 h-5 rounded-full bg-[#be123c] text-white flex items-center justify-center shrink-0">
-                                                <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 5v14M12 19h.01" /></svg>
-                                            </div>
-                                            <span>Please enter required card information.</span>
-                                        </div>
-                                    )}
-                                    <div>
-                                        <label className="block text-[13px] text-gray-800 mb-1.5">Card Number</label>
-                                        <div className="relative">
-                                            <input type="text" value={cardNumber} onChange={handleCardNumberChange} className="w-full border border-gray-300 rounded px-3 py-2 text-[14px] focus:outline-none focus:border-gray-400" placeholder="1234 5678 9012 3456" />
-                                            <div className="absolute right-3 top-2 text-gray-300">
-                                                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z" /></svg>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div>
-                                            <label className="block text-[13px] text-gray-800 mb-1.5">Expiry Date</label>
-                                            <div className="relative">
-                                                <input type="text" value={expiryDate} onChange={handleExpiryChange} className="w-full border border-gray-300 rounded px-3 py-2 text-[14px] focus:outline-none focus:border-gray-400" placeholder="MM/YY" />
-                                                <div className="absolute right-3 top-2 text-gray-300">
-                                                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z" /></svg>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <label className="block text-[13px] text-gray-800 mb-1.5">Security Code</label>
-                                            <div className="relative">
-                                                <input type="text" value={securityCode} onChange={handleSecurityCodeChange} className="w-full border border-gray-300 rounded px-3 py-2 text-[14px] focus:outline-none focus:border-gray-400" placeholder="3 digits" />
-                                                <div className="absolute right-3 top-2 text-gray-300">
-                                                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z" /></svg>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <label className="block text-[13px] text-gray-800 mb-1.5">Name on Card</label>
-                                        <div className="relative">
-                                            <input type="text" value={nameOnCard} onChange={(e) => setNameOnCard(e.target.value)} className="w-full border border-gray-300 rounded px-3 py-2 text-[14px] focus:outline-none focus:border-gray-400" placeholder="Full Name" />
-                                            <div className="absolute right-3 top-2.5 text-green-600">
-                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
-                                            </div>
-                                        </div>
-                                    </div>
 
-                                    <div className="space-y-3 pt-2">
-                                        <label className="flex items-center gap-2 cursor-pointer">
-                                            <input type="checkbox" defaultChecked className="w-4 h-4 text-[#458500] border-gray-300 rounded focus:ring-[#458500] accent-[#458500]" />
-                                            <span className="text-[14px] sm:text-[15px] text-gray-900">Save card for future purchases</span>
-                                        </label>
-                                        <label className="flex items-center gap-2 cursor-pointer">
-                                            <input type="checkbox" defaultChecked className="w-4 h-4 text-[#458500] border-gray-300 rounded focus:ring-[#458500] accent-[#458500]" />
-                                            <span className="text-[14px] sm:text-[15px] text-gray-900">Set as my default payment method</span>
-                                        </label>
-                                        <label className="flex items-center gap-2 cursor-pointer">
-                                            <input type="checkbox" defaultChecked className="w-4 h-4 text-[#458500] border-gray-300 rounded focus:ring-[#458500] accent-[#458500]" />
-                                            <span className="text-[14px] sm:text-[15px] text-gray-900">Billing address is the same as shipping address</span>
-                                        </label>
-                                    </div>
-
-                                    <div className="bg-[#f9f9f9] rounded px-4 py-4 mt-4 text-[13px] text-gray-800">
-                                        <div className="font-bold text-gray-900 mb-3 text-[14px]">Billing address</div>
-                                        <div className="font-bold text-gray-900 mb-1 text-[14px]">{activeAddress?.fullName || 'No address selected'}</div>
-                                        <div className="text-gray-600 leading-relaxed">
-                                            {activeAddress ? `${activeAddress.addressLine1}${activeAddress.addressLine2 ? ', ' + activeAddress.addressLine2 : ''}, ${activeAddress.landmark ? activeAddress.landmark + ', ' : ''}${activeAddress.city}, ${activeAddress.state}, ${activeAddress.zip} | India | ${activeAddress.phone}` : ''}
-                                        </div>
-                                    </div>
-
-                                    <div className="flex justify-end mt-4">
-                                        <button type="button" onClick={(e) => { e.preventDefault(); validateAndContinue(); }} className="bg-[#458500] hover:bg-[#366800] text-white font-normal font-bold text-[14px] sm:text-[16px] py-[5.5px] sm:py-2 px-4 sm:px-6 rounded-md transition-colors cursor-pointer">
-                                            Continue
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
                     </div>
 
                     {/* Option 2: Google Pay */}

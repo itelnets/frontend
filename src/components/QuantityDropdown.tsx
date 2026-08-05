@@ -56,30 +56,10 @@ export default function QuantityDropdown({ value, onChange, max = 10, className 
                     className="absolute left-0 mt-1 w-[64px] sm:w-[72px] bg-white border border-gray-200 rounded-[14px] shadow-lg z-50 py-1.5 flex flex-col"
                     style={{ maxHeight: '200px' }}
                 >
-                    {/* Scroll Container with thin scrollbar */}
+                    {/* Scroll Container */}
                     <div
-                        className="overflow-y-auto flex-1 px-1 custom-thin-scrollbar"
-                        style={{
-                            scrollbarWidth: 'thin',
-                            scrollbarColor: '#d1d5db transparent'
-                        }}
+                        className="overflow-y-auto flex-1 px-1"
                     >
-                        <style jsx global>{`
-                            .custom-thin-scrollbar::-webkit-scrollbar {
-                                width: 4px;
-                            }
-                            .custom-thin-scrollbar::-webkit-scrollbar-track {
-                                background: transparent;
-                            }
-                            .custom-thin-scrollbar::-webkit-scrollbar-thumb {
-                                background-color: #cbd5e1;
-                                border-radius: 9999px;
-                            }
-                            .custom-thin-scrollbar::-webkit-scrollbar-thumb:hover {
-                                background-color: #94a3b8;
-                            }
-                        `}</style>
-
                         {options.map((option) => {
                             const isSelected = option === value;
                             return (

@@ -60,7 +60,7 @@ export default function ProductDetailsPage() {
         discount: product?.discount,
         inStock: product?.inStock,
         bestSeller: product?.bestSeller,
-        soldRecently: "0",
+        soldRecently: product?.salesCount || 0,
         images: product?.images?.length ? product.images.map((img: string) => getImageUrl(img)) : [
             "https://via.placeholder.com/600x600?text=No+Image+Available"
         ],
@@ -369,8 +369,7 @@ export default function ProductDetailsPage() {
                 <span className={`text-xs lg:text-sm font-bold ${displayProduct.inStock?.toLowerCase() === 'yes' ? 'text-green-700' : 'text-red-600'}`}>
                     {displayProduct.inStock?.toLowerCase() === 'yes' ? 'In Stock' : 'Out of Stock'}
                 </span>
-                <span className="text-[10px] lg:text-xs font-medium text-red-600 flex items-center gap-1">
-                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>
+                <span className="text-[12px] lg:text-[14px] font-medium text-green-800 flex items-center gap-1">
                     {displayProduct.soldRecently} sold in 30 days
                 </span>
             </div>

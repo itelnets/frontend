@@ -3,8 +3,10 @@ import axios from 'axios';
 const api = axios.create({
     baseURL: process.env.NEXT_PUBLIC_API_URL,
     withCredentials: true, // Important for HttpOnly cookies
+    timeout: 3000, // 3 seconds timeout for immediate detection
     headers: {
         'Content-Type': 'application/json',
+        'ngrok-skip-browser-warning': 'true'
     },
 });
 
@@ -21,7 +23,7 @@ api.interceptors.request.use(
                 try {
                     const parsed = JSON.parse(infoStr);
                     token = parsed.token;
-                } catch (e) {}
+                } catch (e) { }
             }
         }
 
@@ -38,6 +40,15 @@ api.interceptors.response.use(
     (response) => response,
     async (error) => {
         const originalRequest = error.config;
+
+        // Check if there is no response from the backend server (e.g. server is down/unreachable)
+        if (!error.response) {
+            if (typeof window !== 'undefined') {
+                window.dispatchEvent(new Event('server-maintenance'));
+            }
+            // Return an unresolved promise so downstream catch blocks don't trigger Next.js dev overlay
+            return new Promise(() => { });
+        }
 
         if (error.response?.status === 401) {
             // Do not force a redirect if the user is already trying to log in

@@ -16,7 +16,7 @@ export default function BrandsPage() {
             try {
                 const { data } = await getFilters();
                 const brands: string[] = data.brands || [];
-                
+
                 const grouped: { [key: string]: string[] } = {};
                 keys.forEach(key => grouped[key] = []);
 
@@ -31,7 +31,7 @@ export default function BrandsPage() {
                         grouped['0-9'].push(brand);
                     }
                 });
-                
+
                 Object.keys(grouped).forEach(key => {
                     grouped[key].sort((a, b) => a.localeCompare(b));
                 });
@@ -63,8 +63,8 @@ export default function BrandsPage() {
                 {/* Jump Links */}
                 <div className="sticky top-[80px] sm:top-[120px] bg-white z-10 py-3 sm:py-4 border-t border-b border-gray-200 mb-10 flex flex-wrap gap-x-3 gap-y-3 justify-center sm:justify-between text-[#d98324] font-semibold text-sm sm:text-base px-2 shadow-sm">
                     {keys.map(key => (
-                        <a 
-                            key={key} 
+                        <a
+                            key={key}
                             href={`#section-${key}`}
                             className={`hover:text-[#458500] transition-colors ${groupedBrands[key]?.length === 0 ? 'opacity-30 pointer-events-none' : ''}`}
                         >
@@ -89,8 +89,8 @@ export default function BrandsPage() {
                                 </div>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                                     {brandsInGroup.map(brand => (
-                                        <Link 
-                                            key={brand} 
+                                        <Link
+                                            key={brand}
                                             href={`/products?brand=${encodeURIComponent(brand)}`}
                                             className="text-sm text-gray-700 hover:text-[#458500] hover:underline truncate"
                                         >

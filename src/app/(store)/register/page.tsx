@@ -53,7 +53,7 @@ export default function RegisterPage() {
 
         setIsLoading(true);
         try {
-            const { data } = await api.post('/auth/register', { email, mobileNumber: fullMobileNumber, password });
+            const { data } = await api.post('/auth/register', { email, mobileNumber: fullMobileNumber, password }, { timeout: 15000 });
 
             // Store the timestamp when the OTP was successfully sent
             localStorage.setItem(`otp_sent_${email}`, Date.now().toString());

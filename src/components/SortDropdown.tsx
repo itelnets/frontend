@@ -7,9 +7,11 @@ type Props = {
     value: string;
     onChange: (val: string) => void;
     className?: string;
+    buttonClassName?: string;
+    menuClassName?: string;
 };
 
-export default function SortDropdown({ options, value, onChange, className = '' }: Props) {
+export default function SortDropdown({ options, value, onChange, className = '', buttonClassName, menuClassName }: Props) {
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -33,11 +35,11 @@ export default function SortDropdown({ options, value, onChange, className = '' 
             <button
                 type="button"
                 onClick={() => setIsOpen(!isOpen)}
-                className="w-full flex items-center justify-between bg-white border border-gray-300 text-gray-800 py-[7px] pl-4 pr-3 rounded-full text-sm font-bold min-w-[200px] sm:min-w-[220px] focus:outline-none hover:border-[#007185] transition-colors cursor-pointer select-none shadow-sm"
+                className={`w-full flex items-center justify-between bg-white border ${isOpen ? 'border-[#458500]' : 'border-gray-300'} text-gray-800 py-1.5 sm:py-[7px] px-2 sm:px-3 rounded-lg text-[12px] sm:text-sm font-bold focus:outline-none transition-colors cursor-pointer select-none shadow-sm ${buttonClassName || 'min-w-[200px] sm:min-w-[220px]'}`}
             >
                 <span className="truncate">{value}</span>
                 <svg
-                    className={`h-4 w-4 text-gray-500 transition-transform duration-200 ml-2 flex-shrink-0 ${isOpen ? 'rotate-180' : ''}`}
+                    className={`h-3.5 w-3.5 sm:h-4 sm:w-4 text-gray-500 transition-transform duration-200 ml-2 flex-shrink-0 ${isOpen ? 'rotate-180' : ''}`}
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -48,24 +50,9 @@ export default function SortDropdown({ options, value, onChange, className = '' 
 
             {isOpen && (
                 <div
-                    className="absolute right-0 mt-1 w-full sm:w-[240px] bg-white border border-gray-200 rounded-[14px] shadow-lg z-50 py-1.5 flex flex-col"
+                    className={`absolute right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50 py-1.5 flex flex-col ${menuClassName || 'w-full sm:w-[240px]'}`}
                 >
-                    <div className="overflow-y-auto flex-1 px-1 custom-thin-scrollbar max-h-[300px]">
-                        <style jsx global>{`
-                            .custom-thin-scrollbar::-webkit-scrollbar {
-                                width: 4px;
-                            }
-                            .custom-thin-scrollbar::-webkit-scrollbar-track {
-                                background: transparent;
-                            }
-                            .custom-thin-scrollbar::-webkit-scrollbar-thumb {
-                                background-color: #cbd5e1;
-                                border-radius: 9999px;
-                            }
-                            .custom-thin-scrollbar::-webkit-scrollbar-thumb:hover {
-                                background-color: #94a3b8;
-                            }
-                        `}</style>
+                    <div className="overflow-y-auto flex-1 px-1 max-h-[300px]">
                         {options.map((option) => {
                             const isSelected = option === value;
                             return (
@@ -73,7 +60,7 @@ export default function SortDropdown({ options, value, onChange, className = '' 
                                     key={option}
                                     type="button"
                                     onClick={() => handleSelect(option)}
-                                    className={`w-full text-left px-3 py-2 text-sm transition-colors cursor-pointer block rounded-[10px] mb-0.5 ${isSelected
+                                    className={`w-full text-left px-2 sm:px-3 py-1 sm:py-1.5 text-[12px] sm:text-sm transition-colors cursor-pointer block rounded-md mb-0.5 ${isSelected
                                         ? 'bg-[#e2f0d9] text-[#458500] font-bold'
                                         : 'text-gray-700 hover:bg-gray-100 font-medium'
                                         }`}

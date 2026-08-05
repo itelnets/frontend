@@ -8,12 +8,14 @@ import PageLoader from '@/components/PageLoader';
 import ConfirmModal from '@/components/ConfirmModal';
 import toast from 'react-hot-toast';
 import PaymentMethod from '@/components/PaymentMethod';
+import { useRazorpayPayment } from './useRazorpayPayment';
+
 const toTitleCase = (str: string) => {
     return str.replace(/\b\w/g, (char) => char.toUpperCase());
 };
 
 function CheckoutContent() {
-    const { cartItems, cartCount, updateQuantity, removeFromCart, moveToList } = useCart();
+    const { cartItems, cartCount, updateQuantity, removeFromCart, moveToList, clearCart } = useCart();
     const [showErrors, setShowErrors] = useState(false);
 
     const [savedAddresses, setSavedAddresses] = useState<any[]>([]);
@@ -28,6 +30,7 @@ function CheckoutContent() {
     const [showGPayButton, setShowGPayButton] = useState(false);
     const [isProcessingGPay, setIsProcessingGPay] = useState(false); // Used to hide the credit card option
     const [isPreparingGPay, setIsPreparingGPay] = useState(false); // Used for the loading spinner on the green button
+    const [isProcessingPayment, setIsProcessingPayment] = useState(false);
     const [editingAddressId, setEditingAddressId] = useState<string | null>(null); // address _id or 'new'
     const [addressToDelete, setAddressToDelete] = useState<string | null>(null);
     const [cartItemToDelete, setCartItemToDelete] = useState<string | null>(null);
@@ -86,20 +89,32 @@ function CheckoutContent() {
     }, [router]);
 
     const handleGPayProcess = () => {
-        setIsPreparingGPay(true);
-        // Simulate a brief delay for processing the selection
-        setTimeout(() => {
-            setIsPreparingGPay(false);
-            setIsProcessingGPay(true); // Hides the card option
-            setShowGPayButton(true);   // Swaps green button for the black G Pay button
-        }, 1000);
+        handleRazorpayPayment();
     };
 
     // Total calculation
     const subtotal = cartItems.reduce((acc, item) => acc + (item.product.discount > 0 ? Math.round(item.product.price * (1 - item.product.discount / 100)) : item.product.price) * item.quantity, 0);
-    const shipping = subtotal > 1000 ? 0 : 99;
-    const taxes = Math.round(subtotal * 0.05); // 5% taxes
+    const shipping = cartItems.length === 0 ? 0 : (subtotal > 1000 ? 0 : 99);
+    const taxes = subtotal * 0.05; // 5% taxes
     const total = subtotal + (cartItems.length > 0 ? shipping + taxes : 0);
+
+    const { handleRazorpayPayment: processRazorpayPayment } = useRazorpayPayment();
+
+    const handleRazorpayPayment = () => {
+        const activeAddress = savedAddresses.find((a: any) => a._id === selectedAddressMode) || (selectedAddressMode !== 'new' ? savedAddresses[0] : null);
+        processRazorpayPayment({
+            activeAddress,
+            cartItems,
+            subtotal,
+            taxes,
+            shipping,
+            total,
+            userEmail,
+            setIsProcessingPayment,
+            clearCart,
+            router
+        });
+    };
 
     const handleEditClick = (e: React.MouseEvent, addr: any) => {
         e.stopPropagation();
@@ -193,12 +208,12 @@ function CheckoutContent() {
                 </div>
 
                 <div className="relative pt-2">
-                    <input type="text" id="addressLine1" maxLength={30} value={formData.addressLine1} onChange={(e) => setFormData({ ...formData, addressLine1: toTitleCase(e.target.value) })} className={`peer w-full border ${showErrors && !formData.addressLine1 ? 'border-red-500' : 'border-gray-300'} rounded-md pr-10 sm:pr-12 px-2 sm:px-3 py-2 sm:py-3 text-[13.5px] sm:text-sm focus:outline-none ${showErrors && !formData.addressLine1 ? '' : 'focus:border-green-600 focus:ring-0.5 focus:ring-green-600'}`} placeholder=" " />
+                    <input type="text" id="addressLine1" maxLength={45} value={formData.addressLine1} onChange={(e) => setFormData({ ...formData, addressLine1: toTitleCase(e.target.value) })} className={`peer w-full border ${showErrors && !formData.addressLine1 ? 'border-red-500' : 'border-gray-300'} rounded-md pr-10 sm:pr-12 px-2 sm:px-3 py-2 sm:py-3 text-[13.5px] sm:text-sm focus:outline-none ${showErrors && !formData.addressLine1 ? '' : 'focus:border-green-600 focus:ring-0.5 focus:ring-green-600'}`} placeholder=" " />
                     <label htmlFor="addressLine1" className={`absolute left-2 -top-0 bg-white px-1 text-xs transition-all peer-placeholder-shown:top-[18px] sm:peer-placeholder-shown:top-5 peer-placeholder-shown:text-xs sm:peer-placeholder-shown:text-sm peer-placeholder-shown:text-gray-400 peer-focus:-top-0 sm:peer-focus:-top-0 peer-focus:text-xs z-10 pointer-events-none ${showErrors && !formData.addressLine1 ? 'text-red-500 peer-focus:text-red-500' : 'text-gray-500 peer-focus:text-green-600'}`}>
                         Address Line 1*
                     </label>
                     <div className="absolute right-2 sm:right-3 top-[19px] sm:top-[22px] text-xs text-gray-400 pointer-events-none">
-                        {30 - (formData.addressLine1?.length || 0)}
+                        {45 - (formData.addressLine1?.length || 0)}
                     </div>
                     {showErrors && !formData.addressLine1 && (
                         <div className="absolute right-10 sm:right-12 top-[18px] sm:top-[21px] pointer-events-none">
@@ -210,12 +225,12 @@ function CheckoutContent() {
 
                 {showAddressLine2 ? (
                     <div className="relative pt-2">
-                        <input type="text" id="addressLine2" maxLength={30} value={formData.addressLine2} onChange={(e) => setFormData({ ...formData, addressLine2: toTitleCase(e.target.value) })} className="peer w-full border border-gray-300 rounded-md pr-10 sm:pr-12 px-2 sm:px-3 py-2 sm:py-3 text-[13.5px] sm:text-sm focus:outline-none focus:border-green-600 focus:ring-0.5 focus:ring-green-600" placeholder=" " />
+                        <input type="text" id="addressLine2" maxLength={25} value={formData.addressLine2} onChange={(e) => setFormData({ ...formData, addressLine2: toTitleCase(e.target.value) })} className="peer w-full border border-gray-300 rounded-md pr-10 sm:pr-12 px-2 sm:px-3 py-2 sm:py-3 text-[13.5px] sm:text-sm focus:outline-none focus:border-green-600 focus:ring-0.5 focus:ring-green-600" placeholder=" " />
                         <label htmlFor="addressLine2" className="absolute left-2 -top-0 bg-white px-1 text-xs text-gray-500 transition-all peer-placeholder-shown:top-[18px] sm:peer-placeholder-shown:top-5 peer-placeholder-shown:text-xs sm:peer-placeholder-shown:text-sm peer-placeholder-shown:text-gray-400 peer-focus:-top-0 sm:peer-focus:-top-0 peer-focus:text-xs peer-focus:text-green-600 z-10 pointer-events-none">
                             Address Line 2
                         </label>
                         <div className="absolute right-2 sm:right-3 top-[19px] sm:top-[22px] text-xs text-gray-400 pointer-events-none">
-                            {30 - (formData.addressLine2?.length || 0)}
+                            {25 - (formData.addressLine2?.length || 0)}
                         </div>
                     </div>
                 ) : (
@@ -226,12 +241,12 @@ function CheckoutContent() {
 
                 {showLandmark ? (
                     <div className="relative pt-2">
-                        <input type="text" id="landmark" maxLength={15} value={formData.landmark} onChange={(e) => setFormData({ ...formData, landmark: toTitleCase(e.target.value) })} className="peer w-full border border-gray-300 rounded-md pr-10 sm:pr-12 px-2 sm:px-3 py-2 sm:py-3 text-[13.5px] sm:text-sm focus:outline-none focus:border-green-600 focus:ring-0.5 focus:ring-green-600" placeholder=" " />
+                        <input type="text" id="landmark" maxLength={10} value={formData.landmark} onChange={(e) => setFormData({ ...formData, landmark: toTitleCase(e.target.value) })} className="peer w-full border border-gray-300 rounded-md pr-10 sm:pr-12 px-2 sm:px-3 py-2 sm:py-3 text-[13.5px] sm:text-sm focus:outline-none focus:border-green-600 focus:ring-0.5 focus:ring-green-600" placeholder=" " />
                         <label htmlFor="landmark" className="absolute left-2 -top-0 bg-white px-1 text-xs text-gray-500 transition-all peer-placeholder-shown:top-[18px] sm:peer-placeholder-shown:top-5 peer-placeholder-shown:text-xs sm:peer-placeholder-shown:text-sm peer-placeholder-shown:text-gray-400 peer-focus:-top-0 sm:peer-focus:-top-0 peer-focus:text-xs peer-focus:text-green-600 z-10 pointer-events-none">
                             Landmarks
                         </label>
                         <div className="absolute right-2 sm:right-3 top-[19px] sm:top-[22px] text-xs text-gray-400 pointer-events-none">
-                            {15 - (formData.landmark?.length || 0)}
+                            {10 - (formData.landmark?.length || 0)}
                         </div>
                     </div>
                 ) : (
@@ -244,7 +259,7 @@ function CheckoutContent() {
                     <div className="relative pt-2">
                         <input type="text" id="city" value={formData.city} onChange={(e) => setFormData({ ...formData, city: toTitleCase(e.target.value) })} className={`peer w-full border ${showErrors && !formData.city ? 'border-red-500' : 'border-gray-300'} rounded-md px-2 sm:px-3 py-2 sm:py-3 text-[13.5px] sm:text-sm focus:outline-none ${showErrors && !formData.city ? '' : 'focus:border-green-600 focus:ring-0.5 focus:ring-green-600'}`} placeholder=" " />
                         <label htmlFor="city" className={`absolute left-2 -top-0 bg-white px-1 text-xs transition-all peer-placeholder-shown:top-[18px] sm:peer-placeholder-shown:top-5 peer-placeholder-shown:text-xs sm:peer-placeholder-shown:text-sm peer-placeholder-shown:text-gray-400 peer-focus:-top-0 sm:peer-focus:-top-0 peer-focus:text-xs z-10 pointer-events-none ${showErrors && !formData.city ? 'text-red-500 peer-focus:text-red-500' : 'text-gray-500 peer-focus:text-green-600'}`}>
-                            Area name*
+                            City*
                         </label>
                         {showErrors && !formData.city && (
                             <div className="absolute right-2 sm:right-3 top-[18px] sm:top-[21px] pointer-events-none">
@@ -358,7 +373,8 @@ function CheckoutContent() {
                         </div>
                         <div className="pl-6 sm:pl-8">
                             <div className="text-[12px] sm:text-[14px] text-gray-500">
-                                {addr.addressLine1} {addr.addressLine2}, {addr.landmark}, {addr.city}, {addr.state}, {addr.zip} | India | {addr.phone}
+                                <div>{addr.addressLine1},{addr.addressLine2}{addr.addressLine2 ? ' - ' : ''}{addr.zip},</div>
+                                <div>{addr.landmark ? addr.landmark + ', ' : ''}{addr.city}, {addr.state}</div>
                             </div>
                             {editingAddressId !== addr._id && (
                                 <div className="mt-3 flex justify-between items-center">
@@ -617,19 +633,35 @@ function CheckoutContent() {
                             ) : (
                                 <button type="button" onClick={(e) => {
                                     e.preventDefault();
+                                    if (cartItems.length === 0) {
+                                        router.push('/');
+                                        return;
+                                    }
                                     if (checkoutStep === 1) {
+                                        if (selectedAddressMode === 'new') {
+                                            toast.error('Please add the address');
+                                            return;
+                                        }
                                         router.push('/checkout?step=2');
                                         return;
                                     }
                                     if (!selectedPaymentMethod) {
                                         toast.error('Please select a payment method');
                                     } else if (selectedPaymentMethod === 'card') {
-                                        setShowCardError(true);
+                                        // setShowCardError(true);
+                                        handleRazorpayPayment();
                                     } else if (selectedPaymentMethod === 'gpay') {
                                         handleGPayProcess();
                                     }
-                                }} disabled={isPreparingGPay} className="w-full bg-[#458500] hover:bg-[#366800] text-white font-normal py-2 sm:py-3 px-6 rounded-md transition-colors font-bold mb-4 text-[16px] cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed">
-                                    {checkoutStep === 1 ? 'Continue' : 'Place Order'}
+                                }} disabled={isPreparingGPay || isProcessingPayment} className="w-full bg-[#458500] hover:bg-[#366800] text-white font-normal py-2 sm:py-3 px-6 rounded-md transition-colors font-bold mb-4 text-[16px] cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center">
+                                    {isProcessingPayment ? (
+                                        <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                    ) : (
+                                        cartItems.length === 0 ? 'Select the product' : (checkoutStep === 1 ? 'Continue' : 'Place Order')
+                                    )}
                                 </button>
                             )}
                         </div>
