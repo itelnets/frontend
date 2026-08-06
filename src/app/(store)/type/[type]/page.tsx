@@ -113,10 +113,10 @@ export default function TypeProductsPage() {
 
 
     return (
-        <div className="min-h-screen bg-gray-50 py-2.5 sm:py-5 px-2.5 sm:px-4 lg:px-5">
-            <div className="max-w-[1400px] mx-auto flex flex-col lg:flex-row gap-4">
+        <div className="flex-1 bg-gray-50 py-2.5 sm:py-5 px-2.5 sm:px-4 lg:px-5 flex flex-col">
+            <div className="flex-1 w-full max-w-[1400px] mx-auto flex flex-col lg:flex-row gap-4 relative">
                 {/* Left Sidebar (Filters - Desktop) */}
-                <div className="hidden lg:block w-56 shrink-0 bg-white p-5 rounded-xl border border-gray-200 h-fit sticky top-6 shadow-sm">
+                <div className="hidden lg:block w-56 shrink-0 bg-white p-5 rounded-xl border border-gray-200 h-fit self-start sticky top-[175px] shadow-sm max-h-[calc(100vh-180px)] overflow-y-auto scrollbar-thin">
                     <h2 className="font-bold text-lg text-gray-900 mb-4 border-b border-gray-100 pb-2">Filters</h2>
 
                     <div className="mb-6">
@@ -129,9 +129,9 @@ export default function TypeProductsPage() {
                         </label>
                     </div>
 
-                    <div className="mb-6 border-t border-gray-100 pt-4">
+                    <div className="mb-3 border-t border-gray-100 pt-2">
                         <h3 className="font-semibold text-sm text-gray-800 mb-3">Brands</h3>
-                        <div className="space-y-2.5 text-sm text-gray-600 max-h-60 overflow-y-auto scrollbar-thin">
+                        <div className="space-y-2.5 text-sm text-gray-600 max-h-48 overflow-y-auto scrollbar-thin">
                             {availableBrands.map(brand => (
                                 <label key={brand} className="flex items-start gap-2.5 cursor-pointer group">
                                     <input
@@ -153,7 +153,7 @@ export default function TypeProductsPage() {
                         </div>
                     </div>
 
-                    <div className="mb-6 border-t border-gray-100 pt-4">
+                    <div className="mb-3 border-t border-gray-100 pt-2">
                         <h3 className="font-semibold text-sm text-gray-800 mb-3">Price</h3>
                         <div className="space-y-2.5 text-sm text-gray-600">
                             {['₹0 - ₹500', '₹500 - ₹1,000', '₹1,000 - ₹2,000', '₹2,000 - ₹3,000', '₹3,000+'].map(priceOption => (
@@ -175,7 +175,7 @@ export default function TypeProductsPage() {
                         </div>
                     </div>
 
-                    <div className="border-t border-gray-100 pt-4">
+                    <div className="border-t border-gray-100 pt-3">
                         <h3 className="font-semibold text-sm text-gray-800 mb-3">Ratings</h3>
                         <div className="space-y-2.5 text-sm text-gray-600">
                             {['5 Stars', '4 Stars', '3 Stars', '2 Stars', '1 Star'].map(ratingOption => {
@@ -260,8 +260,9 @@ export default function TypeProductsPage() {
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-gray-200 pb-3 mb-4 sm:mb-6 sm:bg-white sm:p-4 sm:rounded-xl sm:shadow-sm mt-1 sm:mt-0">
                         {/* Desktop Header */}
                         <div className="hidden sm:block">
-                            <h1 className="text-xl sm:text-2xl text-gray-900 font-bold capitalize">{decodeURIComponent(paramsType)}</h1>
-                            <p className="text-sm text-gray-500 mt-1">Showing 1-{products.length} of {products.length} results</p>
+                            <h1 className="text-[18px] sm:text-[20px] text-gray-900 font-bold capitalize">
+                                {decodeURIComponent(paramsType)} <span className="text-gray-500 font-normal text-[18px] sm:text-[20px]">({products.length})</span>
+                            </h1>
                         </div>
                         <div className="hidden sm:flex items-center gap-3 text-sm mt-4 sm:mt-0">
                             <label className="text-gray-600 whitespace-nowrap">Sort by:</label>

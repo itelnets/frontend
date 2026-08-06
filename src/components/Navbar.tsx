@@ -71,21 +71,17 @@ const Navbar = () => {
     return (
         <>
             <header ref={headerRef} className="sticky w-full left-0 top-0 z-[100]">
-                {/* Top Promo Bar (Hidden on very small screens) - visually hidden when scrolled */}
-                <div className={`hidden md:flex bg-[#f5f5f5] border-b border-gray-200 text-xs text-gray-700 items-center justify-between px-4 py-1.5`}>
-                    <div className="flex items-center space-x-6">
-                        <span className="cursor-pointer hover:underline bg-[#dca8b9] text-[#78233f] px-2 py-0.5 rounded-full font-medium">Buy One, Get One 80% Off &gt;</span>
-                        <span className="cursor-pointer hover:underline flex items-center gap-1">
-                            Shop Travel Essentials &gt;
-                        </span>
-                        <span className="cursor-pointer hover:underline flex items-center gap-1">
-                            Sunscreen: Buy One, Get One 50% Off &gt;
-                        </span>
-                    </div>
-                    <div className="flex items-center space-x-4">
-                        <span className="cursor-pointer hover:underline flex items-center gap-1">
-                            IN | EN | INR
-                        </span>
+                {/* Top Promo Bar */}
+                <div className={`hidden md:block bg-[#f5f5f5] border-b border-gray-200 text-xs text-gray-700`}>
+                    <div className="max-w-[1400px] mx-auto flex items-center justify-between px-4 py-1.5">
+                        <div className="flex items-center gap-6">
+                            <Link href="/offers" className="text-pink-700 font-medium hover:underline bg-pink-100 px-2 py-0.5 rounded">Buy One, Get One 80% Off &gt;</Link>
+                            <Link href="/offers" className="hover:text-gray-900 transition-colors">Shop Travel Essentials &gt;</Link>
+                            <Link href="/offers" className="hover:text-gray-900 transition-colors">Sunscreen: Buy One, Get One 50% Off &gt;</Link>
+                        </div>
+                        <div className="flex items-center gap-4">
+                            <span className="hover:text-gray-900 cursor-pointer transition-colors">IN | EN | INR</span>
+                        </div>
                     </div>
                 </div>
 
@@ -370,7 +366,7 @@ const Navbar = () => {
                                     {/* Main Categories */}
                                     <div className="flex flex-col">
                                         {['Supplements', 'Sports', 'Bath', 'Beauty', 'Grocery', 'Home', 'Baby', 'Pets'].map((cat) => (
-                                            <Link key={cat} href={`/type/${cat.toLowerCase()}`} className="flex items-center justify-between px-3 sm:px-4 py-2.5 sm:py-3.5 hover:bg-gray-50 border-b border-gray-50">
+                                            <Link key={cat} href={`/type/${cat.toLowerCase()}`} onClick={() => setIsMobileMenuOpen(false)} className="flex items-center justify-between px-3 sm:px-4 py-2.5 sm:py-3.5 hover:bg-gray-50 border-b border-gray-50">
                                                 <span className="text-base font-medium text-gray-900">{cat}</span>
                                                 <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
                                             </Link>
@@ -380,25 +376,25 @@ const Navbar = () => {
                                     {/* Shop By Section */}
                                     <div className="pt-6 pb-2">
                                         <div className="px-4 text-xs text-gray-500 mb-2 uppercase tracking-wide">Shop By</div>
-                                        <Link href="/products" className="flex items-center justify-between px-4 py-3 hover:bg-gray-50">
+                                        <Link href="/products" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center justify-between px-4 py-3 hover:bg-gray-50">
                                             <span className="text-base font-medium text-gray-900">Health Topics</span>
                                             <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
                                         </Link>
-                                        <Link href="/products" className="flex items-center justify-between px-4 py-3 hover:bg-gray-50">
-                                            <span className="text-base font-medium text-gray-900">Brands</span>
+                                        <Link href="/brands" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center justify-between px-4 py-3 hover:bg-gray-50">
+                                            <span className="text-base font-medium text-gray-900">Brands A-Z</span>
                                             <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
                                         </Link>
-                                        <Link href="/products" className="block px-4 py-3 hover:bg-gray-50 text-base font-medium text-red-600">Deals</Link>
-                                        <Link href="/products" className="block px-3 sm:px-4 py-2.5 sm:py-3 hover:bg-gray-50 text-base font-medium text-gray-900">Best Sellers</Link>
-                                        <Link href="/products" className="block px-3 sm:px-4 py-2.5 sm:py-3 hover:bg-gray-50 text-base font-medium text-gray-900">New</Link>
-                                        <Link href="/products" className="block px-3 sm:px-4 py-2.5 sm:py-3 hover:bg-gray-50 text-base font-medium text-gray-900">Try</Link>
+                                        <Link href="/products" onClick={() => setIsMobileMenuOpen(false)} className="block px-4 py-3 hover:bg-gray-50 text-base font-medium text-red-600">Deals</Link>
+                                        <Link href="/products" onClick={() => setIsMobileMenuOpen(false)} className="block px-3 sm:px-4 py-2.5 sm:py-3 hover:bg-gray-50 text-base font-medium text-gray-900">Best Sellers</Link>
+                                        <Link href="/products" onClick={() => setIsMobileMenuOpen(false)} className="block px-3 sm:px-4 py-2.5 sm:py-3 hover:bg-gray-50 text-base font-medium text-gray-900">New</Link>
+                                        <Link href="/products" onClick={() => setIsMobileMenuOpen(false)} className="block px-3 sm:px-4 py-2.5 sm:py-3 hover:bg-gray-50 text-base font-medium text-gray-900">Try</Link>
                                     </div>
                                     <div className="mx-4 border-b border-gray-200"></div>
 
                                     {/* Learn Section */}
                                     <div className="pt-4 pb-2">
                                         <div className="px-4 text-xs text-gray-500 mb-2 uppercase tracking-wide">Learn</div>
-                                        <Link href="/products" className="block px-3 sm:px-4 py-2.5 sm:py-3 hover:bg-gray-50 text-base font-medium text-gray-900">Wellness Hub</Link>
+                                        <Link href="/products" onClick={() => setIsMobileMenuOpen(false)} className="block px-3 sm:px-4 py-2.5 sm:py-3 hover:bg-gray-50 text-base font-medium text-gray-900">Wellness Hub</Link>
                                     </div>
                                     <div className="mx-4 border-b border-gray-200"></div>
 

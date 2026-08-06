@@ -28,7 +28,7 @@ export default function AdminDashboardLayout({
     }
 
     return (
-        <div className="flex h-screen overflow-hidden bg-gray-50 font-sans">
+        <div className="flex h-[100dvh] overflow-hidden bg-gray-50 font-sans">
             {/* Sidebar Component */}
             <AdminSidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
 

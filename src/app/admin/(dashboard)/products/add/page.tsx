@@ -7,6 +7,7 @@ import toast from 'react-hot-toast';
 import Spinner from '@/components/Spinner';
 import PageLoader from '@/components/PageLoader';
 import CustomDropdown from '@/components/CustomDropdown';
+import * as XLSX from 'xlsx';
 
 export default function AddProductPage() {
     const router = useRouter();
@@ -22,6 +23,92 @@ export default function AddProductPage() {
         const timestamp = Math.floor(new Date().getTime() / 1000).toString(16);
         const randomHex = 'xxxxxxxxxxxxxxxx'.replace(/[x]/g, () => Math.floor(Math.random() * 16).toString(16));
         return timestamp + randomHex;
+    };
+
+    const handleBulkUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        setIsLoading(true);
+
+        const reader = new FileReader();
+        reader.onload = async (evt) => {
+            try {
+                const arrayBuffer = evt.target?.result as ArrayBuffer;
+                const wb = XLSX.read(arrayBuffer, { type: 'array' });
+                const wsname = wb.SheetNames[0];
+                const ws = wb.Sheets[wsname];
+                const data = XLSX.utils.sheet_to_json(ws);
+
+                if (!data || data.length === 0) {
+                    toast.error("No data found in the Excel file");
+                    setIsLoading(false);
+                    return;
+                }
+
+                let successCount = 0;
+                let errorCount = 0;
+
+                for (let i = 0; i < data.length; i++) {
+                    const row: any = data[i];
+                    
+                    try {
+                        const standardFields = [
+                            'name', 'type', 'description', 'price', 'discount', 'overview',
+                            'suggestedUse', 'otherIngredients', 'warnings', 'disclaimer',
+                            'brand', 'manufacturer', 'inStock', 'bestSeller', 'categories',
+                            'rating', 'hsn', 'batchNo', 'expiredOn', 'images', 'specifications'
+                        ];
+
+                        const specs = Object.keys(row)
+                            .filter(key => !standardFields.includes(key) && row[key] !== undefined && String(row[key]).trim() !== '')
+                            .map(key => ({ key: key.trim(), value: String(row[key]).trim() }));
+
+                        const productData = {
+                            name: row.name || '',
+                            type: row.type || '',
+                            description: row.description || '',
+                            price: Number(row.price) || 0,
+                            discount: Number(row.discount) || 0,
+                            overview: row.overview || '',
+                            suggestedUse: row.suggestedUse || '',
+                            otherIngredients: row.otherIngredients || '',
+                            warnings: row.warnings || '',
+                            disclaimer: row.disclaimer || '',
+                            brand: row.brand || '',
+                            manufacturer: row.manufacturer || '',
+                            inStock: row.inStock !== undefined ? String(row.inStock) : 'Yes',
+                            bestSeller: row.bestSeller !== undefined ? String(row.bestSeller) : '',
+                            categories: row.categories ? String(row.categories).split(',').map((c: string) => c.trim()).filter(Boolean) : [],
+                            rating: row.rating ? Number(row.rating) : 0,
+                            hsn: row.hsn || '',
+                            batchNo: row.batchNo || '',
+                            expiredOn: row.expiredOn || '',
+                            images: [], 
+                            specifications: specs 
+                        };
+
+                        await createProduct(productData);
+                        successCount++;
+                    } catch (err) {
+                        console.error(`Error uploading row ${i + 1}:`, err);
+                        errorCount++;
+                    }
+                }
+
+                toast.success(`Bulk upload complete: ${successCount} added, ${errorCount} failed.`);
+                if (successCount > 0) {
+                    router.push('/admin/products');
+                }
+            } catch (error) {
+                console.error(error);
+                toast.error("Failed to parse Excel file");
+            } finally {
+                setIsLoading(false);
+                if (e.target) e.target.value = '';
+            }
+        };
+        reader.readAsArrayBuffer(file);
     };
 
     useEffect(() => {
@@ -244,7 +331,6 @@ export default function AddProductPage() {
             const uploadedImageUrls = await Promise.all(uploadPromises);
 
             const productData = {
-                _id: newProductId,
                 ...formData,
                 price: Number(formData.price),
                 discount: Number(formData.discount),
@@ -265,20 +351,34 @@ export default function AddProductPage() {
         }
     };
 
-    if (isCancelling || isLoading) {
-        return <PageLoader />;
-    }
-
     return (
         <div className="font-sans p-0 sm:p-4 lg:h-full lg:flex lg:flex-col lg:overflow-hidden">
-            <div className="w-full lg:flex-1 bg-white/80 backdrop-blur-xl border border-white/50 rounded-md shadow-[0_8px_30px_rgb(0,0,0,0.08)] p-3 sm:p-6 transition-all lg:overflow-hidden lg:flex lg:flex-col">
+            <div className="relative w-full lg:flex-1 bg-white/80 backdrop-blur-xl border border-white/50 rounded-md shadow-[0_8px_30px_rgb(0,0,0,0.08)] p-3 sm:p-6 transition-all lg:overflow-hidden lg:flex lg:flex-col">
+                {(isCancelling || isLoading) && (
+                    <div className="absolute inset-0 z-50 bg-white/60 backdrop-blur-sm rounded-md">
+                        <div className="sticky top-0 h-[80vh] lg:h-full flex flex-col items-center justify-center">
+                            <Spinner className="w-10 h-10 sm:w-12 sm:h-12 text-green-600 mb-4" />
+                            <span className="text-gray-700 font-medium">
+                                {isCancelling ? 'Cancelling...' : 'Processing, please wait...'}
+                            </span>
+                        </div>
+                    </div>
+                )}
+                {/* Hidden Bulk Upload Input (Triggered from Topbar) */}
+                <input type="file" id="bulk-upload-input" accept=".csv" className="hidden" onChange={handleBulkUpload} />
+
                 <form id="product-form" onSubmit={handleSubmit} noValidate className="flex flex-col lg:flex-row gap-8 items-start lg:flex-1 lg:overflow-hidden">
 
                     {/* Left Column - Images & Basic Info */}
                     <div className="w-full lg:w-5/12 space-y-4 lg:h-full lg:overflow-y-auto lg:pr-2 scrollbar-thin scrollbar-thumb-gray-200">
                         <div>
-                            <div className="flex items-center gap-4 mb-3">
+                            <div className="flex items-center justify-between gap-4 mb-3">
                                 <label className="block text-sm font-semibold text-gray-700">Product Images <span className="text-red-500">*</span></label>
+                                {/* Mobile Only Bulk Upload Button */}
+                                <label htmlFor="bulk-upload-input" className="sm:hidden bg-[#0052A5] text-white px-3 py-1.5 border border-transparent rounded-md hover:bg-[#003d7a] transition font-medium text-[13px] flex items-center gap-1.5 cursor-pointer shadow-sm shrink-0">
+                                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
+                                    Bulk Upload (.csv)
+                                </label>
                             </div>
 
                             {/* Drag and Drop Upload Container */}

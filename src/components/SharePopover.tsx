@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface SharePopoverProps {
     url: string;
@@ -6,12 +6,11 @@ interface SharePopoverProps {
 
 export default function SharePopover({ url }: SharePopoverProps) {
     const [copied, setCopied] = useState(false);
-    const [isLoggedIn] = useState(() => {
-        if (typeof window !== 'undefined') {
-            return !!localStorage.getItem('userInfo');
-        }
-        return false;
-    });
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+    useEffect(() => {
+        setIsLoggedIn(!!localStorage.getItem('userInfo'));
+    }, []);
 
     const handleCopy = () => {
         if (navigator.clipboard && window.isSecureContext) {

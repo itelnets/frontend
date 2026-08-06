@@ -38,7 +38,7 @@ export default function AdminSidebar({ isOpen, setIsOpen }: AdminSidebarProps) {
 
             {/* Sidebar */}
             <aside
-                className={`fixed top-0 left-0 z-50 h-screen w-48 sm:w-56 bg-white border-r border-gray-200 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static flex flex-col shadow-xl lg:shadow-none ${isOpen ? 'translate-x-0' : '-translate-x-full'
+                className={`fixed top-0 left-0 z-50 h-[100dvh] w-48 sm:w-56 bg-white border-r border-gray-200 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static flex flex-col shadow-xl lg:shadow-none pb-1 lg:pb-0 ${isOpen ? 'translate-x-0' : '-translate-x-full'
                     }`}
             >
                 {/* Logo Area */}
@@ -85,7 +85,7 @@ export default function AdminSidebar({ isOpen, setIsOpen }: AdminSidebarProps) {
                     })}
                 </nav>
 
-                <div className="px-2 py-2 border-t border-gray-100">
+                <div className="p-0 sm:p-2 border-t border-gray-100">
                     <button onClick={handleLogout} className="flex items-center gap-3 px-3 py-2.5 rounded-md w-full cursor-pointer text-left text-sm font-medium text-red-600 hover:bg-red-50 transition-colors">
                         <svg className="w-4.5 h-4.5 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
                         Logout

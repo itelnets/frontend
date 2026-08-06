@@ -339,14 +339,19 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
         }
     };
 
-    if (isLoading || isCancelling || isSaving) {
-        return <PageLoader />;
-    }
-
     return (
         <div className="font-sans p-0 sm:p-4 lg:h-full lg:flex lg:flex-col lg:overflow-hidden">
-            <div className="w-full lg:flex-1 bg-white/80 backdrop-blur-xl border border-white/50 rounded-md shadow-[0_8px_30px_rgb(0,0,0,0.08)] p-3 sm:p-6 transition-all lg:overflow-hidden lg:flex lg:flex-col">
-
+            <div className="relative w-full lg:flex-1 bg-white/80 backdrop-blur-xl border border-white/50 rounded-md shadow-[0_8px_30px_rgb(0,0,0,0.08)] p-3 sm:p-6 transition-all lg:overflow-hidden lg:flex lg:flex-col">
+                {(isLoading || isCancelling || isSaving) && (
+                    <div className="absolute inset-0 z-50 bg-white/60 backdrop-blur-sm rounded-md">
+                        <div className="sticky top-0 h-[80vh] lg:h-full flex flex-col items-center justify-center">
+                            <Spinner className="w-10 h-10 sm:w-12 sm:h-12 text-green-600 mb-4" />
+                            <span className="text-gray-700 font-medium">
+                                {isLoading && !isSaving ? 'Loading product...' : isCancelling ? 'Cancelling...' : 'Processing, please wait...'}
+                            </span>
+                        </div>
+                    </div>
+                )}
                 <form id="product-form" onSubmit={handleSubmit} noValidate className="flex flex-col lg:flex-row gap-8 items-start lg:flex-1 lg:overflow-hidden">
 
                     {/* Left Column - Images & Basic Info */}

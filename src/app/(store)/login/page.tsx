@@ -111,24 +111,28 @@ export default function LoginPage() {
             localStorage.removeItem(lastFailedKey);
             localStorage.setItem('userInfo', JSON.stringify(data));
             document.cookie = "isLoggedIn=true; path=/; max-age=2592000"; // 30 days
+            window.dispatchEvent(new Event('userInfoUpdated'));
 
             if (data.token) {
                 api.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
             }
 
-            toast.success(data.message);
-
             if (data.role === 'admin') {
+                toast.success(data.message);
                 router.push('/admin/users');
             } else {
-                router.push('/');
                 if (navigator.geolocation) {
                     navigator.geolocation.getCurrentPosition(
                         (position) => {
                             api.put('/users/profile', {
                                 latitude: position.coords.latitude,
                                 longitude: position.coords.longitude
-                            }).catch(e => console.error('Failed to save location', e));
+                            })
+                            .catch(e => console.error('Failed to save location', e))
+                            .finally(() => {
+                                toast.success(data.message);
+                                router.push('/');
+                            });
                         },
                         (error) => {
                             if (error.code === 1) { // PERMISSION_DENIED
@@ -139,10 +143,15 @@ export default function LoginPage() {
                                 window.location.href = '/login';
                             } else {
                                 console.warn('Location retrieval timed out or failed (non-fatal)', error);
+                                toast.success(data.message);
+                                router.push('/');
                             }
                         },
-                        { maximumAge: 600000, timeout: 10000, enableHighAccuracy: false }
+                        { maximumAge: 0, timeout: 20000, enableHighAccuracy: true }
                     );
+                } else {
+                    toast.success(data.message);
+                    router.push('/');
                 }
             }
             // If admin or geolocation in progress, keep spinner active
