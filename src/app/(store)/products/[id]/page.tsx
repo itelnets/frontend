@@ -86,104 +86,102 @@ export default function ProductDetailsPage() {
         );
     }
 
-    const renderReviewsPopover = () => (
-        <div className="absolute top-full left-0 mt-2 w-[350px] bg-white border border-gray-200 rounded-xl shadow-xl z-50 p-5 cursor-default" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center gap-4 mb-4">
-                <div className="text-4xl font-extrabold text-gray-900">{displayProduct.rating || 0}</div>
-                <div className="flex flex-col">
-                    <div className="flex text-yellow-400 mb-1">
-                        {[...Array(5)].map((_, i) => {
-                            const rating = displayProduct.rating || 0;
-                            if (rating >= i + 1) {
-                                return (
-                                    <svg key={i} className="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                    </svg>
-                                );
-                            } else if (rating > i) {
-                                return (
-                                    <div key={i} className="relative w-4 h-4">
-                                        <svg className="absolute top-0 left-0 w-4 h-4 text-gray-200" fill="currentColor" viewBox="0 0 20 20">
-                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                        </svg>
-                                        <svg className="absolute top-0 left-0 w-4 h-4 text-yellow-400" style={{ clipPath: 'inset(0 50% 0 0)' }} fill="currentColor" viewBox="0 0 20 20">
-                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                        </svg>
-                                    </div>
-                                );
-                            } else {
-                                return (
-                                    <svg key={i} className="w-4 h-4 text-gray-200" fill="currentColor" viewBox="0 0 20 20">
-                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                    </svg>
-                                );
-                            }
-                        })}
-                    </div>
-                    <span className="text-[10px] text-gray-500">Based on {displayProduct.numReviews} ratings</span>
-                </div>
-            </div>
+    const renderReviewsPopover = () => {
+        const reviews = product?.reviews || [];
+        const totalReviews = displayProduct.numReviews || reviews.length || 0;
 
-            <div className="space-y-2 mb-6">
-                {[
-                    { star: 5, pct: 87, w: 'w-[87%]', color: 'bg-green-700' },
-                    { star: 4, pct: 10, w: 'w-[10%]', color: 'bg-green-600' },
-                    { star: 3, pct: 2, w: 'w-[2%]', color: 'bg-green-400' },
-                    { star: 2, pct: 0, w: 'w-[0%]', color: 'bg-gray-200' },
-                    { star: 1, pct: 0, w: 'w-[0%]', color: 'bg-gray-200' },
-                ].map((row) => (
-                    <div key={row.star} className="flex items-center gap-3 text-xs text-gray-600">
-                        <div className="flex text-yellow-400 w-16">
-                            {[...Array(5)].map((_, i) => (
-                                <svg key={i} className={`w-3 h-3 ${i < row.star ? 'text-yellow-400' : 'text-gray-200'}`} fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
-                            ))}
+        const counts = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+        if (reviews.length > 0) {
+            reviews.forEach((r: any) => {
+                const ratingFloor = Math.floor(r.rating);
+                if (counts[ratingFloor as keyof typeof counts] !== undefined) {
+                    counts[ratingFloor as keyof typeof counts]++;
+                }
+            });
+        }
+
+        const ratingData = [5, 4, 3, 2, 1].map(star => {
+            let pct = 0;
+            if (reviews.length > 0) {
+                pct = Math.round((counts[star as keyof typeof counts] / reviews.length) * 100) || 0;
+            } else if (totalReviews > 0) {
+                if (Math.round(displayProduct.rating || 0) === star) {
+                    pct = 100;
+                }
+            }
+
+            let color = 'bg-gray-200';
+            if (pct > 0) {
+                color = 'bg-green-700'; // Make all progress bars same dark green color
+            }
+
+            return { star, pct, color };
+        });
+
+        return (
+            <div className="absolute top-full left-0 pt-2 z-50 cursor-default" onClick={e => e.stopPropagation()}>
+                <div className="w-[290px] sm:w-[350px] bg-white border border-gray-200 rounded-xl shadow-xl p-4 sm:p-5">
+                    <div className="flex items-center gap-4 mb-4">
+                        <div className="text-3xl sm:text-4xl font-extrabold text-gray-900">{displayProduct.rating || 0}</div>
+                        <div className="flex flex-col">
+                            <div className="flex text-yellow-400 mb-1">
+                                {[...Array(5)].map((_, i) => {
+                                    const rating = displayProduct.rating || 0;
+                                    if (rating >= i + 1) {
+                                        return (
+                                            <svg key={i} className="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                            </svg>
+                                        );
+                                    } else if (rating > i) {
+                                        return (
+                                            <div key={i} className="relative w-4 h-4">
+                                                <svg className="absolute top-0 left-0 w-4 h-4 text-gray-200" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                                </svg>
+                                                <svg className="absolute top-0 left-0 w-4 h-4 text-yellow-400" style={{ clipPath: 'inset(0 50% 0 0)' }} fill="currentColor" viewBox="0 0 20 20">
+                                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                                </svg>
+                                            </div>
+                                        );
+                                    } else {
+                                        return (
+                                            <svg key={i} className="w-4 h-4 text-gray-200" fill="currentColor" viewBox="0 0 20 20">
+                                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                            </svg>
+                                        );
+                                    }
+                                })}
+                            </div>
+                            <span className="text-[10px] text-gray-500">Based on {displayProduct.numReviews} ratings</span>
                         </div>
-                        <div className="flex-1 h-1.5 bg-gray-200 rounded-full overflow-hidden">
-                            <div className={`h-full ${row.color} ${row.w}`}></div>
-                        </div>
-                        <div className="w-6 text-right text-[10px]">{row.pct}%</div>
                     </div>
-                ))}
-            </div>
 
-            <div className="mb-4">
-                <div className="flex items-center gap-1.5 font-bold text-gray-900 text-sm mb-3">
-                    <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" /></svg>
-                    Review highlights
-                    <svg className="w-3.5 h-3.5 text-gray-400 cursor-pointer" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                    <span className="flex items-center gap-1.5 bg-green-50 text-green-800 text-xs px-2.5 py-1.5 rounded-full border border-green-200 hover:bg-green-100 cursor-pointer transition-colors">
-                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" /></svg>
-                        Heart health
-                    </span>
-                    <span className="flex items-center gap-1.5 bg-green-50 text-green-800 text-xs px-2.5 py-1.5 rounded-full border border-green-200 hover:bg-green-100 cursor-pointer transition-colors">
-                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" /></svg>
-                        Feeling better
-                    </span>
-                    <span className="flex items-center gap-1.5 bg-green-50 text-green-800 text-xs px-2.5 py-1.5 rounded-full border border-green-200 hover:bg-green-100 cursor-pointer transition-colors">
-                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" /></svg>
-                        Premium option
-                    </span>
-                    <span className="flex items-center gap-1.5 bg-green-50 text-green-800 text-xs px-2.5 py-1.5 rounded-full border border-green-200 hover:bg-green-100 cursor-pointer transition-colors">
-                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" /></svg>
-                        Smooth and pliable
-                    </span>
-                    <span className="flex items-center gap-1.5 bg-red-50 text-red-800 text-xs px-2.5 py-1.5 rounded-full border border-red-200 hover:bg-red-100 cursor-pointer transition-colors">
-                        <svg className="w-3.5 h-3.5 transform rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" /></svg>
-                        Fishy after taste
-                    </span>
+                    <div className="space-y-1 sm:space-y-2 mb-4 sm:mb-6">
+                        {ratingData.map((row) => (
+                            <div key={row.star} className="flex items-center gap-3 text-xs text-gray-600">
+                                <div className="flex text-yellow-400 w-16">
+                                    {[...Array(5)].map((_, i) => (
+                                        <svg key={i} className={`w-3 h-3 ${i < row.star ? 'text-yellow-400' : 'text-gray-200'}`} fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
+                                    ))}
+                                </div>
+                                <div className="flex-1 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                                    <div className={`h-full ${row.color}`} style={{ width: `${row.pct}%` }}></div>
+                                </div>
+                                <div className="w-6 text-right text-[10px]">{row.pct}%</div>
+                            </div>
+                        ))}
+                    </div>
+                    <div className="text-center">
+                        <a href="#customer-reviews" onClick={() => setShowReviewsPopover(false)} className="text-green-700 text-[12.5px] sm:text-[14px] font-bold flex items-center justify-center gap-1">
+                            See customer reviews
+                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                        </a>
+                    </div>
                 </div>
             </div>
-
-            <div className="text-center">
-                <Link href="#" className="text-blue-600 hover:underline text-xs font-bold flex items-center justify-center gap-1">
-                    See customer reviews
-                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
-                </Link>
-            </div>
-        </div>
-    );
+        );
+    };
 
     const renderTitleAndRating = () => (
         <div className="mb-2">
@@ -212,6 +210,7 @@ export default function ProductDetailsPage() {
                     className="flex items-center gap-1 relative cursor-pointer"
                     onMouseEnter={() => setShowReviewsPopover(true)}
                     onMouseLeave={() => setShowReviewsPopover(false)}
+                    onClick={() => setShowReviewsPopover(!showReviewsPopover)}
                 >
                     {/* Mobile View: 4.9 [1 star] 409 */}
                     <div className="flex lg:hidden items-center gap-1 cursor-pointer">
@@ -555,10 +554,11 @@ export default function ProductDetailsPage() {
                     </div>
                 </div>
 
-                {/* NEW SECTIONS: Appended to both mobile & desktop layouts */}
                 {renderFrequentlyPurchased()}
                 {renderProductInformation()}
-                <CustomerReviews productId={params.id as string} onReviewSubmitted={fetchProduct} />
+                <div id="customer-reviews">
+                    <CustomerReviews productId={params.id as string} onReviewSubmitted={fetchProduct} />
+                </div>
 
             </div>
         </div>
