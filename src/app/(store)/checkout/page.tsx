@@ -428,13 +428,13 @@ function CheckoutContent() {
                         }}
                         className="w-4 h-4 sm:w-5 sm:h-5 text-green-600 border-gray-300 focus:ring-green-500 accent-[#458500] cursor-pointer shrink-0"
                     />
-                    <span className="font-bold text-gray-900 text-[14px] sm:text-[18px] leading-none">Add a new shipping address</span>
+                    <span className="font-bold text-gray-900 text-[14px] sm:text-[18px] leading-none">Add shipping address</span>
                 </div>
 
                 {selectedAddressMode === 'new' && editingAddressId === 'new' && addressFormUI}
                 {selectedAddressMode === 'new' && editingAddressId !== 'new' && (
-                    <div className="mt-4 ml-8">
-                        <button type="button" onClick={() => { setEditingAddressId('new'); setFormData({ fullName: '', addressLine1: '', addressLine2: '', landmark: '', city: '', state: '', zip: '', phone: '', isDefault: false }); }} className="bg-[#458500] hover:bg-[#366800] text-white font-normal py-3 px-12 rounded-md transition-colors font-bold mb-4 text-[16px] cursor-pointer">
+                    <div className="mt-4 sm:ml-8 flex justify-end">
+                        <button type="button" onClick={() => { setEditingAddressId('new'); setFormData({ fullName: '', addressLine1: '', addressLine2: '', landmark: '', city: '', state: '', zip: '', phone: '', isDefault: false }); }} className="bg-[#458500] hover:bg-[#366800] text-white font-normal py-2 sm:py-3 px-6 sm:px-12 rounded-md transition-colors font-bold mb-2 sm:mb-4 text-[14px] sm:text-[16px] cursor-pointer">
                             Fill New Address Form
                         </button>
                     </div>
@@ -548,7 +548,7 @@ function CheckoutContent() {
                         <>
                             <div className="bg-white rounded shadow-sm overflow-hidden mb-2 sm:mb-6">
                                 <div className="p-3 sm:p-6">
-                                    <h2 className="text-[12px] sm:text-[22px] font-bold text-gray-900 mb-1 sm:mb-4">Shipping information</h2>
+                                    <h2 className="text-[18px] sm:text-[22px] font-bold text-gray-900 mb-1 sm:mb-4">Shipping information</h2>
                                     <h3 className="text-base font-bold text-gray-900 mb-3 sm:mb-4">Select a shipping address</h3>
 
                                     {addressSelectionUI}

@@ -18,7 +18,7 @@ export default function TermsAndConditions() {
                         <h1 className="text-[16px] sm:text-[18px] font-bold text-gray-800 m-0">Itelents - Terms & Conditions</h1>
                     </div>
                 </div>
-                <div className="p-4 sm:p-6 lg:p-8 flex-1 min-h-0 overflow-y-auto">
+                <div className="px-4 sm:px-6 lg:px-8 py-4 flex-1 min-h-0 overflow-y-auto">
                     <div className="prose !text-[14px] sm:!text-[15px] text-gray-700 max-w-none space-y-3 sm:space-y-4">
 
                         <h2 className="text-[16px] sm:text-lg lg:text-xl font-bold text-gray-900 !mb-1 sm:!mb-2">1. Purpose</h2>

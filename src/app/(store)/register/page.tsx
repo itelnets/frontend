@@ -8,6 +8,7 @@ import toast from 'react-hot-toast';
 import Spinner from '@/components/Spinner';
 
 export default function RegisterPage() {
+    const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [mobileNumber, setMobileNumber] = useState('');
     const [password, setPassword] = useState('');
@@ -30,7 +31,7 @@ export default function RegisterPage() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (!email || !mobileNumber || !password) {
+        if (!name || !email || !mobileNumber || !password) {
             toast.error('Please fill out all required fields');
             return;
         }
@@ -72,7 +73,7 @@ export default function RegisterPage() {
 
         setIsLoading(true);
         try {
-            const { data } = await api.post('/auth/register', { email, mobileNumber: fullMobileNumber, password }, { timeout: 15000 });
+            const { data } = await api.post('/auth/register', { name, email, mobileNumber: fullMobileNumber, password }, { timeout: 15000 });
 
             // Store the timestamp when the OTP was successfully sent
             localStorage.setItem(`otp_sent_${email}`, Date.now().toString());
@@ -152,6 +153,25 @@ export default function RegisterPage() {
                 {step === 'register' ? (
                     <form className="mt-4 space-y-4" onSubmit={handleSubmit} noValidate>
                         <div className="space-y-3">
+                            <div>
+                                <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+                                    Full Name
+                                </label>
+                                <div className="mt-1">
+                                    <input
+                                        id="name"
+                                        name="name"
+                                        type="text"
+                                        autoComplete="name"
+                                        required
+                                        value={name}
+                                        onChange={(e) => setName(e.target.value)}
+                                        className="block w-full px-3 py-2 sm:px-4 sm:py-3 rounded-md border border-gray-300 placeholder-gray-400 focus:border-[#458500] focus:ring-[#458500] transition duration-200 outline-none text-sm"
+                                        placeholder="John Doe"
+                                    />
+                                </div>
+                            </div>
+
                             <div>
                                 <label htmlFor="email" className="block text-sm font-medium text-gray-700">
                                     Email Address

@@ -49,6 +49,8 @@ export default function MyAccountPage() {
             if (userInfo) {
                 const parsedUser = JSON.parse(userInfo);
                 setUser(parsedUser);
+                setIsLoading(false); // Render immediately using cached data
+
                 try {
                     const freshProfile = await getProfile('addresses');
                     if (freshProfile) {
@@ -67,8 +69,8 @@ export default function MyAccountPage() {
                 }
             } else {
                 router.push('/login');
+                setIsLoading(false);
             }
-            setIsLoading(false);
         };
         loadProfileData();
     }, [router]);
@@ -454,7 +456,7 @@ export default function MyAccountPage() {
                                         </button>
                                     ) : (
                                         <div className="flex items-center gap-4">
-                                            {section.id === 'name' && !user.name && <span className="w-2 h-2 rounded-full bg-[#458500]"></span>}
+
                                             <svg className="w-4 h-4 sm:w-[18px] sm:h-[18px] text-gray-400 group-hover:text-gray-600 transition-colors cursor-pointer" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                                             </svg>

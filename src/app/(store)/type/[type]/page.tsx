@@ -1,11 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { getProducts, getFilters } from '@/services/product';
 import toast from 'react-hot-toast';
 import ProductCard from '@/components/ProductCard';
-import { useCart } from '@/context/CartContext';
 import Spinner from '@/components/Spinner';
 import SortDropdown from '@/components/SortDropdown';
 import MobileFilterDrawer from '@/components/MobileFilterDrawer';
@@ -23,9 +21,7 @@ interface Product {
 import { useParams } from 'next/navigation';
 
 export default function TypeProductsPage() {
-    const router = useRouter();
     const { type: paramsType } = useParams<{ type: string }>();
-    const { myLists, moveToList, removeFromList } = useCart();
     const [products, setProducts] = useState<Product[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [sortOption, setSortOption] = useState('Featured');
@@ -52,36 +48,58 @@ export default function TypeProductsPage() {
     }, []);
 
     useEffect(() => {
-        const fetchFilters = async () => {
-            try {
-                const typeRaw = decodeURIComponent(paramsType);
-                const typeCapitalized = typeRaw.charAt(0).toUpperCase() + typeRaw.slice(1);
-                const { data } = await getFilters({ type: typeCapitalized });
-                setAvailableBrands(data.brands || []);
-            } catch (err) {
-                console.error(err);
-            }
-        };
-        fetchFilters();
-    }, []);
-
-    useEffect(() => {
         const fetchProducts = async () => {
             try {
                 setIsLoading(true);
                 const typeRaw = decodeURIComponent(paramsType);
-                const typeCapitalized = typeRaw.charAt(0).toUpperCase() + typeRaw.slice(1);
+                const typeFormatted = typeRaw.charAt(0).toLowerCase() + typeRaw.slice(1);
 
-                const params = {
+                let minPrice: number | undefined = undefined;
+                let maxPrice: number | undefined = undefined;
+
+                if (filters.price.length > 0) {
+                    const minValues = filters.price.map(p => {
+                        if (p === '₹0 - ₹500') return 0;
+                        if (p === '₹500 - ₹1,000') return 500;
+                        if (p === '₹1,000 - ₹2,000') return 1000;
+                        if (p === '₹2,000 - ₹3,000') return 2000;
+                        if (p === '₹3,000+') return 3000;
+                        return 0;
+                    });
+                    const maxValues = filters.price.map(p => {
+                        if (p === '₹0 - ₹500') return 500;
+                        if (p === '₹500 - ₹1,000') return 1000;
+                        if (p === '₹1,000 - ₹2,000') return 2000;
+                        if (p === '₹2,000 - ₹3,000') return 3000;
+                        if (p === '₹3,000+') return 999999;
+                        return 999999;
+                    });
+                    minPrice = Math.min(...minValues);
+                    const computedMax = Math.max(...maxValues);
+                    maxPrice = computedMax === 999999 ? undefined : computedMax;
+                }
+
+                const cleanRatings = filters.rating.map(r => parseInt(r.charAt(0))).filter(n => !isNaN(n)).join(',');
+
+                const params: any = {
+                    type: typeFormatted,
                     sort: sortOption !== 'Featured' ? sortOption : undefined,
                     inStock: filters.inStock ? 'true' : undefined,
-                    brand: filters.brands.length > 0 ? filters.brands.join('|') : undefined,
-                    priceRanges: filters.price.length > 0 ? filters.price.join('|') : undefined,
-                    ratings: filters.rating.length > 0 ? filters.rating.join('|') : undefined,
-                    type: typeCapitalized
+                    brand: filters.brands.length > 0 ? filters.brands.join(',') : undefined,
+                    ratings: cleanRatings || undefined,
+                    includeFilters: availableBrands.length === 0
                 };
+
+                if (minPrice !== undefined) params.minPrice = minPrice;
+                if (maxPrice !== undefined) params.maxPrice = maxPrice;
+
                 const { data } = await getProducts(params);
-                setProducts(data);
+
+                if (data.filters && data.filters.brands) {
+                    setAvailableBrands(data.filters.brands);
+                }
+
+                setProducts(data.products || data);
             } catch (error) {
                 console.error('Failed to fetch products', error);
                 toast.error('Failed to load products');
@@ -92,9 +110,6 @@ export default function TypeProductsPage() {
 
         fetchProducts();
     }, [filters, sortOption]);
-
-
-
 
 
     return (
@@ -139,10 +154,10 @@ export default function TypeProductsPage() {
                     </div>
 
                     <div className="mb-6 border-t border-gray-100 pt-4">
-                        <h3 className="font-semibold text-sm text-gray-800 mb-3">Price Range</h3>
+                        <h3 className="font-semibold text-sm text-gray-800 mb-3">Price</h3>
                         <div className="space-y-2.5 text-sm text-gray-600">
-                            {['Under ₹500', '₹500 - ₹1,000', 'Over ₹1,000'].map(priceOption => (
-                                <label key={priceOption} className="flex items-center gap-2 cursor-pointer hover:text-[#458500]">
+                            {['₹0 - ₹500', '₹500 - ₹1,000', '₹1,000 - ₹2,000', '₹2,000 - ₹3,000', '₹3,000+'].map(priceOption => (
+                                <label key={priceOption} className="flex items-center gap-2 cursor-pointer">
                                     <input
                                         type="checkbox"
                                         name="price"
@@ -163,22 +178,32 @@ export default function TypeProductsPage() {
                     <div className="border-t border-gray-100 pt-4">
                         <h3 className="font-semibold text-sm text-gray-800 mb-3">Ratings</h3>
                         <div className="space-y-2.5 text-sm text-gray-600">
-                            {['4 Stars & Up', '3 Stars & Up'].map(ratingOption => (
-                                <label key={ratingOption} className="flex items-center gap-2 cursor-pointer hover:text-[#458500]">
-                                    <input
-                                        type="checkbox"
-                                        name="rating"
-                                        className="text-[#458500] focus:ring-[#458500] rounded accent-[#458500] w-4 h-4 cursor-pointer border-gray-300"
-                                        checked={filters.rating.includes(ratingOption)}
-                                        onChange={(e) => {
-                                            const newRating = e.target.checked
-                                                ? [...filters.rating, ratingOption]
-                                                : filters.rating.filter(r => r !== ratingOption);
-                                            setFilters({ ...filters, rating: newRating });
-                                        }}
-                                    /> {ratingOption}
-                                </label>
-                            ))}
+                            {['5 Stars', '4 Stars', '3 Stars', '2 Stars', '1 Star'].map(ratingOption => {
+                                const stars = parseInt(ratingOption.charAt(0)) || 0;
+                                return (
+                                    <label key={ratingOption} className="flex items-center gap-2 cursor-pointer">
+                                        <input
+                                            type="checkbox"
+                                            name="rating"
+                                            className="text-[#458500] focus:ring-[#458500] rounded accent-[#458500] w-4 h-4 cursor-pointer border-gray-300"
+                                            checked={filters.rating.includes(ratingOption)}
+                                            onChange={(e) => {
+                                                const newRating = e.target.checked
+                                                    ? [...filters.rating, ratingOption]
+                                                    : filters.rating.filter(r => r !== ratingOption);
+                                                setFilters({ ...filters, rating: newRating });
+                                            }}
+                                        />
+                                        <div className="flex items-center gap-1">
+                                            <div className="flex">
+                                                {[1, 2, 3, 4, 5].map(i => (
+                                                    <svg key={i} className={`w-4 h-4 ${i <= stars ? 'text-[#f5a623] fill-current' : 'text-gray-300 stroke-current fill-transparent'}`} viewBox="0 0 24 24" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </label>
+                                )
+                            })}
                         </div>
                     </div>
                 </div>
@@ -280,7 +305,24 @@ export default function TypeProductsPage() {
                             </div>
 
                             {products.length === 0 && (
-                                <p className="text-[15px] sm:text-xl text-gray-500">No products found. Check back soon!</p>
+                                <div className="flex flex-col items-center justify-center w-full py-16 sm:py-24 text-center px-4 bg-white rounded-xl border border-gray-100 shadow-sm mt-4">
+                                    <div className="w-20 h-20 sm:w-24 sm:h-24 bg-gray-50 rounded-full flex items-center justify-center mb-4 sm:mb-6">
+                                        <svg className="w-10 h-10 sm:w-12 sm:h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 13.5l1.5-1.5m0 0l1.5-1.5m-1.5 1.5l-1.5-1.5m1.5 1.5l1.5 1.5" />
+                                        </svg>
+                                    </div>
+                                    <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">No products found</h3>
+                                    <p className="text-sm sm:text-base text-gray-500 max-w-sm">
+                                        We couldn't find any products matching your current filters. Try adjusting your search criteria to find what you're looking for.
+                                    </p>
+                                    <button
+                                        onClick={() => setFilters({ inStock: false, brands: [], price: [], rating: [] })}
+                                        className="mt-6 px-6 py-2.5 bg-[#458500] text-white font-medium rounded-lg hover:bg-[#366800] transition-colors shadow-sm text-sm"
+                                    >
+                                        Clear all filters
+                                    </button>
+                                </div>
                             )}
                         </>
                     )}

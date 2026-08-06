@@ -137,29 +137,38 @@ export default function MobileFilterDrawer({ isOpen, onClose, totalResults, init
 
     const renderRatingsContent = () => (
         <div className="p-4 space-y-6">
-            {['4 Stars & Up', '3 Stars & Up'].map((ratingOption, idx) => (
-                <label key={idx} className="flex items-center gap-3 cursor-pointer">
-                    <input
-                        type="checkbox"
-                        name="mobile-rating"
-                        className="w-5 h-5 border-gray-300 rounded text-[#458500] focus:ring-[#458500] accent-[#458500]"
-                        checked={localFilters.rating.includes(ratingOption)}
-                        onChange={(e) => {
-                            const newRating = e.target.checked
-                                ? [...localFilters.rating, ratingOption]
-                                : localFilters.rating.filter((r: string) => r !== ratingOption);
-                            setLocalFilters({ ...localFilters, rating: newRating });
-                        }}
-                    />
-                    <span className="text-gray-600 font-medium ml-1">{ratingOption}</span>
-                </label>
-            ))}
+            {['5 Stars', '4 Stars', '3 Stars', '2 Stars', '1 Star'].map((ratingOption, idx) => {
+                const stars = parseInt(ratingOption.charAt(0)) || 0;
+                return (
+                    <label key={idx} className="flex items-center gap-3 cursor-pointer">
+                        <input
+                            type="checkbox"
+                            name="mobile-rating"
+                            className="w-5 h-5 border-gray-300 rounded text-[#458500] focus:ring-[#458500] accent-[#458500]"
+                            checked={localFilters.rating.includes(ratingOption)}
+                            onChange={(e) => {
+                                const newRating = e.target.checked
+                                    ? [...localFilters.rating, ratingOption]
+                                    : localFilters.rating.filter((r: string) => r !== ratingOption);
+                                setLocalFilters({ ...localFilters, rating: newRating });
+                            }}
+                        />
+                        <div className="flex items-center gap-1 ml-1">
+                            <div className="flex">
+                                {[1, 2, 3, 4, 5].map(i => (
+                                    <svg key={i} className={`w-5 h-5 ${i <= stars ? 'text-[#f5a623] fill-current' : 'text-gray-300 stroke-current fill-transparent'}`} viewBox="0 0 24 24" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                                ))}
+                            </div>
+                        </div>
+                    </label>
+                )
+            })}
         </div>
     );
 
     const renderPriceContent = () => (
         <div className="p-4 space-y-6">
-            {['Under ₹500', '₹500 - ₹1,000', 'Over ₹1,000'].map(priceOption => (
+            {['₹0 - ₹500', '₹500 - ₹1,000', '₹1,000 - ₹2,000', '₹2,000 - ₹3,000', '₹3,000+'].map(priceOption => (
                 <label key={priceOption} className="flex items-center gap-3 cursor-pointer">
                     <input
                         type="checkbox"

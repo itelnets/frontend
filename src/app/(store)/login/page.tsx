@@ -131,11 +131,15 @@ export default function LoginPage() {
                             }).catch(e => console.error('Failed to save location', e));
                         },
                         (error) => {
-                            toast.error('Location access is required to log in');
-                            localStorage.removeItem('userInfo');
-                            document.cookie = "isLoggedIn=; path=/; max-age=0";
-                            delete api.defaults.headers.common['Authorization'];
-                            window.location.href = '/login';
+                            if (error.code === 1) { // PERMISSION_DENIED
+                                toast.error('Location access is required to log in');
+                                localStorage.removeItem('userInfo');
+                                document.cookie = "isLoggedIn=; path=/; max-age=0";
+                                delete api.defaults.headers.common['Authorization'];
+                                window.location.href = '/login';
+                            } else {
+                                console.warn('Location retrieval timed out or failed (non-fatal)', error);
+                            }
                         },
                         { maximumAge: 600000, timeout: 10000, enableHighAccuracy: false }
                     );

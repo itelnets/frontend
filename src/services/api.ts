@@ -6,7 +6,7 @@ const api = axios.create({
     timeout: 3000, // 3 seconds timeout for immediate detection
     headers: {
         'Content-Type': 'application/json',
-        'ngrok-skip-browser-warning': 'true'
+        // 'ngrok-skip-browser-warning': 'true'
     },
 });
 

@@ -13,8 +13,7 @@ export default function OrdersPage() {
     const router = useRouter();
     const [orders, setOrders] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
-    const [activeTab, setActiveTab] = useState<string>('All');
-    const [currentPage, setCurrentPage] = useState<number>(1);
+    const [queryParams, setQueryParams] = useState({ page: 1, status: 'All' });
     const [totalPages, setTotalPages] = useState<number>(1);
     const [totalOrders, setTotalOrders] = useState<number>(0);
     const [selectedOrder, setSelectedOrder] = useState<any>(null);
@@ -59,7 +58,7 @@ export default function OrdersPage() {
         const loadOrders = async () => {
             setIsLoading(true);
             try {
-                const data = await fetchMyOrders(currentPage, 10, activeTab);
+                const data = await fetchMyOrders(queryParams.page, 10, queryParams.status);
                 setOrders(data.orders || []);
                 setTotalPages(data.totalPages || 1);
                 setTotalOrders(data.totalOrders || 0);
@@ -70,16 +69,10 @@ export default function OrdersPage() {
             }
         };
         loadOrders();
-    }, [activeTab, currentPage]);
+    }, [queryParams]);
 
     const filteredOrders = orders;
-
     const tabs = ['All', 'Success', 'Failed', 'Refunded'];
-
-    // Reset to page 1 when changing tabs
-    useEffect(() => {
-        setCurrentPage(1);
-    }, [activeTab]);
 
     const canRequestReturn = (order: any) => {
         if (!order.isPaid || !order.paidAt) return false;
@@ -109,44 +102,46 @@ export default function OrdersPage() {
     return (
         <div className="w-full h-[calc(100dvh-110px)]  sm:h-[calc(100dvh-150px)] md:h-[calc(100dvh-210px)] flex flex-col">
             <div className="bg-white rounded-none sm:rounded-lg shadow-sm border border-[#458500]/20 flex flex-col flex-1 min-h-0 overflow-hidden">
-                <div className="p-3 sm:p-4 border-b-2 border-[#458500]/20 flex items-center justify-between shrink-0">
-                    <div className="flex items-center gap-2">
-                        <svg className="w-5 h-5 text-[#458500]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                        </svg>
-                        <span className="text-[14px] sm:text-[16px] font-bold text-gray-800">My Orders {totalOrders > 0 ? `(${totalOrders})` : ''}</span>
-                    </div>
-
-                    <div className="flex items-center gap-3">
+                {(totalOrders > 0 || queryParams.status !== 'All') && (
+                    <div className="p-2 sm:p-4 border-b-2 border-[#458500]/20 flex items-center justify-between shrink-0 gap-1 sm:gap-2">
                         <div className="flex items-center gap-1 sm:gap-2">
-                            <button
-                                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                                disabled={currentPage === 1}
-                                className="p-1 sm:p-1.5 rounded-md bg-[#458500] text-white hover:bg-[#366800] disabled:bg-gray-100 disabled:text-gray-400 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-colors"
-                            >
-                                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
-                            </button>
-                            <span className="text-[12px] sm:text-[14px] text-gray-700 font-medium whitespace-nowrap">
-                                {currentPage} / {Math.max(1, totalPages)}
-                            </span>
-                            <button
-                                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                                disabled={currentPage >= totalPages}
-                                className="p-1 sm:p-1.5 rounded-md bg-[#458500] text-white hover:bg-[#366800] disabled:bg-gray-100 disabled:text-gray-400 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-colors"
-                            >
-                                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
-                            </button>
+                            <svg className="w-4 h-4 sm:w-5 sm:h-5 text-[#458500]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                            </svg>
+                            <span className="text-[13px] sm:text-[16px] font-bold text-gray-800 whitespace-nowrap">My Orders {totalOrders > 0 ? `(${totalOrders})` : ''}</span>
                         </div>
-                        <SortDropdown
-                            options={tabs.map(tab => tab === 'All' ? 'All Orders' : tab)}
-                            value={activeTab === 'All' ? 'All Orders' : activeTab}
-                            onChange={(val) => setActiveTab(val === 'All Orders' ? 'All' : val)}
-                            className="z-[90]"
-                            buttonClassName="w-[140px] sm:w-[150px]"
-                            menuClassName="w-[100px] sm:w-full"
-                        />
+
+                        <div className="flex items-center gap-1 sm:gap-3">
+                            <div className="flex items-center gap-0.5 sm:gap-2">
+                                <button
+                                    onClick={() => setQueryParams(p => ({ ...p, page: Math.max(1, p.page - 1) }))}
+                                    disabled={queryParams.page === 1}
+                                    className="p-0.5 sm:p-1.5 rounded-md bg-[#458500] text-white hover:bg-[#366800] disabled:bg-gray-100 disabled:text-gray-400 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-colors"
+                                >
+                                    <svg className="w-3.5 h-3.5 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+                                </button>
+                                <span className="text-[11px] sm:text-[14px] text-gray-700 font-medium whitespace-nowrap px-0.5">
+                                    {queryParams.page} / {Math.max(1, totalPages)}
+                                </span>
+                                <button
+                                    onClick={() => setQueryParams(p => ({ ...p, page: Math.min(totalPages, p.page + 1) }))}
+                                    disabled={queryParams.page >= totalPages}
+                                    className="p-0.5 sm:p-1.5 rounded-md bg-[#458500] text-white hover:bg-[#366800] disabled:bg-gray-100 disabled:text-gray-400 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-colors"
+                                >
+                                    <svg className="w-3.5 h-3.5 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                                </button>
+                            </div>
+                            <SortDropdown
+                                options={tabs.map(tab => tab === 'All' ? 'All Orders' : tab)}
+                                value={queryParams.status === 'All' ? 'All Orders' : queryParams.status}
+                                onChange={(val) => setQueryParams({ page: 1, status: val === 'All Orders' ? 'All' : val })}
+                                className="z-[90]"
+                                buttonClassName="min-w-[100px] sm:min-w-[150px] text-[11px] sm:text-[14px] py-1 px-1.5 sm:py-[7px] sm:px-3"
+                                menuClassName="w-[100px] sm:w-full"
+                            />
+                        </div>
                     </div>
-                </div>
+                )}
 
                 <div className="flex-1 min-h-0 flex flex-col">
                     {isLoading ? (
@@ -154,15 +149,17 @@ export default function OrdersPage() {
                             <svg className="animate-spin h-8 w-8 sm:h-12 sm:w-12 text-[#458500]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
                         </div>
                     ) : filteredOrders.length === 0 ? (
-                        <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-10 sm:p-16 text-center flex-1 flex flex-col items-center justify-center min-h-0">
-                            <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4 shrink-0">
-                                <svg className="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
+                        <div className="flex-1 flex flex-col items-center justify-center text-center">
+                            <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gray-100 rounded-full flex items-center justify-center mb-3 sm:mb-4 shrink-0">
+                                <svg className="w-6 h-6 sm:w-8 sm:h-8 text-gray-400" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
                             </div>
-                            <h2 className="text-[18px] sm:text-[20px] font-bold text-gray-900 mb-2">
-                                {activeTab === 'All' ? 'No orders found' : `No ${activeTab} orders found`}
+                            <h2 className="text-base sm:text-lg font-bold text-gray-900 mb-1.5 sm:mb-2">
+                                {queryParams.status === 'All' ? 'No orders found' : `No ${queryParams.status} orders found`}
                             </h2>
-                            <p className="text-gray-500 mb-6 max-w-md mx-auto">Looks like you haven't placed any orders yet. Start shopping to fill this space!</p>
-                            <button onClick={() => router.push('/')} className="bg-[#458500] hover:bg-[#366800] text-white px-8 py-3 rounded-md font-bold transition-colors shadow-sm cursor-pointer shrink-0">
+                            <p className="text-xs sm:text-sm text-gray-500 mb-5 sm:mb-6 max-w-sm px-4">
+                                Looks like you haven't placed any orders yet. Start shopping to fill this space!
+                            </p>
+                            <button onClick={() => router.push('/')} className="px-5 py-2 sm:px-6 sm:py-2.5 rounded-md bg-[#458500] hover:bg-[#366800] text-white text-sm sm:text-base font-bold transition-colors cursor-pointer shrink-0">
                                 Start Shopping
                             </button>
                         </div>

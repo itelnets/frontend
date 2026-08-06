@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import api from '@/services/api';
 import toast from 'react-hot-toast';
 import Spinner from '@/components/Spinner';
@@ -127,7 +126,7 @@ export default function AdminLoginPage() {
                     </div>
 
                     <div className="text-center mt-4">
-                        <a href={`${process.env.NEXT_PUBLIC_STOREFRONT_URL}/login`} className="text-sm text-gray-400 hover:text-white transition">
+                        <a href={`${process.env.NEXT_PUBLIC_FRONTEND_URL}/login`} className="text-sm text-gray-400 hover:text-white transition">
                             &larr; Back to Customer Login
                         </a>
                     </div>
