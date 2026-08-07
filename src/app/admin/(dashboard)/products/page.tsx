@@ -29,7 +29,7 @@ export default function AdminDashboard() {
     const [searchInput, setSearchInput] = useState('');
     const [searchQuery, setSearchQuery] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 10;
+    const itemsPerPage = 20;
     const [portalNode, setPortalNode] = useState<HTMLElement | null>(null);
 
     useEffect(() => {
@@ -132,11 +132,14 @@ export default function AdminDashboard() {
         checkAdmin();
     }, [router]);
 
+    const initialSearchRender = useRef(true);
     // Fetch when query changes after initial load
     useEffect(() => {
-        if (fetched.current) {
-            fetchProducts(searchQuery);
+        if (initialSearchRender.current) {
+            initialSearchRender.current = false;
+            return;
         }
+        fetchProducts(searchQuery);
     }, [searchQuery]);
 
     const toggleProductStatus = async (productId: string, currentStatus: boolean) => {
