@@ -115,12 +115,11 @@ export default function LoginPage() {
             }
 
             const completeLogin = () => {
-                setIsLoading(false);
                 localStorage.setItem('userInfo', JSON.stringify(data));
                 document.cookie = "isLoggedIn=true; path=/; max-age=2592000"; // 30 days
                 window.dispatchEvent(new Event('userInfoUpdated'));
                 toast.success(data.message);
-                router.push(data.role === 'admin' ? '/admin/users' : '/');
+                window.location.href = data.role === 'admin' ? '/admin/users' : '/';
             };
 
             if (data.role === 'admin') {
