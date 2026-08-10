@@ -115,6 +115,7 @@ export default function LoginPage() {
             }
 
             const completeLogin = () => {
+                setIsLoading(false);
                 localStorage.setItem('userInfo', JSON.stringify(data));
                 document.cookie = "isLoggedIn=true; path=/; max-age=2592000"; // 30 days
                 window.dispatchEvent(new Event('userInfoUpdated'));
