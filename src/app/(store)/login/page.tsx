@@ -147,7 +147,7 @@ export default function LoginPage() {
                                 completeLogin();
                             }
                         },
-                        { maximumAge: 7000, timeout: 3000, enableHighAccuracy: false }
+                        { maximumAge: 8000, timeout: 3000, enableHighAccuracy: false }
                     );
                 } else {
                     completeLogin();
