@@ -2,7 +2,6 @@
 import React, { useEffect, useState } from 'react';
 
 export default function MaintenanceModal() {
-    // return null; // Temporarily hidden for ngrok testing
     const [isOpen, setIsOpen] = useState(false);
     const [isChecking, setIsChecking] = useState(false);
 

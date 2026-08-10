@@ -109,17 +109,21 @@ export default function LoginPage() {
             // Clear failed attempts on successful login
             localStorage.removeItem(failedAttemptsKey);
             localStorage.removeItem(lastFailedKey);
-            localStorage.setItem('userInfo', JSON.stringify(data));
-            document.cookie = "isLoggedIn=true; path=/; max-age=2592000"; // 30 days
-            window.dispatchEvent(new Event('userInfoUpdated'));
 
             if (data.token) {
                 api.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
             }
 
-            if (data.role === 'admin') {
+            const completeLogin = () => {
+                localStorage.setItem('userInfo', JSON.stringify(data));
+                document.cookie = "isLoggedIn=true; path=/; max-age=2592000"; // 30 days
+                window.dispatchEvent(new Event('userInfoUpdated'));
                 toast.success(data.message);
-                router.push('/admin/users');
+                router.push(data.role === 'admin' ? '/admin/users' : '/');
+            };
+
+            if (data.role === 'admin') {
+                completeLogin();
             } else {
                 if (navigator.geolocation) {
                     navigator.geolocation.getCurrentPosition(
@@ -128,37 +132,31 @@ export default function LoginPage() {
                                 latitude: position.coords.latitude,
                                 longitude: position.coords.longitude
                             })
-                            .catch(e => console.error('Failed to save location', e))
-                            .finally(() => {
-                                toast.success(data.message);
-                                router.push('/');
-                            });
+                                .catch(e => console.error('Failed to save location', e))
+                                .finally(() => {
+                                    completeLogin();
+                                });
                         },
                         (error) => {
                             if (error.code === 1) { // PERMISSION_DENIED
                                 toast.error('Location access is required to log in');
-                                localStorage.removeItem('userInfo');
-                                document.cookie = "isLoggedIn=; path=/; max-age=0";
                                 delete api.defaults.headers.common['Authorization'];
-                                window.location.href = '/login';
+                                setIsLoading(false);
                             } else {
                                 console.warn('Location retrieval timed out or failed (non-fatal)', error);
-                                toast.success(data.message);
-                                router.push('/');
+                                completeLogin();
                             }
                         },
-                        { maximumAge: 0, timeout: 20000, enableHighAccuracy: true }
+                        { maximumAge: 10000, timeout: 3000, enableHighAccuracy: false }
                     );
                 } else {
-                    toast.success(data.message);
-                    router.push('/');
+                    completeLogin();
                 }
             }
-            // If admin or geolocation in progress, keep spinner active
         } catch (err: any) {
             const errorMessage = err.response?.data?.message || 'Login failed';
 
-            if (err.response?.status === 401 || err.response?.status === 400) {
+            if (err.response?.status === 401 || err.response?.status === 400 || err.response?.status === 404) {
                 const newAttempts = failedAttempts + 1;
                 localStorage.setItem(failedAttemptsKey, newAttempts.toString());
                 localStorage.setItem(lastFailedKey, Date.now().toString());

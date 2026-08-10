@@ -62,7 +62,6 @@ export default function HeroCarousel() {
                 setBanners(data);
             } catch (error) {
                 console.error('Failed to load banners:', error);
-                // setBanners([]); // Fallback to static slides if api fails
             }
         };
         fetchBanners();
