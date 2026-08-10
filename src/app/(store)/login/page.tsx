@@ -237,7 +237,7 @@ export default function LoginPage() {
                                     />
                                     <button
                                         type="button"
-                                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-green-600 hover:text-green-700 cursor-pointer focus:outline-none"
+                                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-[#458500] hover:text-[#386c00] cursor-pointer focus:outline-none"
                                         onClick={() => setShowPassword(!showPassword)}
                                     >
                                         {showPassword ? (

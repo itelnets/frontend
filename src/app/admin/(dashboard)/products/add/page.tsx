@@ -49,8 +49,43 @@ export default function AddProductPage() {
                 let successCount = 0;
                 let errorCount = 0;
 
+                const headerMap: Record<string, string> = {
+                    'Product Name': 'name',
+                    'Product Type': 'type',
+                    'Description': 'description',
+                    'Price (₹)': 'price',
+                    'Price': 'price',
+                    'Discount (%)': 'discount',
+                    'Discount': 'discount',
+                    'Overview': 'overview',
+                    'Suggested Use': 'suggestedUse',
+                    'Other Ingredients': 'otherIngredients',
+                    'Warnings': 'warnings',
+                    'Disclaimer': 'disclaimer',
+                    'Brand': 'brand',
+                    'Manufacturer': 'manufacturer',
+                    'In Stock': 'inStock',
+                    'Best Seller': 'bestSeller',
+                    'Categories (comma-separated)': 'categories',
+                    'Categories': 'categories',
+                    'Manual Rating (optional)': 'rating',
+                    'Rating': 'rating',
+                    'HSN Code': 'hsn',
+                    'Batch No.': 'batchNo',
+                    'Expired On': 'expiredOn'
+                };
+
                 for (let i = 0; i < data.length; i++) {
-                    const row: any = data[i];
+                    const originalRow: any = data[i];
+                    const row: any = {};
+                    
+                    // Normalize the row keys based on the header map
+                    Object.keys(originalRow).forEach(key => {
+                        const trimmedKey = key.trim();
+                        // Match with mapping, or fallback to exact string if it's already camelCase or custom spec
+                        const mappedKey = headerMap[trimmedKey] || trimmedKey;
+                        row[mappedKey] = originalRow[key];
+                    });
                     
                     try {
                         const standardFields = [

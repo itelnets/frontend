@@ -45,6 +45,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
         hsn: '',
         batchNo: '',
         expiredOn: '',
+        categories: '',
     });
 
     // State for Unified Images
@@ -135,6 +136,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                 hsn: data.hsn || '',
                 batchNo: data.batchNo || '',
                 expiredOn: data.expiredOn || '',
+                categories: data.categories ? data.categories.join(', ') : '',
             });
             const existingMapped: ImageItem[] = (data.images || []).map((img: string) => ({
                 type: 'existing',
@@ -326,6 +328,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                 discount: Number(formData.discount),
                 images: finalImageUrls, // Send total combined array of full S3 URLs
                 specifications: specifications.filter(s => s.key.trim() !== '' && s.value.trim() !== ''),
+                categories: formData.categories ? formData.categories.split(',').map((c: string) => c.trim()).filter(Boolean) : [],
             };
 
             await updateProduct(productId, productData);
@@ -490,6 +493,11 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                                     <label className="block text-sm font-semibold text-gray-700 mb-2">Batch No.</label>
                                     <input name="batchNo" value={formData.batchNo} onChange={handleChange} className="w-full px-3 py-2 text-sm bg-white/50 border border-gray-200 rounded-md focus:outline-none focus:border-green-600 transition-all outline-none placeholder-gray-400 h-[38px]" placeholder="e.g. BATCH-001" />
                                 </div>
+                            </div>
+                            
+                            <div>
+                                <label className="block text-sm font-semibold text-gray-700 mb-2">Categories (comma-separated)</label>
+                                <input name="categories" value={formData.categories} onChange={handleChange} className="w-full px-3 py-2 text-sm bg-white/50 border border-gray-200 rounded-md focus:outline-none focus:border-green-600 transition-all outline-none placeholder-gray-400" placeholder="e.g. Health, Vitamins, Best Seller" />
                             </div>
                         </div>
                     </div>

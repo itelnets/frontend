@@ -55,7 +55,7 @@ export default function AdminTopbar({ onMenuClick }: AdminTopbarProps) {
                 </div>
 
                 {!pathname.includes('/products/add') && !pathname.includes('/products/edit') && !pathname.includes('/orders') && !pathname.includes('/users') ? (
-                    <div className="flex items-center gap-2 sm:gap-4 flex-1 justify-end">
+                    <div className="flex items-center gap-2 sm:gap-2.5 flex-1 justify-end">
                         <div id="products-topbar-portal" className="contents"></div>
                         <Link href="/admin/products/add" className="bg-green-600 cursor-pointer hover:bg-green-700 text-white px-2 sm:px-4 py-1 sm:py-1.5 border border-transparent rounded-md text-[13px] sm:text-sm font-medium transition-colors shrink-0">
                             Add Product

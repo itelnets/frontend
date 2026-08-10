@@ -67,7 +67,7 @@ function ResetPasswordForm() {
     return (
         <div className="flex flex-1 h-full bg-gray-50">
             {/* Left Side - Image/Branding */}
-            <div className="hidden lg:flex lg:w-1/2 bg-green-900 relative items-center justify-center">
+            <div className="hidden lg:flex lg:w-1/2 bg-[#458500] relative items-center justify-center">
                 <div className="absolute inset-0 opacity-20 bg-[url('https://www.toptal.com/designers/subtlepatterns/uploads/leaf.png')]"></div>
                 <div className="z-10 text-center px-10">
                     <h1 className="text-5xl text-white mb-4 font-bold">Itelents</h1>
@@ -96,12 +96,12 @@ function ResetPasswordForm() {
                                         required
                                         value={newPassword}
                                         onChange={(e) => setNewPassword(e.target.value)}
-                                        className="block w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-green-500 focus:ring-green-500 transition duration-200 outline-none text-sm pr-10"
+                                        className="block w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-[#458500] focus:ring-[#458500] transition duration-200 outline-none text-sm pr-10"
                                         placeholder="••••••••"
                                     />
                                     <button
                                         type="button"
-                                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-green-600 hover:text-green-700 cursor-pointer focus:outline-none"
+                                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-[#458500] hover:text-[#386c00] cursor-pointer focus:outline-none"
                                         onClick={() => setShowPassword(!showPassword)}
                                     >
                                         {showPassword ? (
@@ -112,10 +112,10 @@ function ResetPasswordForm() {
                                     </button>
                                 </div>
                                 <div className="mt-2 flex flex-wrap gap-2 text-xs">
-                                    <span className={`transition-all duration-300 px-2 py-1 rounded-md border ${/[A-Z]/.test(newPassword) ? 'opacity-100 border-green-500 text-green-700 bg-green-50' : (showPasswordErrors && !/[A-Z]/.test(newPassword) ? 'opacity-100 border-red-500 text-red-700 bg-red-50' : 'opacity-40 border-gray-300 text-gray-500 bg-gray-50')}`}>Capital</span>
-                                    <span className={`transition-all duration-300 px-2 py-1 rounded-md border ${/[a-z]/.test(newPassword) ? 'opacity-100 border-green-500 text-green-700 bg-green-50' : (showPasswordErrors && !/[a-z]/.test(newPassword) ? 'opacity-100 border-red-500 text-red-700 bg-red-50' : 'opacity-40 border-gray-300 text-gray-500 bg-gray-50')}`}>Lowercase</span>
-                                    <span className={`transition-all duration-300 px-2 py-1 rounded-md border ${/[0-9]/.test(newPassword) ? 'opacity-100 border-green-500 text-green-700 bg-green-50' : (showPasswordErrors && !/[0-9]/.test(newPassword) ? 'opacity-100 border-red-500 text-red-700 bg-red-50' : 'opacity-40 border-gray-300 text-gray-500 bg-gray-50')}`}>Numeric</span>
-                                    <span className={`transition-all duration-300 px-2 py-1 rounded-md border ${/[^A-Za-z0-9]/.test(newPassword) && newPassword.length > 0 ? 'opacity-100 border-green-500 text-green-700 bg-green-50' : (showPasswordErrors && (!/[^A-Za-z0-9]/.test(newPassword) || newPassword.length === 0) ? 'opacity-100 border-red-500 text-red-700 bg-red-50' : 'opacity-40 border-gray-300 text-gray-500 bg-gray-50')}`}>Special</span>
+                                    <span className={`transition-all duration-300 px-2 py-1 rounded-md border ${/[A-Z]/.test(newPassword) ? 'opacity-100 border-[#458500] text-[#458500] bg-[#458500]/10' : (showPasswordErrors && !/[A-Z]/.test(newPassword) ? 'opacity-100 border-red-500 text-red-700 bg-red-50' : 'opacity-40 border-gray-300 text-gray-500 bg-gray-50')}`}>Capital</span>
+                                    <span className={`transition-all duration-300 px-2 py-1 rounded-md border ${/[a-z]/.test(newPassword) ? 'opacity-100 border-[#458500] text-[#458500] bg-[#458500]/10' : (showPasswordErrors && !/[a-z]/.test(newPassword) ? 'opacity-100 border-red-500 text-red-700 bg-red-50' : 'opacity-40 border-gray-300 text-gray-500 bg-gray-50')}`}>Lowercase</span>
+                                    <span className={`transition-all duration-300 px-2 py-1 rounded-md border ${/[0-9]/.test(newPassword) ? 'opacity-100 border-[#458500] text-[#458500] bg-[#458500]/10' : (showPasswordErrors && !/[0-9]/.test(newPassword) ? 'opacity-100 border-red-500 text-red-700 bg-red-50' : 'opacity-40 border-gray-300 text-gray-500 bg-gray-50')}`}>Numeric</span>
+                                    <span className={`transition-all duration-300 px-2 py-1 rounded-md border ${/[^A-Za-z0-9]/.test(newPassword) && newPassword.length > 0 ? 'opacity-100 border-[#458500] text-[#458500] bg-[#458500]/10' : (showPasswordErrors && (!/[^A-Za-z0-9]/.test(newPassword) || newPassword.length === 0) ? 'opacity-100 border-red-500 text-red-700 bg-red-50' : 'opacity-40 border-gray-300 text-gray-500 bg-gray-50')}`}>Special</span>
                                 </div>
                             </div>
 
@@ -130,7 +130,7 @@ function ResetPasswordForm() {
                                         required
                                         value={confirmPassword}
                                         onChange={(e) => setConfirmPassword(e.target.value)}
-                                        className="block w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-green-500 focus:ring-green-500 transition duration-200 outline-none text-sm pr-10"
+                                        className="block w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-[#458500] focus:ring-[#458500] transition duration-200 outline-none text-sm pr-10"
                                         placeholder="••••••••"
                                     />
                                 </div>
@@ -141,7 +141,7 @@ function ResetPasswordForm() {
                             <button
                                 type="submit"
                                 disabled={isLoading}
-                                className="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-green-700 hover:bg-green-800 focus:outline-none cursor-pointer transition duration-300 transform disabled:opacity-70 disabled:cursor-not-allowed"
+                                className="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-[#458500] hover:bg-[#386c00] focus:outline-none cursor-pointer transition duration-300 transform disabled:opacity-70 disabled:cursor-not-allowed"
                             >
                                 {isLoading ? <Spinner /> : 'Reset Password'}
                             </button>
