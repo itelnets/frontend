@@ -1,5 +1,6 @@
 import HeroCarousel from '@/components/HeroCarousel';
 import ProductCard from '@/components/ProductCard';
+import TriggerMaintenance from '@/components/TriggerMaintenance';
 
 export const dynamic = 'force-dynamic';
 
@@ -10,16 +11,18 @@ async function getProducts() {
         return await res.json();
     } catch (error) {
         console.error('Error fetching products:', error);
-        return []; // Return an empty array on error, don't trigger full app maintenance
+        return { error: 'maintenance' };
     }
 }
 
 export default async function Home() {
     const allProducts = await getProducts();
-    const products = Array.isArray(allProducts) ? allProducts.filter((p: any) => p.isActive !== false) : [];
+    const isMaintenance = !Array.isArray(allProducts) && allProducts?.error === 'maintenance';
+    const products = isMaintenance ? [] : allProducts.filter((p: any) => p.isActive !== false);
 
     return (
         <div className="flex flex-col min-h-screen bg-white">
+            {isMaintenance && <TriggerMaintenance />}
             <main className="w-full flex-1 mb-20">
                 {/* Hero Banner Section */}
                 <div className="max-w-[1400px] mx-auto mt-0 sm:mt-2">

@@ -11,18 +11,16 @@ export default function MaintenanceModal() {
         try {
             const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
             const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
+            const timeoutId = setTimeout(() => controller.abort(), 3000);
 
-            // Use the health check route instead of the root API which returns 404
-            const res = await fetch(`${apiUrl}/health`, { signal: controller.signal });
+            const res = await fetch(apiUrl, { signal: controller.signal });
             clearTimeout(timeoutId);
 
-            // Only reload if the response is actually successful (status 200-299)
-            if (res && res.ok) {
+            if (res) {
                 window.location.reload();
             }
         } catch (e) {
-            // Still down or aborted
+            // Still down
         } finally {
             if (showLoader) setIsChecking(false);
         }

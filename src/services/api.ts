@@ -3,7 +3,7 @@ import axios from 'axios';
 const api = axios.create({
     baseURL: process.env.NEXT_PUBLIC_API_URL,
     withCredentials: true, // Important for HttpOnly cookies
-    timeout: 15000, // 15 seconds timeout to allow for Vercel cold starts and MongoDB queries
+    timeout: 3000, // 3 seconds timeout for immediate detection
     headers: {
         'Content-Type': 'application/json',
         // 'ngrok-skip-browser-warning': 'true'
