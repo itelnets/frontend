@@ -10,6 +10,7 @@ import ConfirmModal from '@/components/ConfirmModal';
 import Spinner from '@/components/Spinner';
 import { formatDate } from '@/utils/formatDate';
 import CopyIcon from '@/components/CopyIcon';
+import SortDropdown from '@/components/SortDropdown';
 
 interface Product {
     _id: string;
@@ -30,11 +31,15 @@ export default function AdminDashboard() {
     const [searchInput, setSearchInput] = useState('');
     const [searchQuery, setSearchQuery] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [typeFilter, setTypeFilter] = useState('All Types');
     const itemsPerPage = 20;
     const [portalNode, setPortalNode] = useState<HTMLElement | null>(null);
+    const [paginationPortalNode, setPaginationPortalNode] = useState<HTMLElement | null>(null);
 
     useEffect(() => {
         setPortalNode(document.getElementById('products-topbar-portal'));
+        setPaginationPortalNode(document.getElementById('products-pagination-portal'));
     }, []);
     const [productToDelete, setProductToDelete] = useState<string | null>(null);
     const [viewImagesProduct, setViewImagesProduct] = useState<Product | null>(null);
@@ -58,8 +63,6 @@ export default function AdminDashboard() {
         e.preventDefault();
         if (dragIndex.current === null || hoverIndex.current === null || dragIndex.current === hoverIndex.current) return;
 
-        // Since we are using pagination and search, dragging should only work on the displayed subset or we need to map back to original array.
-        // For simplicity, we just swap the elements in the main array based on the paginated array's indices.
         const draggedProduct = paginatedProducts[dragIndex.current];
         const hoveredProduct = paginatedProducts[hoverIndex.current];
 
@@ -85,7 +88,7 @@ export default function AdminDashboard() {
 
     useEffect(() => {
         setCurrentPage(1);
-    }, [searchQuery]);
+    }, [searchQuery, typeFilter]);
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -96,18 +99,32 @@ export default function AdminDashboard() {
         return () => clearTimeout(timer);
     }, [searchInput]);
 
-    const filteredProducts = products; // Backend handles filtering now
+    const paginatedProducts = products;
 
-    const totalPages = Math.max(1, Math.ceil(filteredProducts.length / itemsPerPage));
-    const paginatedProducts = filteredProducts.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
-
-    const fetched = useRef(false);
-
-    const fetchProducts = async (query: string = '') => {
+    const fetchProducts = async (
+        page: number = currentPage,
+        query: string = searchQuery,
+        typeVal: string = typeFilter
+    ) => {
         setIsLoading(true);
         try {
-            const { data } = await getProducts({ search: query });
-            setProducts(Array.isArray(data) ? data : data);
+            const typeParam = typeVal === 'All Types' ? '' : typeVal;
+
+            const { data } = await getProducts({
+                search: query,
+                page: page,
+                limit: itemsPerPage,
+                isActive: 'all',
+                type: typeParam
+            });
+
+            if (data && Array.isArray(data.products)) {
+                setProducts(data.products);
+                setTotalPages(data.totalPages || 1);
+            } else if (Array.isArray(data)) {
+                setProducts(data);
+                setTotalPages(Math.max(1, Math.ceil(data.length / itemsPerPage)));
+            }
         } catch (error) {
             console.error('Failed to fetch products', error);
             toast.error('Failed to load products');
@@ -117,9 +134,6 @@ export default function AdminDashboard() {
     };
 
     useEffect(() => {
-        if (fetched.current) return;
-        fetched.current = true;
-
         const checkAdmin = () => {
             const userInfo = localStorage.getItem('adminInfo');
             if (!userInfo || JSON.parse(userInfo).role !== 'admin') {
@@ -127,21 +141,11 @@ export default function AdminDashboard() {
                 return;
             }
 
-            fetchProducts(searchQuery);
+            fetchProducts(currentPage, searchQuery, typeFilter);
         };
 
         checkAdmin();
-    }, [router]);
-
-    const initialSearchRender = useRef(true);
-    // Fetch when query changes after initial load
-    useEffect(() => {
-        if (initialSearchRender.current) {
-            initialSearchRender.current = false;
-            return;
-        }
-        fetchProducts(searchQuery);
-    }, [searchQuery]);
+    }, [router, currentPage, searchQuery, typeFilter]);
 
     const toggleProductStatus = async (productId: string, currentStatus: boolean) => {
         try {
@@ -192,8 +196,8 @@ export default function AdminDashboard() {
 
     return (
         <div className="sm:p-4 w-full h-[calc(100vh-65px)] flex flex-col mx-auto font-sans">
-            {/* Mobile Controls */}
-            <div className="sm:hidden px-2 py-2 bg-gray-50 flex items-center justify-between gap-2 shrink-0 border-b border-gray-200">
+            {/* Mobile & Tablet Controls (Below Topbar for screens < 1024px) */}
+            <div className="lg:hidden px-2 sm:px-0 pt-2 sm:pt-0 pb-2 bg-gray-50 flex items-center justify-between gap-2 shrink-0 border-b border-gray-200 shadow-2xs">
                 <div className="relative flex items-center flex-1">
                     <div className="absolute left-2.5 text-gray-800">
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
@@ -203,7 +207,7 @@ export default function AdminDashboard() {
                         placeholder="Search by product id and title"
                         value={searchInput}
                         onChange={(e) => setSearchInput(e.target.value)}
-                        className="border border-gray-300 rounded-md pl-8 pr-8 h-[32px] text-[13px] outline-none focus:border-green-500 w-full transition-all bg-white"
+                        className="border border-gray-300 rounded-md pl-8 pr-8 h-[34px] text-[13px] outline-none focus:border-green-500 w-full transition-all bg-white shadow-2xs"
                     />
                     {searchInput && (
                         <button onClick={() => setSearchInput('')} className="absolute right-2 cursor-pointer w-5 h-5 bg-green-500 hover:bg-green-600 text-white rounded-full flex items-center justify-center transition-colors">
@@ -211,24 +215,17 @@ export default function AdminDashboard() {
                         </button>
                     )}
                 </div>
-                <div className="flex items-center gap-1 bg-white border border-gray-300 rounded-md px-1 shadow-sm shrink-0 h-[32px]">
-                    <button
-                        onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                        disabled={currentPage === 1}
-                        className="px-2 py-1 text-sm text-gray-600 disabled:opacity-50 hover:bg-gray-100 rounded cursor-pointer"
-                    >
-                        &lt;
-                    </button>
-                    <span className="text-xs font-medium text-gray-700 min-w-[30px] text-center whitespace-nowrap">
-                        {currentPage}/{Math.max(1, totalPages)}
-                    </span>
-                    <button
-                        onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                        disabled={currentPage >= totalPages}
-                        className="px-2 py-1 text-sm text-gray-600 disabled:opacity-50 hover:bg-gray-100 rounded cursor-pointer"
-                    >
-                        &gt;
-                    </button>
+                <div className="flex items-center gap-1 shrink-0">
+                    <SortDropdown
+                        isAdmin={true}
+                        options={['All Types', 'Supplements', 'Sports', 'Bath', 'Beauty', 'Grocery', 'Home', 'Baby', 'Pets']}
+                        value={typeFilter}
+                        onChange={(val) => setTypeFilter(val)}
+                        className="z-30 w-[110px] sm:w-[130px]"
+                        buttonClassName="h-[34px] text-[11px] sm:text-xs bg-white border border-gray-300 rounded-md px-2"
+                        menuClassName="w-full"
+                        listClassName="max-h-[200px]"
+                    />
                 </div>
             </div>
 
@@ -477,7 +474,7 @@ export default function AdminDashboard() {
 
             {portalNode && createPortal(
                 <>
-                    <div className="hidden sm:flex relative items-center w-[350px] md:w-[400px] xl:w-[500px] shrink min-w-[120px]">
+                    <div className="hidden lg:flex relative items-center w-[350px] xl:w-[450px] shrink min-w-[120px]">
                         <div className="absolute left-2.5 text-gray-800">
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                         </div>
@@ -494,27 +491,41 @@ export default function AdminDashboard() {
                             </button>
                         )}
                     </div>
-                    <div className="flex items-center shrink-0">
-                        <div className="hidden sm:flex items-center gap-1 sm:gap-2 bg-white border sm:border-gray-300 border-gray-200 rounded-md px-1 sm:px-2 shadow-sm h-[32px] sm:h-[36px] shrink-0">
-                            <button
-                                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                                disabled={currentPage === 1}
-                                className="p-1 sm:p-1.5 rounded text-gray-500 hover:bg-gray-100 disabled:opacity-50 cursor-pointer text-xs sm:text-sm"
-                            >
-                                &lt;
-                            </button>
-                            <span className="text-[11px] sm:text-sm font-bold text-gray-700 px-1 whitespace-nowrap min-w-[40px] sm:min-w-[50px] text-center">{currentPage} / {Math.max(1, totalPages)}</span>
-                            <button
-                                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                                disabled={currentPage >= totalPages}
-                                className="p-1 sm:p-1.5 rounded text-gray-500 hover:bg-gray-100 disabled:opacity-50 cursor-pointer text-xs sm:text-sm"
-                            >
-                                &gt;
-                            </button>
-                        </div>
+                    <div className="hidden lg:flex items-center gap-2 sm:gap-3 shrink-0">
+                        <SortDropdown
+                            isAdmin={true}
+                            options={['All Types', 'Supplements', 'Sports', 'Bath', 'Beauty', 'Grocery', 'Home', 'Baby', 'Pets']}
+                            value={typeFilter}
+                            onChange={(val) => setTypeFilter(val)}
+                            className="z-30 w-[120px] sm:w-[140px]"
+                            buttonClassName="h-[32px] sm:h-[36px] text-[11px] sm:text-sm bg-white border border-gray-300 rounded-md"
+                            menuClassName="w-full"
+                            listClassName="max-h-[200px]"
+                        />
                     </div>
                 </>,
                 portalNode
+            )}
+
+            {paginationPortalNode && createPortal(
+                <div className="flex items-center gap-0.5 sm:gap-1 bg-white border border-gray-300 rounded-md px-1 shadow-xs h-[30px] sm:h-[36px] shrink-0">
+                    <button
+                        onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                        disabled={currentPage === 1}
+                        className="px-1.5 py-0.5 sm:p-1.5 rounded text-gray-500 hover:bg-gray-100 disabled:opacity-40 cursor-pointer text-xs sm:text-sm"
+                    >
+                        &lt;
+                    </button>
+                    <span className="text-[11px] sm:text-sm font-bold text-gray-700 px-0.5 sm:px-1 whitespace-nowrap min-w-[28px] sm:min-w-[44px] text-center">{currentPage} / {Math.max(1, totalPages)}</span>
+                    <button
+                        onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                        disabled={currentPage >= totalPages}
+                        className="px-1.5 py-0.5 sm:p-1.5 rounded text-gray-500 hover:bg-gray-100 disabled:opacity-40 cursor-pointer text-xs sm:text-sm"
+                    >
+                        &gt;
+                    </button>
+                </div>,
+                paginationPortalNode
             )}
         </div>
     );

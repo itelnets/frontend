@@ -4,7 +4,7 @@ export const createProduct = async (productData: any) => {
     return api.post('/products', productData);
 };
 
-export const getProducts = async (params: { search?: string; brand?: string; priceRanges?: string; minPrice?: number; maxPrice?: number; sort?: string; inStock?: string; categories?: string; ratings?: string; type?: string; includeFilters?: boolean } = {}) => {
+export const getProducts = async (params: { search?: string; brand?: string; priceRanges?: string; minPrice?: number; maxPrice?: number; sort?: string; inStock?: string; categories?: string; ratings?: string; type?: string; includeFilters?: boolean; page?: number; limit?: number; isActive?: string } = {}) => {
     const queryParams = new URLSearchParams();
     if (params.search) queryParams.append('search', params.search);
     if (params.brand) queryParams.append('brand', params.brand);
@@ -17,6 +17,9 @@ export const getProducts = async (params: { search?: string; brand?: string; pri
     if (params.ratings) queryParams.append('ratings', params.ratings);
     if (params.type) queryParams.append('type', params.type);
     if (params.includeFilters) queryParams.append('includeFilters', 'true');
+    if (params.page !== undefined) queryParams.append('page', params.page.toString());
+    if (params.limit !== undefined) queryParams.append('limit', params.limit.toString());
+    if (params.isActive) queryParams.append('isActive', params.isActive);
 
     const queryString = queryParams.toString();
     const url = queryString ? `/products?${queryString}` : '/products';

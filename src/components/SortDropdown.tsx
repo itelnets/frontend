@@ -9,10 +9,11 @@ type Props = {
     className?: string;
     buttonClassName?: string;
     menuClassName?: string;
+    listClassName?: string;
     isAdmin?: boolean;
 };
 
-export default function SortDropdown({ options, value, onChange, className = '', buttonClassName, menuClassName, isAdmin = false }: Props) {
+export default function SortDropdown({ options, value, onChange, className = '', buttonClassName, menuClassName, listClassName, isAdmin = false }: Props) {
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -53,7 +54,7 @@ export default function SortDropdown({ options, value, onChange, className = '',
                 <div
                     className={`absolute right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50 py-1.5 flex flex-col ${menuClassName || 'w-full sm:w-[240px]'}`}
                 >
-                    <div className="overflow-y-auto flex-1 px-1 max-h-[300px]">
+                    <div className={`overflow-y-auto flex-1 px-1 ${listClassName || 'max-h-[300px]'}`}>
                         {options.map((option) => {
                             const isSelected = option === value;
                             return (

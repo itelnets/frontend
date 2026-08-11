@@ -60,6 +60,7 @@ export default function AdminTopbar({ onMenuClick }: AdminTopbarProps) {
                         <Link href="/admin/products/add" className="bg-green-600 cursor-pointer hover:bg-green-700 text-white px-2 sm:px-4 py-1 sm:py-1.5 border border-transparent rounded-md text-[13px] sm:text-sm font-medium transition-colors shrink-0">
                             Add Product
                         </Link>
+                        <div id="products-pagination-portal" className="contents"></div>
                     </div>
                 ) : pathname.includes('/orders') || pathname.includes('/users') ? (
                     <div id="orders-topbar-portal" className="contents"></div>
