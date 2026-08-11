@@ -10,7 +10,7 @@ export default function MaintenanceModal() {
         try {
             const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
             const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 3000);
+            const timeoutId = setTimeout(() => controller.abort(), 10000);
 
             const res = await fetch(apiUrl, { signal: controller.signal });
             clearTimeout(timeoutId);
