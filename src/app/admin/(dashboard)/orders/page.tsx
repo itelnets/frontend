@@ -138,7 +138,7 @@ function AdminOrdersContent() {
                                 <th className="w-[14%] px-3 sm:px-4 py-3.5 text-center text-[12px] sm:text-[13px] font-bold text-white uppercase tracking-wide whitespace-nowrap border-b border-green-700">Actions</th>
                             </tr>
                         </thead>
-                        <tbody className={`bg-transparent sm:bg-white divide-y-0 sm:divide-y divide-gray-200 block sm:table-row-group transition-opacity duration-200 ${isLoading ? 'opacity-40 pointer-events-none' : 'opacity-100'}`}>
+                        <tbody className={`bg-transparent sm:bg-white divide-y-0 sm:divide-y divide-gray-200 block sm:table-row-group transition-opacity duration-200 ${isLoading && orders.length > 0 ? 'opacity-40 pointer-events-none' : 'opacity-100'}`}>
                             {orders.length === 0 && !isLoading && (
                                 <tr>
                                     <td colSpan={7} className="p-10 text-center text-gray-500">
