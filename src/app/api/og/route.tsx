@@ -11,14 +11,12 @@ export async function GET(request: Request) {
 
         let imageSrc: string | ArrayBuffer = imageUrl;
         try {
-            // Bypass ngrok warning by fetching from localhost directly
-            const localUrl = imageUrl.replace(/https?:\/\/[^\/]+/, 'http://127.0.0.1:5000');
-            const res = await fetch(localUrl);
+            const res = await fetch(imageUrl);
             if (res.ok) {
                 imageSrc = await res.arrayBuffer();
             }
         } catch (e) {
-            console.error('Failed to fetch local image:', e);
+            console.error('Failed to fetch image:', e);
         }
 
         return new ImageResponse(

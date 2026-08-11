@@ -9,13 +9,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     try {
         const resolvedParams = await params;
         const id = resolvedParams.id;
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
-
-        // Bypass ngrok warning for server-side fetches
-        const fetchUrl = apiUrl.includes('ngrok-free.app') ? 'http://127.0.0.1:4000/api' : apiUrl;
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+        if (!apiUrl) {
+            return { title: 'Product Details' };
+        }
 
         // Fetch product from backend
-        const res = await fetch(`${fetchUrl}/products/${id}`);
+        const res = await fetch(`${apiUrl}/products/${id}`);
         if (!res.ok) {
             return {
                 title: 'Product Not Found',
@@ -26,7 +26,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         try {
             product = await res.json();
         } catch (e) {
-            console.error("Failed to parse JSON (ngrok warning?):", e);
+            console.error("Failed to parse JSON response:", e);
             return { title: 'Product Details' };
         }
 
