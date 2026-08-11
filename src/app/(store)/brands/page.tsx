@@ -57,7 +57,7 @@ export default function BrandsPage() {
 
     if (isLoading) {
         return (
-            <div className="min-h-[60vh] flex items-center justify-center">
+            <div className="min-h-[80vh] flex items-center justify-center">
                 <Spinner className="w-8 h-8 text-[#458500]" />
             </div>
         );

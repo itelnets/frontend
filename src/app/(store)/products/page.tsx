@@ -287,7 +287,7 @@ export default function ProductsPage() {
                     </div>
 
                     {isLoading && products.length === 0 ? (
-                        <div className="w-full flex items-center justify-center min-h-[50vh]">
+                        <div className="w-full flex items-center justify-center min-h-[70vh]">
                             <Spinner className="w-8 h-8 sm:w-12 sm:h-12 text-[#458500]" />
                         </div>
                     ) : (
