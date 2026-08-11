@@ -38,7 +38,7 @@ export default function AdminSidebar({ isOpen, setIsOpen }: AdminSidebarProps) {
 
             {/* Sidebar */}
             <aside
-                className={`fixed top-0 left-0 z-50 h-[100dvh] w-48 sm:w-56 bg-white border-r border-gray-200 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static flex flex-col shadow-xl lg:shadow-none pb-1 lg:pb-0 ${isOpen ? 'translate-x-0' : '-translate-x-full'
+                className={`fixed top-0 left-0 z-50 h-[100dvh] w-48 sm:w-52 bg-white border-r border-gray-200 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static flex flex-col shadow-xl lg:shadow-none pb-1 lg:pb-0 ${isOpen ? 'translate-x-0' : '-translate-x-full'
                     }`}
             >
                 {/* Logo Area */}

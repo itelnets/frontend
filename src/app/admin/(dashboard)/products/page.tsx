@@ -17,6 +17,7 @@ interface Product {
     price: number;
     discount: number;
     images: string[];
+    type?: string;
     isActive?: boolean;
     createdAt?: string;
     updatedAt?: string;
@@ -245,6 +246,7 @@ export default function AdminDashboard() {
                                 <tr>
                                     <th scope="col" className="px-3 py-3.5 w-8 border-b border-green-700"></th>
                                     <th scope="col" className="px-6 py-3.5 text-left text-[12px] sm:text-[13px] font-bold text-white uppercase tracking-wide whitespace-nowrap border-b border-green-700">Product</th>
+                                    <th scope="col" className="px-6 py-3.5 text-center w-24 text-[12px] sm:text-[13px] font-bold text-white uppercase tracking-wide whitespace-nowrap border-b border-green-700">Type</th>
                                     <th scope="col" className="px-6 py-3.5 text-center w-10 text-[12px] sm:text-[13px] font-bold text-white uppercase tracking-wide whitespace-nowrap border-b border-green-700">Price</th>
                                     <th scope="col" className="px-6 py-3.5 text-center w-10 text-[12px] sm:text-[13px] font-bold text-white uppercase tracking-wide whitespace-nowrap border-b border-green-700">Discount</th>
                                     <th scope="col" className="px-6 py-3.5 text-center w-10 text-[12px] sm:text-[13px] font-bold text-white uppercase tracking-wide whitespace-nowrap border-b border-green-700">D.Price</th>
@@ -296,6 +298,12 @@ export default function AdminDashboard() {
                                                 </div>
                                             </div>
                                         </td>
+                                        {/* Type */}
+                                        <td className="p-0 sm:px-4 sm:py-2 hidden sm:table-cell sm:border-b sm:border-gray-200 sm:whitespace-nowrap sm:text-center">
+                                            <span className="inline-flex items-center px-2 py-1 rounded text-[14px] font-medium text-gray-800">
+                                                {product.type || 'N/A'}
+                                            </span>
+                                        </td>
                                         {/* Price */}
                                         <td className="p-0 sm:px-4 sm:py-2 hidden sm:table-cell sm:border-b sm:border-gray-200 sm:whitespace-nowrap sm:text-center">
                                             <div className="text-sm font-medium text-gray-900">₹{product.price}</div>
@@ -346,7 +354,7 @@ export default function AdminDashboard() {
                                         {/* Mobile-only compact info row (col-span-3) */}
                                         <td className="col-span-3 sm:hidden px-3 pb-2 pt-0 block">
                                             {/* Row 1: Price + Discount + D.Price + Actions */}
-                                            <div className="flex items-end justify-between gap-2">
+                                            <div className="flex items-end justify-between gap-2 pt-1">
                                                 <div className="flex items-end gap-3 flex-1 min-w-0">
                                                     <div>
                                                         <div className="text-[9px] font-semibold text-gray-400 uppercase">Price</div>
@@ -355,6 +363,10 @@ export default function AdminDashboard() {
                                                     <div>
                                                         <div className="text-[9px] font-semibold text-gray-400 uppercase">D.Price</div>
                                                         <div className="text-[11px] font-semibold text-gray-800">₹{product.discount > 0 ? (product.price - (product.price * product.discount / 100)).toFixed(0) : product.price}</div>
+                                                    </div>
+                                                    <div>
+                                                        <div className="text-[9px] font-semibold text-gray-400 uppercase">Type</div>
+                                                        <div className="text-[11px] font-semibold text-gray-800">{product.type || 'N/A'}</div>
                                                     </div>
                                                 </div>
                                                 {/* Actions */}
@@ -379,7 +391,7 @@ export default function AdminDashboard() {
                                                 </div>
                                             </div>
                                             {/* Row 2: Created At + Updated At */}
-                                            <div className="flex items-center gap-3 mt-1">
+                                            <div className="flex items-center gap-3 h-5">
                                                 <div>
                                                     <span className="text-[9px] font-semibold text-gray-400 uppercase">Created: </span>
                                                     <span className="text-[10px] font-medium text-gray-700">{formatDate(product.createdAt)}</span>

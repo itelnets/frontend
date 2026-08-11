@@ -15,12 +15,12 @@ interface CustomDropdownProps {
     className?: string;
 }
 
-export default function CustomDropdown({ 
-    options, 
-    value, 
-    onChange, 
-    placeholder = 'Select...', 
-    className = 'w-48' 
+export default function CustomDropdown({
+    options,
+    value,
+    onChange,
+    placeholder = 'Select...',
+    className = 'w-48'
 }: CustomDropdownProps) {
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
@@ -45,7 +45,7 @@ export default function CustomDropdown({
 
     return (
         <div className={`relative select-none ${className}`} ref={dropdownRef}>
-            <button 
+            <button
                 type="button"
                 draggable={false}
                 onClick={() => setIsOpen(!isOpen)}
@@ -56,20 +56,19 @@ export default function CustomDropdown({
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
                 </svg>
             </button>
-            
+
             {isOpen && (
                 <div className="absolute top-full right-0 mt-1 w-full min-w-full bg-white border border-gray-200 rounded-md shadow-lg overflow-hidden z-50">
                     <div className="max-h-60 overflow-y-auto py-1">
                         {options.map((option) => (
-                            <button 
+                            <button
                                 key={option.value}
                                 type="button"
-                                onClick={() => handleSelect(option.value)} 
-                                className={`w-full cursor-pointer text-left px-4 py-2 text-sm transition-colors ${
-                                    value === option.value 
-                                        ? 'bg-green-600 text-white font-semibold' 
-                                        : 'text-gray-700 hover:bg-green-50 hover:text-green-700'
-                                }`}
+                                onClick={() => handleSelect(option.value)}
+                                className={`w-full cursor-pointer text-left px-4 py-2 text-sm transition-colors ${value === option.value
+                                    ? 'bg-green-600 text-white font-semibold'
+                                    : 'text-gray-700 hover:bg-green-50 hover:text-green-700'
+                                    }`}
                             >
                                 {option.label}
                             </button>
