@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import Image from 'next/image';
 import Spinner from './Spinner';
 import { getBanners, BannerItem } from '../services/banner';
 
@@ -148,10 +149,13 @@ export default function HeroCarousel() {
 
                 {/* Background: uploaded S3 image or loading overlay */}
                 {uploadedBanner ? (
-                    <img
+                    <Image
                         src={uploadedBanner.imageUrl}
                         alt="Promotion Background"
-                        className="absolute inset-0 w-full h-full object-cover z-0"
+                        fill
+                        priority
+                        sizes="100vw"
+                        className="object-cover z-0"
                     />
                 ) : (
                     <div className="absolute inset-0 w-full h-full bg-white z-0" />

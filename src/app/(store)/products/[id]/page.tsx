@@ -80,8 +80,8 @@ export default function ProductDetailsPage() {
 
     if (isLoading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-white">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-700"></div>
+            <div className="min-h-[80vh] flex items-center justify-center bg-white">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-700 -mt-4"></div>
             </div>
         );
     }

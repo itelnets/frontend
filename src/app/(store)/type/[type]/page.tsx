@@ -122,7 +122,7 @@ export default function TypeProductsPage() {
                     <div className="mb-6">
                         <label className="flex items-center justify-between cursor-pointer group">
                             <span className="font-semibold text-sm text-gray-800 group-hover:text-[#458500] transition-colors">In Stock</span>
-                            <div className={`w-11 h-6 rounded-full flex items-center transition-colors px-0.5 ${filters.inStock ? 'bg-green-600' : 'bg-gray-400'}`}>
+                            <div className={`w-11 h-6 rounded-full flex items-center transition-colors px-0.5 ${filters.inStock ? 'bg-[#458500]' : 'bg-gray-400'}`}>
                                 <div className={`bg-white w-5 h-5 rounded-full shadow-sm transform transition-transform ${filters.inStock ? 'translate-x-5' : ''}`} />
                             </div>
                             <input type="checkbox" className="hidden accent-[#458500]" checked={filters.inStock} onChange={(e) => setFilters({ ...filters, inStock: e.target.checked })} />
@@ -291,12 +291,12 @@ export default function TypeProductsPage() {
                         </div>
                     </div>
 
-                    {isLoading ? (
+                    {isLoading && products.length === 0 ? (
                         <div className="w-full flex items-center justify-center min-h-[50vh]">
                             <Spinner className="w-8 h-8 sm:w-12 sm:h-12 text-[#458500]" />
                         </div>
                     ) : (
-                        <>
+                        <div className={`transition-opacity duration-200 ${isLoading ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
                             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-5 gap-2 sm:gap-3">
                                 {products.map((product) => (
                                     <div key={product._id} className="h-full">
@@ -305,7 +305,7 @@ export default function TypeProductsPage() {
                                 ))}
                             </div>
 
-                            {products.length === 0 && (
+                            {!isLoading && products.length === 0 && (
                                 <div className="flex flex-col items-center justify-center w-full py-16 sm:py-24 text-center px-4 bg-white rounded-xl border border-gray-100 shadow-sm mt-4">
                                     <div className="w-20 h-20 sm:w-24 sm:h-24 bg-gray-50 rounded-full flex items-center justify-center mb-4 sm:mb-6">
                                         <svg className="w-10 h-10 sm:w-12 sm:h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -325,7 +325,7 @@ export default function TypeProductsPage() {
                                     </button>
                                 </div>
                             )}
-                        </>
+                        </div>
                     )}
                 </div>
             </div>

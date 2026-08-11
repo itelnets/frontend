@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import AddToCartButton from '@/components/AddToCartButton';
 import { useCart } from '@/context/CartContext';
 import ConfirmModal from '@/components/ConfirmModal';
@@ -90,10 +91,12 @@ export default function ProductCard({ product, showHeart = false }: ProductCardP
 
             <div className="w-full aspect-[6/5] flex items-center justify-center relative bg-white border-b border-gray-100 p-2 sm:p-4">
                 {product.images && product.images.length > 0 ? (
-                    <img
+                    <Image
                         src={product.images[0].startsWith('http') ? product.images[0] : `${process.env.NEXT_PUBLIC_API_URL}/upload/file/${product.images[0]}`}
                         alt={product.name}
-                        className="w-full h-full object-contain"
+                        fill
+                        sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 16vw"
+                        className="object-contain"
                     />
                 ) : (
                     <svg className="w-12 h-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
