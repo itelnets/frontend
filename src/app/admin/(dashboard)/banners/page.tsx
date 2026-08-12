@@ -123,20 +123,27 @@ export default function BannersPage() {
         try {
             setIsUploading(true);
 
+            const adminInfo = localStorage.getItem('adminInfo');
+            const token = adminInfo ? JSON.parse(adminInfo).token : '';
+
             const fileData = new FormData();
             fileData.append('image', selectedFile);
 
             const uploadRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/upload?type=banner`, {
                 method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
                 body: fileData
             });
 
             if (!uploadRes.ok) {
-                throw new Error('Image upload failed');
+                const errorData = await uploadRes.json().catch(() => ({}));
+                throw new Error(errorData.message || 'Image upload failed');
             }
 
             const uploadData = await uploadRes.json();
-            const imageKey = uploadData.imageKey;
+            const imageKey = uploadData.imageUrl || uploadData.imageKey;
 
             const newBanner = await createBanner(
                 imageKey,

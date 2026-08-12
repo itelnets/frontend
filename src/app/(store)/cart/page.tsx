@@ -11,7 +11,6 @@ import { fetchAddresses } from '@/services/addressService';
 import ConfirmModal from '@/components/ConfirmModal';
 import QuantityDropdown from '@/components/QuantityDropdown';
 import ProductCard from '@/components/ProductCard';
-import PageLoader from '@/components/PageLoader';
 
 export default function CartPage() {
     const { cartItems, cartCount, removeFromCart, addToCart, updateQuantity, myLists, moveToCartFromList, moveToList, clearCart, removeFromList, savedForLater, saveForLater, moveToCartFromSaved, removeFromSaved, isCartLoading } = useCart();

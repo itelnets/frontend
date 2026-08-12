@@ -235,7 +235,6 @@ export default function MobileFilterDrawer({ isOpen, onClose, totalResults, init
                             <div className="p-4 border-b border-gray-200">
                                 <h3 className="text-sm font-bold text-gray-900 mb-3">Popular filters</h3>
                                 <div className="flex flex-wrap gap-2">
-                                    <button className="px-3 py-1.5 border border-gray-300 rounded-full text-sm text-gray-700 bg-white hover:bg-gray-50">Sport Certified</button>
                                     <button
                                         onClick={() => setLocalFilters({ ...localFilters, inStock: !localFilters.inStock })}
                                         className={`px-3 py-1.5 border rounded-full text-sm font-medium transition-colors ${localFilters.inStock ? 'bg-green-50 border-[#458500] text-[#458500]' : 'border-gray-300 text-gray-700 bg-white hover:bg-gray-50'}`}
@@ -264,9 +263,6 @@ export default function MobileFilterDrawer({ isOpen, onClose, totalResults, init
                             <AccordionItem title="Price" activeValue={localFilters.price.length > 0 ? localFilters.price.join(', ') : undefined}>
                                 {renderPriceContent()}
                             </AccordionItem>
-                            <AccordionItem title="Special offers" />
-                            <AccordionItem title="Weight" />
-                            <AccordionItem title="Help With" />
                         </>
                     )}
 

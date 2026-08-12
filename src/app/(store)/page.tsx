@@ -30,7 +30,7 @@ export default async function Home() {
                 </div>
 
                 {/* Deals Section */}
-                <div className="max-w-[1400px] mx-auto px-2.5 sm:px-4 mt-2 sm:mt-6">
+                <div className="max-w-[1400px] mx-auto px-2.5 sm:px-4 mt-1 sm:mt-[-20px] md:mt-[-10px] lg:mt-6">
                     <div className="flex items-center gap-4 mb-2 sm:mb-6">
                         <h2 className="text-lg sm:text-xl font-bold text-gray-900">Recommended for you</h2>
                     </div>

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import Link from 'next/link';
 import Image from 'next/image';
 import Spinner from './Spinner';
 import { getBanners, BannerItem } from '../services/banner';
@@ -12,6 +13,12 @@ const BG_CLASSES = [
     "from-[#fef3c7] via-[#fde68a] to-[#fef3c7]",
     "from-[#f5f3ff] via-[#ede9fe] to-[#f5f3ff]"
 ];
+
+export const getBannerSlug = (title?: string) => {
+    if (!title) return 'deals';
+    const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+    return slug || 'deals';
+};
 
 export default function HeroCarousel() {
     const [banners, setBanners] = useState<BannerItem[] | null>(null);
@@ -131,16 +138,18 @@ export default function HeroCarousel() {
 
                 {/* Background: uploaded S3 image or fallback gradient */}
                 {uploadedBanner ? (
-                    <Image
-                        src={uploadedBanner.imageUrl}
-                        alt="Promotion Background"
-                        fill
-                        priority
-                        sizes="100vw"
-                        className="object-cover z-0"
-                    />
+                    <Link href={`/${getBannerSlug(activeSlide?.tabTitle)}`} className="absolute inset-0 z-0 cursor-pointer block">
+                        <Image
+                            src={uploadedBanner.imageUrl}
+                            alt={activeSlide?.tabTitle || "Promotion Background"}
+                            fill
+                            priority
+                            sizes="100vw"
+                            className="object-cover z-0"
+                        />
+                    </Link>
                 ) : (
-                    <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-[#fae6e9] via-[#f7d9dc] to-[#fce4e6] z-0" />
+                    <Link href={`/${getBannerSlug(activeSlide?.tabTitle)}`} className="absolute inset-0 w-full h-full bg-gradient-to-r from-[#fae6e9] via-[#f7d9dc] to-[#fce4e6] z-0 block" />
                 )}
 
                 {isBannerLoading && (
@@ -187,7 +196,7 @@ export default function HeroCarousel() {
                 </button>
 
                 {/* Mobile dot indicators */}
-                <div className="flex sm:hidden absolute bottom-1 left-1/2 -translate-x-1/2 gap-1 z-20">
+                <div className="flex sm:hidden absolute bottom-1.5 left-1/2 -translate-x-1/2 gap-1 z-20">
                     {activeSlides.map((_, idx) => (
                         <button
                             key={idx}
@@ -204,8 +213,9 @@ export default function HeroCarousel() {
                 {activeSlides.map((item, idx) => {
                     const isActive = idx === currentSlide;
                     return (
-                        <div
+                        <Link
                             key={item.id}
+                            href={`/${getBannerSlug(item.tabTitle)}`}
                             onMouseEnter={() => handleTabHover(idx)}
                             className={`flex flex-col justify-center py-2.5 px-5 text-center cursor-pointer transition-all duration-300 rounded-xl whitespace-nowrap ${isActive
                                 ? 'bg-white border border-gray-300 shadow-xs'
@@ -222,7 +232,7 @@ export default function HeroCarousel() {
                                     {item.tabSubtitle}
                                 </div>
                             ) : null}
-                        </div>
+                        </Link>
                     );
                 })}
             </div>
