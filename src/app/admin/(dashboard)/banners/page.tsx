@@ -181,6 +181,7 @@ export default function BannersPage() {
     // (no inline edit or toggle handlers needed)
 
     const onDragStart = (e: React.DragEvent, index: number) => {
+        window.getSelection()?.removeAllRanges();
         setDragIndex(index);
         e.dataTransfer.effectAllowed = 'move';
         try { e.dataTransfer.setData('text/plain', index.toString()); } catch (err) { }
@@ -193,6 +194,7 @@ export default function BannersPage() {
 
     const onDrop = async (e: React.DragEvent, index: number) => {
         e.preventDefault();
+        window.getSelection()?.removeAllRanges();
         const fromIndex = dragIndex !== null ? dragIndex : parseInt(e.dataTransfer.getData('text/plain') || '-1', 10);
         const toIndex = index;
         setDragIndex(null);
@@ -203,17 +205,18 @@ export default function BannersPage() {
         const updated = [...banners];
         const [moved] = updated.splice(fromIndex, 1);
         updated.splice(toIndex, 0, moved);
+
+        // Optimistically update UI
         setBanners(updated);
 
-        // persist new order
         try {
             const ids = updated.map(u => u._id);
             await reorderBanners(ids);
             toast.success('Order saved');
         } catch (error) {
-            console.error('Error saving order:', error);
+            console.error('Failed to update banner order:', error);
             toast.error('Failed to save new order');
-            // reload to revert
+            // Revert on error
             loadBanners();
         }
     };
@@ -237,18 +240,16 @@ export default function BannersPage() {
 
     return (
         <div className="p-3 sm:p-6 max-w-6xl mx-auto select-none">
-            <div className="mb-6 flex flex-col sm:flex-row justify-between sm:items-center gap-3">
-                <div>
-                    <h1 className="text-xl sm:text-2xl font-extrabold text-gray-900 tracking-tight">Homepage Banners</h1>
-                    <p className="text-xs sm:text-sm text-gray-500 mt-1">Upload and manage promotional slides for the store header.</p>
-                </div>
-                <span className="inline-flex items-center w-fit gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-green-50 text-green-700 border border-green-200/50">
-                    Required Size: 1368 x 260 px | JPG, JPEG, PNG
-                </span>
-            </div>
-
             {/* Compact, Space-Optimized Banner upload form */}
-            <form onSubmit={handleSubmit} className="bg-white border border-gray-200 rounded-xl p-4 sm:p-5 mb-4 sm:mb-8 shadow-xs max-w-4xl space-y-4">
+            <form onSubmit={handleSubmit} className="bg-white border border-gray-200 rounded-xl p-4 sm:p-5 mb-4 sm:mb-8 shadow-xs space-y-3">
+                {/* Info Badge Row (above drag & drop and upload button row, right-aligned) */}
+                <div className="flex justify-center sm:justify-end">
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] sm:text-xs font-semibold bg-green-50 text-green-700 border border-green-200/50">
+                        Required Size: 1368 x 260 px | JPG, JPEG, PNG
+                    </span>
+                </div>
+
+                {/* Main Row: Drag & Drop Zone + Image Preview + Upload Banner Button */}
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
 
                     {/* Compact Drag & Drop Upload Zone */}

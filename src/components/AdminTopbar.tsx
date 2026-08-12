@@ -24,7 +24,9 @@ export default function AdminTopbar({ onMenuClick }: AdminTopbarProps) {
     };
 
     let pageTitle = 'Products';
-    if (pathname.includes('/products/add')) {
+    if (pathname.includes('/banners')) {
+        pageTitle = 'Banners';
+    } else if (pathname.includes('/products/add')) {
         pageTitle = 'Add Product';
     } else if (pathname.includes('/products/edit')) {
         pageTitle = 'Edit Product';
@@ -54,7 +56,7 @@ export default function AdminTopbar({ onMenuClick }: AdminTopbarProps) {
                     <h1 className="text-base sm:text-xl font-bold text-gray-900 tracking-tight">{pageTitle}</h1>
                 </div>
 
-                {!pathname.includes('/products/add') && !pathname.includes('/products/edit') && !pathname.includes('/orders') && !pathname.includes('/users') ? (
+                {!pathname.includes('/products/add') && !pathname.includes('/products/edit') && !pathname.includes('/orders') && !pathname.includes('/users') && !pathname.includes('/banners') ? (
                     <div className="flex items-center gap-2 sm:gap-2.5 flex-1 justify-end">
                         <div id="products-topbar-portal" className="contents"></div>
                         <Link href="/admin/products/add" className="bg-green-600 cursor-pointer hover:bg-green-700 text-white px-2 sm:px-4 py-1 sm:py-1.5 border border-transparent rounded-md text-[13px] sm:text-sm font-medium transition-colors shrink-0">
@@ -62,8 +64,8 @@ export default function AdminTopbar({ onMenuClick }: AdminTopbarProps) {
                         </Link>
                         <div id="products-pagination-portal" className="contents"></div>
                     </div>
-                ) : pathname.includes('/orders') || pathname.includes('/users') ? (
-                    <div id="orders-topbar-portal" className="contents"></div>
+                ) : pathname.includes('/orders') || pathname.includes('/users') || pathname.includes('/banners') ? (
+                    <div id="topbar-portal" className="contents"></div>
                 ) : (
                     <div className="flex items-center gap-2 sm:gap-4">
                         <button onClick={handleCancel} className="bg-white text-gray-700 text-[13px] sm:text-sm font-medium px-2 sm:px-4 py-1 sm:py-1.5 border border-gray-200 rounded-md hover:bg-gray-50 transition-colors cursor-pointer shadow-sm shrink-0">
