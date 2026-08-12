@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import { getProducts } from '@/services/product';
 import { getBanners, BannerItem } from '@/services/banner';
 import { getBannerSlug } from '@/components/HeroCarousel';
@@ -20,6 +20,7 @@ import {
 } from './components/DealsPageComponents';
 
 export default function BannerDealsPage() {
+    const router = useRouter();
     const params = useParams();
     const slug = (params?.slug as string) || '';
 
@@ -42,33 +43,45 @@ export default function BannerDealsPage() {
     const [mobileFilterView, setMobileFilterView] = useState<'main' | 'brands' | 'ratings' | 'price'>('main');
     const [isMobileSortOpen, setIsMobileSortOpen] = useState(false);
 
+    const [isValidating, setIsValidating] = useState(true);
+    const [isValidSlug, setIsValidSlug] = useState<boolean | null>(null);
+
     // Parse discount number and direction from slug or banner title (e.g., 10% off -> maxDiscount: 10; 20% off -> maxDiscount: 20; 30% off -> maxDiscount: 30)
     const isMinDiscount = slug.toLowerCase().includes('min-') || (banner?.tabTitle?.toLowerCase().includes('minimum') ?? false);
     const isUpTo = !isMinDiscount;
     const discountMatch = slug.match(/(\d+)-off/i) || slug.match(/(\d+)%/) || slug.match(/(\d+)-percent/i) || (banner?.tabTitle || '').match(/(\d+)%/) || (banner?.tabTitle || '').match(/(\d+)\s*%?\s*off/i);
     const parsedDiscount = discountMatch ? parseInt(discountMatch[1], 10) : undefined;
 
-    // Fetch banner details for the header card
+    // Fetch banner details and validate slug against backend banners list
     useEffect(() => {
-        const fetchBanner = async () => {
+        const validateBannerSlug = async () => {
             try {
-                setIsBannerLoading(true);
+                setIsValidating(true);
                 const banners = await getBanners();
                 const matched = banners.find(b => getBannerSlug(b.tabTitle) === slug);
                 if (matched) {
                     setBanner(matched);
+                    setIsValidSlug(true);
+                } else {
+                    setIsValidSlug(false);
+                    router.replace('/');
                 }
             } catch (err) {
                 console.error('Failed to load banner details:', err);
+                setIsValidSlug(false);
+                router.replace('/');
             } finally {
+                setIsValidating(false);
                 setIsBannerLoading(false);
             }
         };
-        fetchBanner();
-    }, [slug]);
+        validateBannerSlug();
+    }, [slug, router]);
 
-    // Fetch filtered products
+    // Fetch filtered products (only execute after slug validation succeeds)
     useEffect(() => {
+        if (isValidSlug !== true) return;
+
         const fetchProducts = async () => {
             try {
                 setIsLoading(true);
@@ -88,7 +101,7 @@ export default function BannerDealsPage() {
                     const maxValues = filters.price.map((p: string) => {
                         if (p === '₹0 - ₹500') return 500;
                         if (p === '₹500 - ₹1,000') return 1000;
-                        if (p === '₹1,000 - ₹2,000') return 2000;
+                        if (p === '₹1,000 - ₹2,000') return 1000;
                         if (p === '₹2,000 - ₹3,000') return 3000;
                         if (p === '₹3,000+') return 999999;
                         return 999999;
@@ -142,7 +155,7 @@ export default function BannerDealsPage() {
         };
 
         fetchProducts();
-    }, [slug, banner, selectedType, filters, sortOption, parsedDiscount, isUpTo]);
+    }, [slug, selectedType, sortOption, filters, parsedDiscount, isValidSlug]);
 
     const pageTitle = banner?.tabTitle || slug.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
     const pageSubtitle = banner?.tabSubtitle || 'Hundreds of picks across every aisle. Limited time only.';
@@ -158,6 +171,10 @@ export default function BannerDealsPage() {
         });
         setSelectedType('');
     };
+
+    if (isValidating || isValidSlug === false) {
+        return null;
+    }
 
     return (
         <div className="flex flex-col min-h-screen bg-white">

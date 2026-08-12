@@ -8,6 +8,7 @@ import Spinner from './Spinner';
 import SearchBar from './SearchBar';
 import toast from 'react-hot-toast';
 import api from '@/services/api';
+import { getBannerSlug } from './HeroCarousel';
 
 const Navbar = () => {
     const router = useRouter();
@@ -30,14 +31,14 @@ const Navbar = () => {
         const checkAuth = (e?: Event) => {
             const isUserInfoUpdate = e?.type === 'userInfoUpdated';
             const userInfo = localStorage.getItem('userInfo');
-            
+
             if (userInfo) {
                 setUser(JSON.parse(userInfo));
                 // Self-healing: ensure cookie exists if they have a valid session
                 if (!document.cookie.includes('isLoggedIn=true')) {
                     document.cookie = "isLoggedIn=true; path=/; max-age=2592000";
                 }
-                
+
                 // Only fetch orders on initial load or cross-tab login, NOT on simple profile updates
                 if (!isUserInfoUpdate) {
                     api.get('/orders/myorders?status=Success&limit=1').then(res => {
@@ -71,20 +72,6 @@ const Navbar = () => {
     return (
         <>
             <header ref={headerRef} className="sticky w-full left-0 top-0 z-[100]">
-                {/* Top Promo Bar */}
-                <div className={`hidden md:block bg-[#f5f5f5] border-b border-gray-200 text-xs text-gray-700`}>
-                    <div className="max-w-[1400px] mx-auto flex items-center justify-between px-4 py-1.5">
-                        <div className="flex items-center gap-6">
-                            <Link href="/offers" className="text-pink-700 font-medium hover:underline bg-pink-100 px-2 py-0.5 rounded">Buy One, Get One 80% Off &gt;</Link>
-                            <Link href="/offers" className="hover:text-gray-900 transition-colors">Shop Travel Essentials &gt;</Link>
-                            <Link href="/offers" className="hover:text-gray-900 transition-colors">Sunscreen: Buy One, Get One 50% Off &gt;</Link>
-                        </div>
-                        <div className="flex items-center gap-4">
-                            <span className="hover:text-gray-900 cursor-pointer transition-colors">IN | EN | INR</span>
-                        </div>
-                    </div>
-                </div>
-
                 {/* Main Green Header */}
                 <div className={`bg-[#458500] text-white transition-all duration-200`}>
                     <div className={`max-w-[1400px] mx-auto px-3 sm:px-4 py-2 sm:py-3 flex items-center justify-between gap-4`}>
