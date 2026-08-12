@@ -241,27 +241,24 @@ export default function BannersPage() {
     return (
         <div className="p-3 sm:p-6 max-w-6xl mx-auto select-none">
             {/* Compact, Space-Optimized Banner upload form */}
-            <form onSubmit={handleSubmit} className="bg-white border border-gray-200 rounded-xl p-4 sm:p-5 mb-4 sm:mb-8 shadow-xs space-y-3">
+            <form onSubmit={handleSubmit} className="bg-white border border-gray-200 rounded-lg p-3 sm:p-5 mb-3 sm:mb-8 shadow-xs space-y-2.5 sm:space-y-3">
                 {/* Info Badge Row (above drag & drop and upload button row, right-aligned) */}
                 <div className="flex justify-center sm:justify-end">
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] sm:text-xs font-semibold bg-green-50 text-green-700 border border-green-200/50">
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full text-[10px] sm:text-xs font-semibold bg-green-50 text-green-700 border border-green-200/50">
                         Required Size: 1368 x 260 px | JPG, JPEG, PNG
                     </span>
                 </div>
 
                 {/* Main Row: Drag & Drop Zone + Image Preview + Upload Banner Button */}
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-4">
 
                     {/* Compact Drag & Drop Upload Zone */}
                     <div
                         onDragOver={handleDragOver}
                         onDragLeave={handleDragLeave}
                         onDrop={handleDrop}
-                        onClick={() => document.getElementById('banner-file-input')?.click()}
-                        className={`border-2 border-dashed rounded-lg px-4 py-3 text-center cursor-pointer transition-all flex items-center justify-center gap-3 flex-1 min-h-[64px] ${isDragging
-                            ? 'border-green-600 bg-green-50/20'
-                            : 'border-gray-300 hover:border-green-500 bg-gray-50/40 hover:bg-gray-50/80'
-                            }`}
+                        onClick={() => !previewUrl && document.getElementById('banner-file-input')?.click()}
+                        className={`border-2 border-dashed rounded-lg text-center cursor-pointer transition-all flex items-center justify-center flex-1 w-full aspect-[1368/260] min-h-[56px] sm:min-h-[64px] relative ${previewUrl ? 'p-0 border-gray-300' : 'p-2 border-gray-300 hover:border-green-500 bg-gray-50/40 hover:bg-gray-50/80'} ${isDragging ? 'border-green-600 bg-green-50/20' : ''}`}
                     >
                         <input
                             id="banner-file-input"
@@ -270,26 +267,44 @@ export default function BannersPage() {
                             onChange={handleFileChange}
                             className="hidden"
                         />
-                        <svg className="w-5 h-5 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                        <span className="text-xs text-gray-700 font-semibold truncate">
-                            {selectedFile ? `Selected: ${selectedFile.name}` : 'Drag & drop image here, or browse'}
-                        </span>
-                    </div>
 
-                    {/* Accurate Aspect Ratio Preview Box (Compact) */}
-                    {previewUrl && (
-                        <div className="w-44 aspect-[1368/260] rounded-lg overflow-hidden border border-gray-300 bg-gray-100 shadow-xs shrink-0 self-center">
-                            <img src={previewUrl} alt="Preview" className="w-full h-full object-cover" />
-                        </div>
-                    )}
+                        {previewUrl ? (
+                            <>
+                                <div className="w-full h-full rounded-lg overflow-hidden">
+                                    <img src={previewUrl} alt="Selected Banner Preview" className="w-full h-full object-cover" />
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setSelectedFile(null);
+                                        setPreviewUrl('');
+                                    }}
+                                    className="absolute -top-1.5 -right-1.5 sm:-top-2.5 sm:-right-2.5 z-30 w-5.5 h-5.5 sm:w-7 sm:h-7 rounded-full bg-red-500 hover:bg-red-600 text-white flex items-center justify-center shadow-md cursor-pointer transition-transform hover:scale-110 border border-white sm:border-2"
+                                    title="Remove image"
+                                >
+                                    <svg className="w-3 h-3 sm:w-3.5 sm:h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </>
+                        ) : (
+                            <div className="flex items-center justify-center gap-3 py-2 w-full h-full">
+                                <svg className="w-5 h-5 sm:w-7 sm:h-7 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                                </svg>
+                                <span className="text-xs sm:text-[16px] text-gray-700 font-semibold truncate">
+                                    Upload an image or drag & drop
+                                </span>
+                            </div>
+                        )}
+                    </div>
 
                     {/* Upload action button */}
                     <button
                         type="submit"
                         disabled={isUploading || !selectedFile}
-                        className={`rounded-lg flex items-center justify-center gap-2 cursor-pointer shadow-xs transition-colors text-xs shrink-0 min-w-[140px] py-2.5 px-6 ${isUploading ? 'bg-green-600 text-white hover:bg-green-600' : selectedFile ? 'bg-green-600 text-white hover:bg-green-700' : 'bg-gray-200 text-gray-400 cursor-not-allowed'}`}
+                        className={`rounded-md flex items-center justify-center gap-2 cursor-pointer shadow-xs transition-colors text-xs shrink-0 min-w-[140px] py-2.5 px-6 ${isUploading ? 'bg-green-600 text-white hover:bg-green-600' : selectedFile ? 'bg-green-600 text-white hover:bg-green-700' : 'bg-gray-200 text-gray-400 cursor-not-allowed'}`}
                     >
                         {isUploading ? (
                             <Spinner className="w-4 h-4 text-white animate-spin" />
@@ -324,21 +339,21 @@ export default function BannersPage() {
                 </div>
             </form>
 
-            <div className="border-t border-gray-200 pt-6">
-                <h3 className="text-lg font-bold text-gray-900 mb-4">Uploaded Banners</h3>
+            <div>
+                <h3 className="text-lg font-bold text-gray-900 mb-2">Uploaded Banners</h3>
 
                 {banners.length === 0 ? (
-                    <div className="bg-white border border-gray-200 rounded-xl p-12 text-center shadow-xs">
+                    <div className="bg-white border border-gray-200 rounded-lg p-12 text-center shadow-xs">
                         <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-gray-100 text-gray-400">
                             <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                             </svg>
                         </div>
-                        <h3 className="text-lg font-bold text-gray-900">No banners found</h3>
-                        <p className="text-sm text-gray-500 mt-1 max-w-md mx-auto">Upload images to display in the homepage slider carousel.</p>
+                        <p className="text-gray-500 font-medium text-sm mb-1">No banners uploaded yet</p>
+                        <p className="text-gray-400 text-xs">Upload your first promotional banner using the form above.</p>
                     </div>
                 ) : (
-                    <div className="bg-transparent sm:bg-white sm:border sm:border-gray-200 sm:rounded-xl overflow-hidden sm:shadow-xs">
+                    <div className="bg-transparent sm:bg-white sm:border sm:border-gray-200 sm:rounded-lg overflow-hidden sm:shadow-xs">
                         <div className="overflow-hidden sm:overflow-x-auto w-full pb-2 sm:pb-0">
                             <table className="min-w-full divide-y divide-gray-200 block sm:table">
                                 <thead className="bg-gray-50 hidden sm:table-header-group">
@@ -359,7 +374,7 @@ export default function BannersPage() {
                                                 <div className="flex justify-between items-start">
                                                     <div
                                                         onClick={() => setActiveModalImage(banner.imageUrl)}
-                                                        className="w-36 aspect-[1368/260] bg-gray-150 rounded border border-gray-200 overflow-hidden cursor-zoom-in hover:opacity-90 active:scale-[0.98] transition-all relative group"
+                                                        className="w-36 aspect-[1368/260] bg-gray-150 rounded-lg border border-gray-200 overflow-hidden cursor-pointer hover:opacity-90 active:scale-[0.98] transition-all relative group"
                                                         title="Click to view full banner"
                                                     >
                                                         <img

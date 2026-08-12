@@ -169,28 +169,23 @@ export default function EditBannerPage({ params }: { params: Promise<{ id: strin
 
     return (
         <div className="flex-1 w-full min-h-[calc(100vh-100px)] flex flex-col justify-center p-4 sm:p-6 lg:p-8 animate-in fade-in duration-500 max-w-[1400px] mx-auto bg-gray-50/50">
-            <div className="mb-4 sm:mb-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 sm:p-5 rounded-2xl shadow-sm border border-gray-100">
+            <div className="mb-4 sm:mb-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 sm:p-5 rounded-lg shadow-sm border border-gray-200">
                 <div>
-                    <h1 className="text-xl sm:text-2xl font-extrabold text-gray-900 tracking-tight flex items-center gap-3">
-                        <span className="bg-green-100 text-green-700 p-2 rounded-xl">
-                            <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536M9 11l6-6L20.486 8.486a2 2 0 010 2.828L11 20H4v-7z" />
-                            </svg>
-                        </span>
+                    <h1 className="text-[20px] sm:text-xl font-extrabold text-gray-900 tracking-tight flex items-center gap-3">
                         Edit Banner
                     </h1>
                     <p className="text-xs sm:text-sm text-gray-500 mt-1 font-medium">Update the banner image and text to be displayed on the homepage slider.</p>
                 </div>
             </div>
 
-            <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
                 <div className="p-4 sm:p-6 space-y-4">
                     <div>
                         <label className="block text-xs font-semibold text-gray-700 mb-1.5">
                             Banner Image <span className="text-gray-400 font-normal text-xs ml-2">(Size must be 1368 x 260)</span>
                         </label>
                         <div
-                            className={`border-2 border-dashed rounded-xl p-4 text-center transition-all duration-200 ease-in-out cursor-pointer group flex flex-col items-center justify-center relative overflow-hidden ${isDragging ? 'border-green-500 bg-green-50' : 'border-gray-300 hover:border-green-400 hover:bg-gray-50'}`}
+                            className={`border-2 border-dashed rounded-lg p-4 text-center transition-all duration-200 ease-in-out cursor-pointer group flex flex-col items-center justify-center relative overflow-hidden ${isDragging ? 'border-green-500 bg-green-50' : 'border-gray-300 hover:border-green-400 hover:bg-gray-50'}`}
                             onDragOver={handleDragOver}
                             onDragLeave={handleDragLeave}
                             onDrop={handleDrop}
@@ -217,7 +212,7 @@ export default function EditBannerPage({ params }: { params: Promise<{ id: strin
                                 <div className="py-6">
                                     <div className="w-12 h-12 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform shadow-sm">
                                         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
                                         </svg>
                                     </div>
                                     <p className="text-gray-700 font-medium text-sm mb-0.5 group-hover:text-green-700 transition-colors">Click to upload or drag and drop</p>
