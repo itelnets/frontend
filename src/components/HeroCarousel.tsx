@@ -5,47 +5,12 @@ import Image from 'next/image';
 import Spinner from './Spinner';
 import { getBanners, BannerItem } from '../services/banner';
 
-const slides = [
-    {
-        id: 1,
-        tabTitle: "Up to 70% Off Deals",
-        tabSubtitle: "Shop Now",
-        title: "Up to 70% Off Deals",
-        subtitle: "Hundreds of picks across every aisle",
-        bgClass: "from-[#fae6e9] via-[#f7d9dc] to-[#fce4e6]"
-    },
-    {
-        id: 2,
-        tabTitle: "Free Gift With Purchase",
-        tabSubtitle: "Ultima Electrolyte Packets",
-        title: "Free Gift With Purchase",
-        subtitle: "Get free Ultima Electrolyte Packets with selected products",
-        bgClass: "from-[#eef9f0] via-[#def2e3] to-[#e8f7ec]"
-    },
-    {
-        id: 3,
-        tabTitle: "Sports & Fitness",
-        tabSubtitle: "Shop Now",
-        title: "Sports & Fitness",
-        subtitle: "Fuel your performance, endurance and recovery",
-        bgClass: "from-[#e0f2fe] via-[#bae6fd] to-[#e0f2fe]"
-    },
-    {
-        id: 4,
-        tabTitle: "NAD+",
-        tabSubtitle: "15% Off",
-        title: "NAD+ Longevity Support",
-        subtitle: "Unlock your body's cellular energy and longevity potential",
-        bgClass: "from-[#fef3c7] via-[#fde68a] to-[#fef3c7]"
-    },
-    {
-        id: 5,
-        tabTitle: "Natural Pre-Workout Alternative",
-        tabSubtitle: "Learn More",
-        title: "Natural Pre-Workout Alternative",
-        subtitle: "Clean energy boost without the artificial crash",
-        bgClass: "from-[#f5f3ff] via-[#ede9fe] to-[#f5f3ff]"
-    }
+const BG_CLASSES = [
+    "from-[#fae6e9] via-[#f7d9dc] to-[#fce4e6]",
+    "from-[#eef9f0] via-[#def2e3] to-[#e8f7ec]",
+    "from-[#e0f2fe] via-[#bae6fd] to-[#e0f2fe]",
+    "from-[#fef3c7] via-[#fde68a] to-[#fef3c7]",
+    "from-[#f5f3ff] via-[#ede9fe] to-[#f5f3ff]"
 ];
 
 export default function HeroCarousel() {
@@ -63,17 +28,37 @@ export default function HeroCarousel() {
                 setBanners(data);
             } catch (error) {
                 console.error('Failed to load banners:', error);
+                setBanners([]);
             }
         };
         fetchBanners();
     }, []);
 
+    const activeSlides = (Array.isArray(banners) && banners.length > 0)
+        ? banners.map((b, idx) => ({
+            id: b._id,
+            imageUrl: b.imageUrl,
+            tabTitle: b.tabTitle?.trim() || `Slide ${idx + 1}`,
+            tabSubtitle: b.tabSubtitle?.trim() || '',
+            bgClass: BG_CLASSES[idx % BG_CLASSES.length]
+        }))
+        : [];
+
+    const totalSlides = activeSlides.length;
+
+    // Ensure currentSlide is within bounds
+    useEffect(() => {
+        if (currentSlide >= totalSlides) {
+            setCurrentSlide(0);
+        }
+    }, [totalSlides, currentSlide]);
+
     // Start auto scroll
     const startAutoPlay = () => {
         stopAutoPlay();
-        if (!isPlaying) return;
+        if (!isPlaying || totalSlides === 0) return;
         autoPlayRef.current = setInterval(() => {
-            setCurrentSlide((prev) => (prev + 1) % slides.length);
+            setCurrentSlide((prev) => (prev + 1) % totalSlides);
         }, 5000);
     };
 
@@ -93,7 +78,7 @@ export default function HeroCarousel() {
             stopAutoPlay();
         }
         return () => stopAutoPlay();
-    }, [isHovered, isPlaying]);
+    }, [isHovered, isPlaying, totalSlides]);
 
     const handleTabHover = (index: number) => {
         setCurrentSlide(index);
@@ -101,20 +86,17 @@ export default function HeroCarousel() {
     };
 
     const nextSlide = () => {
-        setCurrentSlide((prev) => (prev + 1) % slides.length);
+        setCurrentSlide((prev) => (prev + 1) % totalSlides);
     };
 
     const prevSlide = () => {
-        setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
+        setCurrentSlide((prev) => (prev - 1 + totalSlides) % totalSlides);
     };
 
-    const slide = slides[currentSlide];
-
-    // Show a fallback slide while banners are loading or unavailable
     const hasBanners = Array.isArray(banners) && banners.length > 0;
-    const currentBanner = hasBanners && currentSlide < banners.length ? banners[currentSlide] : undefined;
-    const activeSlide = currentBanner ?? slide;
-    const uploadedBanner = currentBanner;
+    const currentBanner = (hasBanners && currentSlide < banners.length) ? banners[currentSlide] : undefined;
+    const uploadedBanner = (currentBanner && currentBanner.imageUrl) ? currentBanner : undefined;
+    const activeSlide = activeSlides[currentSlide];
     const isBannerLoading = banners === null;
 
     // Touch swipe support for mobile
@@ -147,7 +129,7 @@ export default function HeroCarousel() {
                 onTouchEnd={handleTouchEnd}
             >
 
-                {/* Background: uploaded S3 image or loading overlay */}
+                {/* Background: uploaded S3 image or fallback gradient */}
                 {uploadedBanner ? (
                     <Image
                         src={uploadedBanner.imageUrl}
@@ -158,7 +140,7 @@ export default function HeroCarousel() {
                         className="object-cover z-0"
                     />
                 ) : (
-                    <div className="absolute inset-0 w-full h-full bg-white z-0" />
+                    <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-[#fae6e9] via-[#f7d9dc] to-[#fce4e6] z-0" />
                 )}
 
                 {isBannerLoading && (
@@ -206,7 +188,7 @@ export default function HeroCarousel() {
 
                 {/* Mobile dot indicators */}
                 <div className="flex sm:hidden absolute bottom-1 left-1/2 -translate-x-1/2 gap-1 z-20">
-                    {slides.map((_, idx) => (
+                    {activeSlides.map((_, idx) => (
                         <button
                             key={idx}
                             onClick={() => setCurrentSlide(idx)}
@@ -219,7 +201,7 @@ export default function HeroCarousel() {
 
             {/* Bottom Overlay Tabs - Centered, half on banner and half off banner */}
             <div className="hidden md:flex absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 bg-[#f5f5f5] rounded-2xl shadow-lg border border-gray-200/80 p-1 z-30 items-stretch gap-1">
-                {slides.map((item, idx) => {
+                {activeSlides.map((item, idx) => {
                     const isActive = idx === currentSlide;
                     return (
                         <div
@@ -234,10 +216,12 @@ export default function HeroCarousel() {
                                 }`}>
                                 {item.tabTitle}
                             </div>
-                            <div className={`text-[9px] lg:text-[10px] mt-0.5 font-bold ${isActive ? 'text-[#458500]' : 'text-gray-500'
-                                }`}>
-                                {item.tabSubtitle}
-                            </div>
+                            {item.tabSubtitle ? (
+                                <div className={`text-[9px] lg:text-[10px] mt-0.5 font-bold ${isActive ? 'text-[#458500]' : 'text-gray-500'
+                                    }`}>
+                                    {item.tabSubtitle}
+                                </div>
+                            ) : null}
                         </div>
                     );
                 })}

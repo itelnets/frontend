@@ -20,6 +20,8 @@ export default function BannersPage() {
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [previewUrl, setPreviewUrl] = useState<string>('');
     const [imageDimensions, setImageDimensions] = useState({ width: 0, height: 0 });
+    const [tabTitle, setTabTitle] = useState('');
+    const [tabSubtitle, setTabSubtitle] = useState('');
     const [isDragging, setIsDragging] = useState(false);
     const [dragIndex, setDragIndex] = useState<number | null>(null);
     const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
@@ -78,7 +80,7 @@ export default function BannersPage() {
             const img = new Image();
             img.onload = () => {
                 if (img.width !== 1368 || img.height !== 260) {
-                    toast.error(`Image dimensions must be exactly 1368 x 260 px. Got: ${img.width} x ${img.height} px.`);
+                    toast.error(`Image dimensions should be 1368 x 260 px.`);
                     setSelectedFile(null);
                     setPreviewUrl('');
                     return;
@@ -140,7 +142,8 @@ export default function BannersPage() {
                 imageKey,
                 selectedFile.size,
                 imageDimensions.width,
-                imageDimensions.height
+                imageDimensions.height,
+                { tabTitle, tabSubtitle }
             );
 
             setBanners(prev => [newBanner, ...prev]);
@@ -149,6 +152,8 @@ export default function BannersPage() {
             setSelectedFile(null);
             setPreviewUrl('');
             setImageDimensions({ width: 0, height: 0 });
+            setTabTitle('');
+            setTabSubtitle('');
         } catch (error) {
             console.error('Error uploading banner:', error);
             toast.error('Failed to upload banner');
@@ -231,7 +236,7 @@ export default function BannersPage() {
     }
 
     return (
-        <div className="p-4 sm:p-6 max-w-6xl mx-auto select-none">
+        <div className="p-3 sm:p-6 max-w-6xl mx-auto select-none">
             <div className="mb-6 flex flex-col sm:flex-row justify-between sm:items-center gap-3">
                 <div>
                     <h1 className="text-xl sm:text-2xl font-extrabold text-gray-900 tracking-tight">Homepage Banners</h1>
@@ -243,7 +248,7 @@ export default function BannersPage() {
             </div>
 
             {/* Compact, Space-Optimized Banner upload form */}
-            <form onSubmit={handleSubmit} className="bg-white border border-gray-200 rounded-xl p-4 mb-8 shadow-xs max-w-4xl">
+            <form onSubmit={handleSubmit} className="bg-white border border-gray-200 rounded-xl p-4 sm:p-5 mb-4 sm:mb-8 shadow-xs max-w-4xl space-y-4">
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
 
                     {/* Compact Drag & Drop Upload Zone */}
@@ -292,6 +297,30 @@ export default function BannersPage() {
                         )}
                     </button>
                 </div>
+
+                {/* Optional Dynamic Text Inputs */}
+                <div className="border-t border-gray-100 pt-3.5 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label className="block text-[11px] font-bold text-gray-600 uppercase mb-1">Tab Title (e.g. Up to 70% Off Deals)</label>
+                        <input
+                            type="text"
+                            placeholder="Enter tab title"
+                            value={tabTitle}
+                            onChange={(e) => setTabTitle(e.target.value)}
+                            className="w-full px-3 py-2 text-sm bg-white/50 border border-gray-200 rounded-md focus:outline-none focus:border-green-600 transition-all outline-none placeholder-gray-400"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-[11px] font-bold text-gray-600 uppercase mb-1">Tab Subtitle (e.g. Shop Now)</label>
+                        <input
+                            type="text"
+                            placeholder="Enter tab subtitle"
+                            value={tabSubtitle}
+                            onChange={(e) => setTabSubtitle(e.target.value)}
+                            className="w-full px-3 py-2 text-sm bg-white/50 border border-gray-200 rounded-md focus:outline-none focus:border-green-600 transition-all outline-none placeholder-gray-400"
+                        />
+                    </div>
+                </div>
             </form>
 
             <div className="border-t border-gray-200 pt-6">
@@ -313,7 +342,8 @@ export default function BannersPage() {
                             <table className="min-w-full divide-y divide-gray-200 block sm:table">
                                 <thead className="bg-gray-50 hidden sm:table-header-group">
                                     <tr className="border-b border-gray-200 text-xs font-bold text-gray-500 uppercase tracking-wider text-left">
-                                        <th className="p-4">Preview (Click to enlarge)</th>
+                                        <th className="p-4">Preview</th>
+                                        <th className="p-4">Tab Title</th>
                                         <th className="p-4">File Size</th>
                                         <th className="p-4 hidden sm:table-cell">Created</th>
                                         <th className="p-4 hidden sm:table-cell">Updated</th>
@@ -374,6 +404,14 @@ export default function BannersPage() {
                                                         </div>
                                                     </div>
                                                 </div>
+                                            </td>
+
+                                            {/* Desktop Tab Title Cell */}
+                                            <td className="p-4 hidden sm:table-cell text-gray-800 font-semibold max-w-[200px] truncate">
+                                                {banner.tabTitle || <span className="text-gray-400 font-normal italic">Default</span>}
+                                                {banner.tabSubtitle && (
+                                                    <span className="block text-xs font-normal text-gray-500 truncate">{banner.tabSubtitle}</span>
+                                                )}
                                             </td>
 
                                             {/* Desktop File Size Cell */}

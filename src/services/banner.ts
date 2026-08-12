@@ -7,6 +7,8 @@ export interface BannerItem {
     fileSize?: number;
     width?: number;
     height?: number;
+    tabTitle?: string;
+    tabSubtitle?: string;
     order?: number;
     isActive: boolean;
     createdAt: string;
@@ -22,13 +24,15 @@ export const createBanner = async (
     imageUrl: string,
     fileSize: number,
     width: number,
-    height: number
+    height: number,
+    textData?: { tabTitle?: string; tabSubtitle?: string }
 ): Promise<BannerItem> => {
     const { data } = await api.post<{ message: string, banner: BannerItem }>('/banners', {
         imageKey: imageUrl,
         fileSize,
         width,
-        height
+        height,
+        ...textData
     });
     return data.banner;
 };
@@ -37,7 +41,7 @@ export const deleteBanner = async (id: string): Promise<void> => {
     await api.delete(`/banners/${id}`);
 };
 
-export const updateBanner = async (id: string, data: Partial<BannerItem | { isActive?: boolean, imageKey?: string }>): Promise<BannerItem> => {
+export const updateBanner = async (id: string, data: Partial<BannerItem | { isActive?: boolean, imageKey?: string, tabTitle?: string, tabSubtitle?: string }>): Promise<BannerItem> => {
     const { data: res } = await api.patch<{ message: string, banner: BannerItem }>(`/banners/${id}`, data);
     return res.banner;
 };

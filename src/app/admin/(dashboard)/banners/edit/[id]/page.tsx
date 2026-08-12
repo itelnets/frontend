@@ -14,8 +14,11 @@ export default function EditBannerPage({ params }: { params: Promise<{ id: strin
 
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
-    const [isCancelling, setIsCancelling] = useState(false);
     const [banner, setBanner] = useState<BannerItem | null>(null);
+
+    // Text states
+    const [tabTitle, setTabTitle] = useState('');
+    const [tabSubtitle, setTabSubtitle] = useState('');
 
     // Upload state
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -35,14 +38,14 @@ export default function EditBannerPage({ params }: { params: Promise<{ id: strin
     const loadBanner = async () => {
         setIsLoading(true);
         try {
-            // We need to fetch the single banner. Wait, there's no getBannerById?
-            // Let's get all banners and find it
             const { getBanners } = await import('../../../../../../services/banner');
             const data = await getBanners();
             const found = data.find(b => b._id === bannerId);
             if (found) {
                 setBanner(found);
                 setPreviewUrl(found.imageUrl);
+                setTabTitle(found.tabTitle || '');
+                setTabSubtitle(found.tabSubtitle || '');
             } else {
                 toast.error('Banner not found');
                 router.push('/admin/banners');
@@ -103,7 +106,6 @@ export default function EditBannerPage({ params }: { params: Promise<{ id: strin
     };
 
     const handleCancel = () => {
-        setIsCancelling(true);
         router.push('/admin/banners');
     };
 
@@ -147,7 +149,9 @@ export default function EditBannerPage({ params }: { params: Promise<{ id: strin
                 imageKey: newImageKey,
                 fileSize: newFileSize,
                 width: newWidth,
-                height: newHeight
+                height: newHeight,
+                tabTitle,
+                tabSubtitle
             });
 
             toast.success('Banner updated successfully');
@@ -164,29 +168,29 @@ export default function EditBannerPage({ params }: { params: Promise<{ id: strin
     }
 
     return (
-        <div className="flex-1 w-full p-4 sm:p-6 lg:p-8 animate-in fade-in duration-500 max-w-[1400px] mx-auto bg-gray-50/50 min-h-screen">
-            <div className="mb-6 sm:mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-gray-100">
+        <div className="flex-1 w-full min-h-[calc(100vh-100px)] flex flex-col justify-center p-4 sm:p-6 lg:p-8 animate-in fade-in duration-500 max-w-[1400px] mx-auto bg-gray-50/50">
+            <div className="mb-4 sm:mb-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 sm:p-5 rounded-2xl shadow-sm border border-gray-100">
                 <div>
-                    <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight flex items-center gap-3">
+                    <h1 className="text-xl sm:text-2xl font-extrabold text-gray-900 tracking-tight flex items-center gap-3">
                         <span className="bg-green-100 text-green-700 p-2 rounded-xl">
-                            <svg className="w-6 h-6 sm:w-8 sm:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536M9 11l6-6L20.486 8.486a2 2 0 010 2.828L11 20H4v-7z" />
                             </svg>
                         </span>
                         Edit Banner
                     </h1>
-                    <p className="text-sm text-gray-500 mt-2 font-medium">Update the banner image to be displayed on the homepage slider.</p>
+                    <p className="text-xs sm:text-sm text-gray-500 mt-1 font-medium">Update the banner image and text to be displayed on the homepage slider.</p>
                 </div>
             </div>
 
             <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                <div className="p-6 sm:p-8">
-                    <div className="mb-6">
-                        <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <div className="p-4 sm:p-6 space-y-4">
+                    <div>
+                        <label className="block text-xs font-semibold text-gray-700 mb-1.5">
                             Banner Image <span className="text-gray-400 font-normal text-xs ml-2">(Size must be 1368 x 260)</span>
                         </label>
                         <div
-                            className={`border-2 border-dashed rounded-xl p-8 text-center transition-all duration-200 ease-in-out cursor-pointer group flex flex-col items-center justify-center relative overflow-hidden ${isDragging ? 'border-green-500 bg-green-50' : 'border-gray-300 hover:border-green-400 hover:bg-gray-50'}`}
+                            className={`border-2 border-dashed rounded-xl p-4 text-center transition-all duration-200 ease-in-out cursor-pointer group flex flex-col items-center justify-center relative overflow-hidden ${isDragging ? 'border-green-500 bg-green-50' : 'border-gray-300 hover:border-green-400 hover:bg-gray-50'}`}
                             onDragOver={handleDragOver}
                             onDragLeave={handleDragLeave}
                             onDrop={handleDrop}
@@ -210,42 +214,67 @@ export default function EditBannerPage({ params }: { params: Promise<{ id: strin
                                     </div>
                                 </div>
                             ) : (
-                                <div className="py-8">
-                                    <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform shadow-sm">
-                                        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <div className="py-6">
+                                    <div className="w-12 h-12 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform shadow-sm">
+                                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                         </svg>
                                     </div>
-                                    <p className="text-gray-700 font-medium mb-1 group-hover:text-green-700 transition-colors">Click to upload or drag and drop</p>
+                                    <p className="text-gray-700 font-medium text-sm mb-0.5 group-hover:text-green-700 transition-colors">Click to upload or drag and drop</p>
                                     <p className="text-xs text-gray-500">JPG or PNG only. (1368 x 260)</p>
                                 </div>
                             )}
                         </div>
                     </div>
+
+                    {/* Dynamic Text Information */}
+                    <div className="border-t border-gray-100 pt-4">
+                        <h3 className="text-sm font-bold text-gray-900 mb-3">Banner Details & Text</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                            <div>
+                                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                                    Tab Title <span className="text-gray-400 font-normal lowercase">(e.g. Up to 70% Off Deals)</span>
+                                </label>
+                                <input
+                                    type="text"
+                                    placeholder="Enter tab title"
+                                    value={tabTitle}
+                                    onChange={(e) => setTabTitle(e.target.value)}
+                                    className="w-full px-3 py-2 text-sm bg-white/50 border border-gray-200 rounded-md focus:outline-none focus:border-green-600 transition-all outline-none placeholder-gray-400"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                                    Tab Subtitle <span className="text-gray-400 font-normal lowercase">(e.g. Shop Now)</span>
+                                </label>
+                                <input
+                                    type="text"
+                                    placeholder="Enter tab subtitle"
+                                    value={tabSubtitle}
+                                    onChange={(e) => setTabSubtitle(e.target.value)}
+                                    className="w-full px-3 py-2 text-sm bg-white/50 border border-gray-200 rounded-md focus:outline-none focus:border-green-600 transition-all outline-none placeholder-gray-400"
+                                />
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
-                <div className="px-6 py-4 sm:px-8 sm:py-5 bg-gray-50 border-t border-gray-100 flex flex-col-reverse sm:flex-row justify-end gap-3 sm:gap-4">
+                <div className="px-4 py-3 sm:px-6 sm:py-3.5 bg-gray-50 border-t border-gray-100 flex flex-col-reverse sm:flex-row justify-end gap-3">
                     <button
                         type="button"
                         onClick={handleCancel}
-                        disabled={isSaving || isCancelling}
-                        className="w-full sm:w-auto px-6 py-2.5 text-sm font-semibold rounded-xl border border-gray-300 text-gray-700 bg-white hover:bg-gray-50 hover:text-gray-900 transition-all focus:outline-none focus:ring-4 focus:ring-gray-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                        disabled={isSaving}
+                        className="w-full sm:w-auto px-6 py-2 cursor-pointer text-sm font-semibold rounded-md border border-gray-300 text-gray-700 bg-white hover:bg-gray-50 hover:text-gray-900 transition-all focus:outline-none focus:ring-4 focus:ring-gray-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
                     >
-                        {isCancelling ? (
-                            <>
-                                <Spinner className="w-4 h-4 mr-2 border-gray-600" />
-                            </>
-                        ) : 'Cancel'}
+                        Cancel
                     </button>
                     <button
                         type="submit"
-                        disabled={isSaving || isCancelling || (!selectedFile && !banner)}
-                        className="w-full sm:w-auto px-6 py-2.5 text-sm font-semibold rounded-xl bg-green-600 text-white hover:bg-green-700 transition-all shadow-sm hover:shadow focus:outline-none focus:ring-4 focus:ring-green-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center relative overflow-hidden group"
+                        disabled={isSaving || (!selectedFile && !banner)}
+                        className="w-full sm:w-auto px-6 py-2 cursor-pointer text-sm font-semibold rounded-md bg-green-600 text-white hover:bg-green-700 transition-all shadow-sm hover:shadow focus:outline-none focus:ring-4 focus:ring-green-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center relative overflow-hidden group"
                     >
                         <span className={`flex items-center transition-opacity ${isSaving ? 'opacity-0' : 'opacity-100'}`}>
-                            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-                            </svg>
                             Update Banner
                         </span>
                         {isSaving && (
