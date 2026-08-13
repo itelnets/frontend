@@ -173,7 +173,7 @@ export default function OrdersPage() {
                                                 {order.orderItems.map((item: any, idx: number) => (
                                                     <div key={idx} className="flex gap-3 sm:gap-4">
                                                         <div className="w-12 h-12 sm:w-16 lg:w-20 sm:h-16 lg:h-20 shrink-0 bg-gray-50 rounded-md border border-gray-200 p-1.5 sm:p-2 overflow-hidden flex items-center justify-center">
-                                                            <img src={item.product?.image || item.image || '/placeholder.png'} alt={item.name} className="max-w-full max-h-full object-contain" />
+                                                            <img src={item.product?.images?.[0] || item.product?.image || item.image || '/placeholder.png'} alt={item.name} className="max-w-full max-h-full object-contain" />
                                                         </div>
                                                         <div className="flex-1 py-0.5 sm:py-1">
                                                             <h3 className="text-[12px] sm:text-[15px] font-medium text-[#284d00] mb-0.5 sm:mb-1 line-clamp-2">{item.name}</h3>
