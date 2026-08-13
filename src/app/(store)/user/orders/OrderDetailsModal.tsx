@@ -50,7 +50,7 @@ export default function OrderDetailsModal({
 
     return (
         <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/40 backdrop-blur-sm transition-opacity" onClick={() => setSelectedOrder(null)}>
-            <div className="bg-[#f2f4f7] sm:bg-white w-full sm:max-w-xl rounded-t-xl sm:rounded-xl shadow-xl overflow-hidden flex flex-col max-h-[95vh]" onClick={(e) => e.stopPropagation()}>
+            <div className="bg-[#f2f4f7] sm:bg-white w-full sm:max-w-lg rounded-t-xl sm:rounded-xl shadow-xl overflow-hidden flex flex-col max-h-[95vh]" onClick={(e) => e.stopPropagation()}>
                 <div className="bg-white p-3 sm:p-4 flex items-center justify-between border-b border-gray-200 shrink-0">
                     <div className="flex items-center gap-2">
                         <h2 className="text-[18px] sm:text-lg font-bold text-gray-900">
