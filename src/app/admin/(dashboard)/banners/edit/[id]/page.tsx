@@ -234,7 +234,7 @@ export default function EditBannerPage({ params }: { params: Promise<{ id: strin
                         <h3 className="text-sm font-bold text-gray-900 mb-3">Banner Details & Text</h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
                             <div>
-                                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                                <label className="block text-[11px] sm:text-xs font-bold text-gray-700 uppercase tracking-normal mb-1.5">
                                     Tab Title <span className="text-gray-400 font-normal lowercase">(e.g. Up to 70% Off Deals)</span>
                                 </label>
                                 <input
@@ -242,12 +242,12 @@ export default function EditBannerPage({ params }: { params: Promise<{ id: strin
                                     placeholder="Enter tab title"
                                     value={tabTitle}
                                     onChange={(e) => setTabTitle(e.target.value)}
-                                    className="w-full px-3 py-2 text-sm bg-white/50 border border-gray-200 rounded-md focus:outline-none focus:border-green-600 transition-all outline-none placeholder-gray-400"
+                                    className="w-full px-3 py-2 text-[13px] sm:text-sm bg-white/50 border border-gray-200 rounded-md focus:outline-none focus:border-green-600 transition-all outline-none placeholder-gray-400"
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                                <label className="block text-[11px] sm:text-xs font-bold text-gray-700 uppercase tracking-normal mb-1.5">
                                     Tab Subtitle <span className="text-gray-400 font-normal lowercase">(e.g. Shop Now)</span>
                                 </label>
                                 <input
@@ -255,7 +255,7 @@ export default function EditBannerPage({ params }: { params: Promise<{ id: strin
                                     placeholder="Enter tab subtitle"
                                     value={tabSubtitle}
                                     onChange={(e) => setTabSubtitle(e.target.value)}
-                                    className="w-full px-3 py-2 text-sm bg-white/50 border border-gray-200 rounded-md focus:outline-none focus:border-green-600 transition-all outline-none placeholder-gray-400"
+                                    className="w-full px-3 py-2 text-[13px] sm:text-sm bg-white/50 border border-gray-200 rounded-md focus:outline-none focus:border-green-600 transition-all outline-none placeholder-gray-400"
                                 />
                             </div>
                         </div>

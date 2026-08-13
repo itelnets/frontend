@@ -15,8 +15,12 @@ export interface BannerItem {
     updatedAt: string;
 }
 
-export const getBanners = async (): Promise<BannerItem[]> => {
-    const { data } = await api.get<BannerItem[]>('/banners');
+export const getBanners = async (params: { isActive?: string } = {}): Promise<BannerItem[]> => {
+    const queryParams = new URLSearchParams();
+    if (params.isActive) queryParams.append('isActive', params.isActive);
+    const queryString = queryParams.toString();
+    const url = queryString ? `/banners?${queryString}` : '/banners';
+    const { data } = await api.get<BannerItem[]>(url);
     return data;
 };
 

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { getBanners, createBanner, deleteBanner, BannerItem, reorderBanners } from '../../../../services/banner';
+import { getBanners, createBanner, deleteBanner, updateBanner, BannerItem, reorderBanners } from '../../../../services/banner';
 import toast from 'react-hot-toast';
 import ConfirmModal from '@/components/ConfirmModal';
 import Spinner from '@/components/Spinner';
@@ -28,8 +28,6 @@ export default function BannersPage() {
     const [bannerToDelete, setBannerToDelete] = useState<string | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
 
-
-
     // Modal state for viewing full image
     const [activeModalImage, setActiveModalImage] = useState<string | null>(null);
 
@@ -45,7 +43,7 @@ export default function BannersPage() {
     const loadBanners = async () => {
         try {
             setIsLoading(true);
-            const data = await getBanners();
+            const data = await getBanners({ isActive: 'all' });
             setBanners(data);
         } catch (error) {
             console.error('Error fetching banners:', error);
@@ -185,7 +183,18 @@ export default function BannersPage() {
         }
     };
 
-    // (no inline edit or toggle handlers needed)
+    const handleToggleStatus = async (bannerId: string, currentStatus: boolean) => {
+        const nextStatus = !currentStatus;
+        try {
+            setBanners(prev => prev.map(b => b._id === bannerId ? { ...b, isActive: nextStatus } : b));
+            await updateBanner(bannerId, { isActive: nextStatus });
+            toast.success(`Banner is now ${nextStatus ? 'Visible' : 'Hidden'} on user side`);
+        } catch (error) {
+            console.error('Error toggling banner status:', error);
+            setBanners(prev => prev.map(b => b._id === bannerId ? { ...b, isActive: currentStatus } : b));
+            toast.error('Failed to update banner status');
+        }
+    };
 
     const onDragStart = (e: React.DragEvent, index: number) => {
         window.getSelection()?.removeAllRanges();
@@ -397,8 +406,17 @@ export default function BannersPage() {
                                                     </div>
 
                                                     {/* Mobile Actions in the same row as image on the right top */}
-                                                    <div className="flex sm:hidden items-center justify-end gap-1.5">
-                                                        <span className="text-[12px] font-bold text-green-700 mr-2">{formatBytes(banner.fileSize || 0)}</span>
+                                                    <div className="flex sm:hidden items-center justify-end gap-3">
+                                                        <button
+                                                            type="button"
+                                                            role="switch"
+                                                            aria-checked={banner.isActive !== false}
+                                                            onClick={() => handleToggleStatus(banner._id, banner.isActive !== false)}
+                                                            className={`cursor-pointer relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none ${banner.isActive !== false ? 'bg-green-600' : 'bg-gray-300'}`}
+                                                            title={banner.isActive !== false ? 'Hide Banner' : 'Show Banner'}
+                                                        >
+                                                            <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform ${banner.isActive !== false ? 'translate-x-4.5' : 'translate-x-0.5'}`} />
+                                                        </button>
                                                         <Link href={`/admin/banners/edit/${banner._id}`} title="Edit" className="inline-flex items-center justify-center p-1.5 border border-transparent rounded-md text-green-700 bg-green-50 hover:bg-green-100 focus:outline-none transition-colors shadow-sm">
                                                             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -415,16 +433,21 @@ export default function BannersPage() {
 
                                             {/* Mobile Compact Data Row */}
                                             <td className="px-3 pb-3 pt-0 sm:hidden block border-b sm:border-0 border-gray-100">
-                                                <div className="flex flex-col gap-1">
-                                                    <div className="flex items-center gap-3">
+                                                <div className="flex items-center justify-between gap-2 mt-1.5 pt-1.5 border-t border-gray-100">
+                                                    <div className="flex flex-col">
                                                         <div>
-                                                            <span className="text-[9px] font-semibold text-gray-400 uppercase">Created: </span>
-                                                            <span className="text-[10px] font-medium text-gray-700">{formatDate(banner.createdAt)}</span>
+                                                            <span className="text-[11px] font-semibold text-gray-400 uppercase">Created: </span>
+                                                            <span className="text-[12px] font-medium text-gray-700">{formatDate(banner.createdAt)}</span>
                                                         </div>
                                                         <div>
-                                                            <span className="text-[9px] font-semibold text-gray-400 uppercase">Updated: </span>
-                                                            <span className="text-[10px] font-medium text-gray-700">{formatDate(banner.updatedAt || banner.createdAt)}</span>
+                                                            <span className="text-[11px] font-semibold text-gray-400 uppercase">Updated: </span>
+                                                            <span className="text-[12px] font-medium text-gray-700">{formatDate(banner.updatedAt || banner.createdAt)}</span>
                                                         </div>
+                                                    </div>
+
+                                                    <div className="flex flex-col items-end gap-0.5 text-right">
+                                                        <span className="text-[10px] font-semibold text-gray-400 uppercase">File Size</span>
+                                                        <span className="text-[11px] font-bold text-green-700">{formatBytes(banner.fileSize || 0)}</span>
                                                     </div>
                                                 </div>
                                             </td>
@@ -448,16 +471,24 @@ export default function BannersPage() {
                                             <td className="p-4 hidden sm:table-cell text-gray-500 whitespace-nowrap">
                                                 {formatDate(banner.updatedAt || banner.createdAt)}
                                             </td>
-                                            {/* Desktop Delete Action Cell */}
+
+                                            {/* Desktop Actions Cell (containing Status Toggle + Edit + Delete) */}
                                             <td className="p-4 text-right hidden sm:table-cell">
-                                                <div className="flex items-center justify-end gap-1.5 sm:gap-2">
-                                                    <Link href={`/admin/banners/edit/${banner._id}`} title="Edit" className="inline-flex items-center justify-center p-1.5 sm:p-2 border border-transparent rounded-md text-green-700 bg-green-50 hover:bg-green-100 focus:outline-none transition-colors shadow-sm">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <div className="flex items-center justify-end gap-3 sm:gap-4">
+                                                    <button
+                                                        onClick={() => handleToggleStatus(banner._id, banner.isActive !== false)}
+                                                        className={`cursor-pointer relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none ${banner.isActive !== false ? 'bg-green-600' : 'bg-gray-300'}`}
+                                                        title={banner.isActive !== false ? 'Hide Banner' : 'Show Banner'}
+                                                    >
+                                                        <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform ${banner.isActive !== false ? 'translate-x-4.5' : 'translate-x-0.5'}`} />
+                                                    </button>
+                                                    <Link href={`/admin/banners/edit/${banner._id}`} title="Edit" className="inline-flex items-center justify-center p-1.5 border border-transparent rounded-md text-green-700 bg-green-50 hover:bg-green-100 focus:outline-none transition-colors shadow-sm">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                                         </svg>
                                                     </Link>
-                                                    <button onClick={() => setBannerToDelete(banner._id)} title="Delete" className="inline-flex items-center justify-center p-1.5 sm:p-2 border border-transparent rounded-md text-red-600 bg-red-50 hover:bg-red-100 focus:outline-none transition-colors cursor-pointer shadow-sm">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <button onClick={() => setBannerToDelete(banner._id)} title="Delete" className="inline-flex items-center justify-center p-1.5 border border-transparent rounded-md text-red-600 bg-red-50 hover:bg-red-100 focus:outline-none transition-colors cursor-pointer shadow-sm">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                                         </svg>
                                                     </button>

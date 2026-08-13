@@ -67,8 +67,6 @@ export default function AddProductPage() {
                     'Best Seller': 'bestSeller',
                     'Categories (comma-separated)': 'categories',
                     'Categories': 'categories',
-                    'Manual Rating (optional)': 'rating',
-                    'Rating': 'rating',
                     'HSN Code': 'hsn',
                     'Batch No.': 'batchNo',
                     'Expired On': 'expiredOn'
@@ -91,7 +89,7 @@ export default function AddProductPage() {
                             'name', 'type', 'description', 'price', 'discount', 'overview',
                             'suggestedUse', 'otherIngredients', 'warnings', 'disclaimer',
                             'brand', 'manufacturer', 'inStock', 'bestSeller', 'categories',
-                            'rating', 'hsn', 'batchNo', 'expiredOn', 'images', 'specifications'
+                            'hsn', 'batchNo', 'expiredOn', 'images', 'specifications'
                         ];
 
                         const specs = Object.keys(row)
@@ -114,7 +112,6 @@ export default function AddProductPage() {
                             inStock: row.inStock !== undefined ? String(row.inStock) : 'Yes',
                             bestSeller: row.bestSeller !== undefined ? String(row.bestSeller) : '',
                             categories: row.categories ? String(row.categories).split(',').map((c: string) => c.trim()).filter(Boolean) : [],
-                            rating: row.rating ? Number(row.rating) : 0,
                             hsn: row.hsn || '',
                             batchNo: row.batchNo || '',
                             expiredOn: row.expiredOn || '',
@@ -169,7 +166,6 @@ export default function AddProductPage() {
         inStock: 'Yes',
         bestSeller: '',
         categories: '',
-        rating: '',
         hsn: '',
         batchNo: '',
         expiredOn: '',
@@ -371,7 +367,6 @@ export default function AddProductPage() {
                 ...formData,
                 price: Number(formData.price),
                 discount: Number(formData.discount),
-                rating: formData.rating ? Number(formData.rating) : 0,
                 categories: formData.categories ? formData.categories.split(',').map((c: string) => c.trim()).filter(Boolean) : [],
                 images: uploadedImageUrls, // Send array of full S3 URLs
                 specifications: specifications.filter(s => s.key.trim() !== '' && s.value.trim() !== ''),
@@ -530,15 +525,9 @@ export default function AddProductPage() {
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-sm font-semibold text-gray-700 mb-2">Categories (comma-separated)</label>
-                                    <input name="categories" value={formData.categories} onChange={handleChange} className="w-full px-3 py-2 text-sm bg-white/50 border border-gray-200 rounded-md focus:outline-none focus:border-green-600 transition-all outline-none placeholder-gray-400" placeholder="e.g. Supplements, Vitamins" />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-semibold text-gray-700 mb-2">Manual Rating (optional)</label>
-                                    <input name="rating" type="number" step="0.1" min="0" max="5" value={formData.rating} onChange={handleChange} className="w-full px-3 py-2 text-sm bg-white/50 border border-gray-200 rounded-md focus:outline-none focus:border-green-600 transition-all outline-none placeholder-gray-400" placeholder="e.g. 4.5" />
-                                </div>
+                            <div>
+                                <label className="block text-sm font-semibold text-gray-700 mb-2">Categories (comma-separated)</label>
+                                <input name="categories" value={formData.categories} onChange={handleChange} className="w-full px-3 py-2 text-sm bg-white/50 border border-gray-200 rounded-md focus:outline-none focus:border-green-600 transition-all outline-none placeholder-gray-400" placeholder="e.g. Supplements, Vitamins" />
                             </div>
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -605,7 +594,7 @@ export default function AddProductPage() {
                         </div>
 
                         <div className="bg-green-50/30 rounded-md border border-green-50/50">
-                            <label className="block text-sm font-semibold text-gray-800">Specifications</label>
+                            <label className="block text-sm font-semibold text-gray-800 mb-2">Specifications</label>
                             {specifications.map((spec, index) => (
                                 <div key={index} className={`relative flex flex-col sm:flex-row gap-1 sm:gap-3 p-2 rounded-md border ${index < 5 ? 'bg-gray-50 border-gray-200' : 'bg-white/60 border-gray-100 pr-11 sm:pr-2'}`}>
                                     {index < 5 ? (

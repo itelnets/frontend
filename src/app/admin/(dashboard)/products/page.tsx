@@ -330,10 +330,10 @@ export default function AdminDashboard() {
                                             <div className="flex items-center justify-end gap-4">
                                                 <button
                                                     onClick={() => toggleProductStatus(product._id, product.isActive !== false)}
-                                                    className={`cursor-pointer relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${product.isActive !== false ? 'bg-green-600' : 'bg-gray-300'}`}
+                                                    className={`cursor-pointer relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none ${product.isActive !== false ? 'bg-green-600' : 'bg-gray-300'}`}
                                                     title={product.isActive !== false ? 'Hide Product' : 'Show Product'}
                                                 >
-                                                    <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${product.isActive !== false ? 'translate-x-6' : 'translate-x-1'}`} />
+                                                    <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform ${product.isActive !== false ? 'translate-x-4.5' : 'translate-x-0.5'}`} />
                                                 </button>
                                                 <Link href={`/admin/products/edit/${product._id}`} title="Edit" className="inline-flex items-center justify-center p-1.5 border border-transparent rounded-md text-green-700 bg-green-50 hover:bg-green-100 focus:outline-none transition-colors shadow-sm">
                                                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -391,11 +391,11 @@ export default function AdminDashboard() {
                                             <div className="flex items-center gap-3 h-5">
                                                 <div>
                                                     <span className="text-[9px] font-semibold text-gray-400 uppercase">Created: </span>
-                                                    <span className="text-[10px] font-medium text-gray-700">{formatDate(product.createdAt)}</span>
+                                                    <span className="text-[11px] font-medium text-gray-700">{formatDate(product.createdAt)}</span>
                                                 </div>
                                                 <div>
                                                     <span className="text-[9px] font-semibold text-gray-400 uppercase">Updated: </span>
-                                                    <span className="text-[10px] font-medium text-gray-700">{formatDate(product.updatedAt)}</span>
+                                                    <span className="text-[11px] font-medium text-gray-700">{formatDate(product.updatedAt)}</span>
                                                 </div>
                                             </div>
                                         </td>

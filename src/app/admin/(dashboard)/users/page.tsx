@@ -213,10 +213,10 @@ export default function AdminUsersPage() {
                                             <div className="flex items-center justify-center gap-4">
                                                 <button
                                                     onClick={() => handleToggleStatus(user._id, !!user.isDeleted)}
-                                                    className={`cursor-pointer relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${!user.isDeleted ? 'bg-green-600' : 'bg-gray-300'}`}
+                                                    className={`cursor-pointer relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none ${!user.isDeleted ? 'bg-green-600' : 'bg-gray-300'}`}
                                                     title={!user.isDeleted ? 'User is active (On)' : 'User is disabled (Off)'}
                                                 >
-                                                    <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${!user.isDeleted ? 'translate-x-6' : 'translate-x-1'}`} />
+                                                    <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform ${!user.isDeleted ? 'translate-x-4.5' : 'translate-x-0.5'}`} />
                                                 </button>
                                                 <Link href={`/admin/orders?userId=${user._id}`} className="inline-flex items-center justify-center p-1.5 border border-transparent rounded-md text-green-700 bg-green-50 hover:bg-green-100 focus:outline-none transition-colors shadow-sm" title="View Orders">
                                                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>

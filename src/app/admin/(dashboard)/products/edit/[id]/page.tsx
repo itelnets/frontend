@@ -450,7 +450,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                         <div className="space-y-4 sm:space-y-6 mt-6 pt-6 border-t-2 border-green-200">
                             <div>
                                 <label className="block text-sm font-semibold text-gray-700 mb-2">Product Name</label>
-                                <input name="name" value={formData.name} onChange={handleChange} className="w-full px-3 py-2 text-sm bg-white/50 border border-gray-200 rounded-md focus:outline-none focus:border-green-600 transition-all outline-none placeholder-gray600" placeholder="e.g. Premium Widget" />
+                                <input name="name" value={formData.name} onChange={handleChange} className="w-full px-3 py-2 text-sm bg-white/50 border border-gray-200 rounded-md focus:outline-none focus:border-green-600 transition-all outline-none placeholder-gray-400" placeholder="e.g. Premium Widget" />
                             </div>
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -487,6 +487,11 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                                 </div>
                             </div>
 
+                            <div>
+                                <label className="block text-sm font-semibold text-gray-700 mb-2">Categories (comma-separated)</label>
+                                <input name="categories" value={formData.categories} onChange={handleChange} className="w-full px-3 py-2 text-sm bg-white/50 border border-gray-200 rounded-md focus:outline-none focus:border-green-600 transition-all outline-none placeholder-gray-400" placeholder="e.g. Supplements, Vitamins" />
+                            </div>
+
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm font-semibold text-gray-700 mb-2">HSN Code</label>
@@ -496,11 +501,6 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                                     <label className="block text-sm font-semibold text-gray-700 mb-2">Batch No.</label>
                                     <input name="batchNo" value={formData.batchNo} onChange={handleChange} className="w-full px-3 py-2 text-sm bg-white/50 border border-gray-200 rounded-md focus:outline-none focus:border-green-600 transition-all outline-none placeholder-gray-400 h-[38px]" placeholder="e.g. BATCH-001" />
                                 </div>
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-2">Categories (comma-separated)</label>
-                                <input name="categories" value={formData.categories} onChange={handleChange} className="w-full px-3 py-2 text-sm bg-white/50 border border-gray-200 rounded-md focus:outline-none focus:border-green-600 transition-all outline-none placeholder-gray-400" placeholder="e.g. Health, Vitamins, Best Seller" />
                             </div>
                         </div>
                     </div>
