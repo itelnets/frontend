@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { createProduct } from '@/services/product';
 import toast from 'react-hot-toast';
 import Spinner from '@/components/Spinner';
-import PageLoader from '@/components/PageLoader';
 import CustomDropdown from '@/components/CustomDropdown';
 import * as XLSX from 'xlsx';
 
@@ -78,7 +77,7 @@ export default function AddProductPage() {
                 for (let i = 0; i < data.length; i++) {
                     const originalRow: any = data[i];
                     const row: any = {};
-                    
+
                     // Normalize the row keys based on the header map
                     Object.keys(originalRow).forEach(key => {
                         const trimmedKey = key.trim();
@@ -86,7 +85,7 @@ export default function AddProductPage() {
                         const mappedKey = headerMap[trimmedKey] || trimmedKey;
                         row[mappedKey] = originalRow[key];
                     });
-                    
+
                     try {
                         const standardFields = [
                             'name', 'type', 'description', 'price', 'discount', 'overview',
@@ -119,8 +118,8 @@ export default function AddProductPage() {
                             hsn: row.hsn || '',
                             batchNo: row.batchNo || '',
                             expiredOn: row.expiredOn || '',
-                            images: [], 
-                            specifications: specs 
+                            images: [],
+                            specifications: specs
                         };
 
                         await createProduct(productData);
@@ -343,16 +342,19 @@ export default function AddProductPage() {
 
             // Upload all selected images concurrently
             const uploadPromises = selectedImages.map(async (item) => {
-                const formData = new FormData();
-                formData.append('productId', newProductId);
-                formData.append('image', item.file);
+                const uploadFormData = new FormData();
+                uploadFormData.append('productId', newProductId);
+                if (formData.type) {
+                    uploadFormData.append('productType', formData.type);
+                }
+                uploadFormData.append('image', item.file);
 
                 const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/upload`, {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${token}`
                     },
-                    body: formData
+                    body: uploadFormData
                 });
 
                 if (!res.ok) {

@@ -305,6 +305,9 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                 // For new images, upload them
                 const formDataToUpload = new FormData();
                 formDataToUpload.append('productId', productId);
+                if (formData.type) {
+                    formDataToUpload.append('productType', formData.type);
+                }
                 formDataToUpload.append('image', item.file);
 
                 const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/upload`, {
@@ -494,7 +497,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                                     <input name="batchNo" value={formData.batchNo} onChange={handleChange} className="w-full px-3 py-2 text-sm bg-white/50 border border-gray-200 rounded-md focus:outline-none focus:border-green-600 transition-all outline-none placeholder-gray-400 h-[38px]" placeholder="e.g. BATCH-001" />
                                 </div>
                             </div>
-                            
+
                             <div>
                                 <label className="block text-sm font-semibold text-gray-700 mb-2">Categories (comma-separated)</label>
                                 <input name="categories" value={formData.categories} onChange={handleChange} className="w-full px-3 py-2 text-sm bg-white/50 border border-gray-200 rounded-md focus:outline-none focus:border-green-600 transition-all outline-none placeholder-gray-400" placeholder="e.g. Health, Vitamins, Best Seller" />
