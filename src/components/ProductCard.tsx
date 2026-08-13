@@ -89,14 +89,14 @@ export default function ProductCard({ product, showHeart = false }: ProductCardP
                 confirmText="Remove"
             />
 
-            <div className="w-full aspect-[6/5] flex items-center justify-center relative bg-white border-b border-gray-100 p-2 sm:p-4">
+            <div className="w-full h-[170px] sm:h-[200px] lg:h-[220px] shrink-0 flex items-center justify-center relative bg-white border-b border-gray-100 p-2 sm:p-4">
                 {product.images && product.images.length > 0 ? (
                     <Image
                         src={product.images[0].startsWith('http') ? product.images[0] : `${process.env.NEXT_PUBLIC_API_URL}/upload/file/${product.images[0]}`}
                         alt={product.name}
                         width={500}
                         height={500}
-                        className="w-full h-full object-contain"
+                        className="max-w-full max-h-full w-auto h-auto object-contain"
                     />
                 ) : (
                     <svg className="w-12 h-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -107,7 +107,7 @@ export default function ProductCard({ product, showHeart = false }: ProductCardP
             </div>
 
             <div className="p-2 sm:p-3 flex-1 flex flex-col relative">
-                <div className="text-[12px] sm:text-[13px] text-gray-800 line-clamp-3 leading-tight sm:leading-snug mb-1 sm:mb-2 font-medium group-hover:text-blue-700 transition-colors">
+                <div className="text-[12px] sm:text-[13px] text-gray-800 line-clamp-2 h-[2.5em] leading-tight sm:leading-snug mb-1 sm:mb-2 font-medium group transition-colors overflow-hidden">
                     {product.name}
                 </div>
 
@@ -141,7 +141,7 @@ export default function ProductCard({ product, showHeart = false }: ProductCardP
                             }
                         })}
                     </div>
-                    <span className="text-[14px] text-blue-600 hover:underline cursor-pointer">{product.numReviews || 0}</span>
+                    <span className="text-[14px] text-[#458500] hover:underline cursor-pointer">{product.numReviews || 0}</span>
                 </div>
 
                 <div className="flex items-center gap-1 lg:gap-2 mt-auto overflow-hidden">
