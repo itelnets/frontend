@@ -64,7 +64,12 @@ export default function AdminTopbar({ onMenuClick }: AdminTopbarProps) {
                         </Link>
                         <div id="products-pagination-portal" className="contents"></div>
                     </div>
-                ) : pathname.includes('/orders') || pathname.includes('/users') || pathname.includes('/banners') ? (
+                ) : pathname.includes('/orders') ? (
+                    <div className="flex items-center gap-2 sm:gap-2.5 flex-1 justify-end">
+                        <div id="orders-topbar-portal" className="contents"></div>
+                        <div id="orders-pagination-portal" className="contents"></div>
+                    </div>
+                ) : pathname.includes('/users') || pathname.includes('/banners') ? (
                     <div id="topbar-portal" className="contents"></div>
                 ) : (
                     <div className="flex items-center gap-2 sm:gap-4">

@@ -384,7 +384,7 @@ export default function ProductDetailsPage() {
                                     <span className="text-[#458500] mr-3">:</span>
                                     <span className="text-gray-900">
                                         {spec.value}
-                                        {spec.key === 'Shipping Weight (gm)' && ' gm'}
+                                        {spec.key === 'Weight (gm)' && ' gm'}
                                     </span>
                                 </div>
                             ))}

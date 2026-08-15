@@ -145,7 +145,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
             }));
             setImages(existingMapped);
             const defaultSpecs = [
-                { key: 'Shipping Weight (gm)', value: '' },
+                { key: 'Weight (gm)', value: '' },
                 { key: 'Product Quantity (No)', value: '' },
                 { key: 'Product Code (SKU)', value: '' },
                 { key: 'Dimensions (l x b h)', value: '' },

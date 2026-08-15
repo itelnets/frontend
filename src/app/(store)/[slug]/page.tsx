@@ -47,6 +47,28 @@ export default function BannerDealsPage() {
     const [isValidSlug, setIsValidSlug] = useState<boolean | null>(null);
 
     // Parse discount number and direction from slug or banner title (e.g., 10% off -> maxDiscount: 10; 20% off -> maxDiscount: 20; 30% off -> maxDiscount: 30)
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const params = new URLSearchParams(window.location.search);
+            const sort = params.get('sort');
+            if (sort) {
+                setSortOption(sort);
+            }
+        }
+    }, []);
+
+    const handleSortChange = (newSort: string) => {
+        setSortOption(newSort);
+        if (typeof window !== 'undefined') {
+            const url = new URL(window.location.href);
+            if (newSort && newSort !== 'Featured') {
+                url.searchParams.set('sort', newSort);
+            } else {
+                url.searchParams.delete('sort');
+            }
+            window.history.replaceState({}, '', url.toString());
+        }
+    };
     const isMinDiscount = slug.toLowerCase().includes('min-') || (banner?.tabTitle?.toLowerCase().includes('minimum') ?? false);
     const isUpTo = !isMinDiscount;
     const discountMatch = slug.match(/(\d+)-off/i) || slug.match(/(\d+)%/) || slug.match(/(\d+)-percent/i) || (banner?.tabTitle || '').match(/(\d+)%/) || (banner?.tabTitle || '').match(/(\d+)\s*%?\s*off/i);
@@ -213,7 +235,7 @@ export default function BannerDealsPage() {
                             filters={filters}
                             setFilters={setFilters}
                             sortOption={sortOption}
-                            setSortOption={setSortOption}
+                            setSortOption={handleSortChange}
                             setIsMobileFilterOpen={setIsMobileFilterOpen}
                             setMobileFilterView={setMobileFilterView}
                             setIsMobileSortOpen={setIsMobileSortOpen}
@@ -247,7 +269,7 @@ export default function BannerDealsPage() {
                 onClose={() => setIsMobileSortOpen(false)}
                 options={SORT_OPTIONS}
                 value={sortOption}
-                onChange={setSortOption}
+                onChange={handleSortChange}
                 totalResults={products.length}
             />
         </div>

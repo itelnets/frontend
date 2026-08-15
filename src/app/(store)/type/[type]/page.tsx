@@ -44,8 +44,25 @@ export default function TypeProductsPage() {
             if (brand) {
                 setFilters(prev => ({ ...prev, brands: [brand] }));
             }
+            const sort = params.get('sort');
+            if (sort) {
+                setSortOption(sort);
+            }
         }
     }, []);
+
+    const handleSortChange = (newSort: string) => {
+        setSortOption(newSort);
+        if (typeof window !== 'undefined') {
+            const url = new URL(window.location.href);
+            if (newSort && newSort !== 'Featured') {
+                url.searchParams.set('sort', newSort);
+            } else {
+                url.searchParams.delete('sort');
+            }
+            window.history.replaceState({}, '', url.toString());
+        }
+    };
 
     useEffect(() => {
         const fetchProducts = async () => {
@@ -269,7 +286,7 @@ export default function TypeProductsPage() {
                             <SortDropdown
                                 options={['Featured', 'Best sellers', 'Top Rated', 'Price: Low to High', 'Price: High to Low', 'Newest', 'Heaviest', 'Lightest', 'Highest Discount']}
                                 value={sortOption}
-                                onChange={setSortOption}
+                                onChange={handleSortChange}
                                 className="w-auto z-[90]"
                                 buttonClassName="!w-[170px] !min-w-[170px]"
                                 menuClassName="!w-[170px] !min-w-[170px] [&>div]:!max-h-[200px]"
@@ -345,7 +362,7 @@ export default function TypeProductsPage() {
                 onClose={() => setIsMobileSortOpen(false)}
                 options={['Featured', 'Best sellers', 'Top Rated', 'Price: Low to High', 'Price: High to Low', 'Newest', 'Heaviest', 'Lightest', 'Highest Discount']}
                 value={sortOption}
-                onChange={setSortOption}
+                onChange={handleSortChange}
                 totalResults={products.length}
             />
         </div>
