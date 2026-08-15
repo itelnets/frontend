@@ -3,7 +3,7 @@ import axios from 'axios';
 const api = axios.create({
     baseURL: process.env.NEXT_PUBLIC_API_URL,
     withCredentials: true, // Important for HttpOnly cookies
-    timeout: 30000, // 30 seconds timeout to allow backend serverless cold-starts and MongoDB connections
+    timeout: 15000, // 15 seconds timeout to allow backend serverless cold-starts and MongoDB connections
     headers: {
         'Content-Type': 'application/json',
     },

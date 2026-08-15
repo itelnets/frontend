@@ -12,7 +12,7 @@ export default function MaintenanceModal() {
             if (!apiUrl) return;
             const healthUrl = `${apiUrl.replace(/\/+$/, '')}/health`;
             const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 20000);
+            const timeoutId = setTimeout(() => controller.abort(), 15000);
 
             const res = await fetch(healthUrl, { signal: controller.signal });
             clearTimeout(timeoutId);
