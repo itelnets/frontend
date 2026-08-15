@@ -10,13 +10,14 @@ export default function MaintenanceModal() {
         try {
             const apiUrl = process.env.NEXT_PUBLIC_API_URL;
             if (!apiUrl) return;
+            const healthUrl = `${apiUrl.replace(/\/+$/, '')}/health`;
             const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 8000);
+            const timeoutId = setTimeout(() => controller.abort(), 20000);
 
-            const res = await fetch(apiUrl, { signal: controller.signal });
+            const res = await fetch(healthUrl, { signal: controller.signal });
             clearTimeout(timeoutId);
 
-            if (res) {
+            if (res && (res.ok || res.status === 200)) {
                 window.location.reload();
             }
         } catch (e) {
