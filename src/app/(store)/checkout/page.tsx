@@ -7,11 +7,9 @@ import { fetchAddresses, addAddress, updateAddress, removeAddress } from '@/serv
 import ConfirmModal from '@/components/ConfirmModal';
 import toast from 'react-hot-toast';
 import PaymentMethod from '@/components/PaymentMethod';
+import AddressSection from '@/components/AddressSection';
 import { useRazorpayPayment } from './useRazorpayPayment';
 
-const toTitleCase = (str: string) => {
-    return str.replace(/\b\w/g, (char) => char.toUpperCase());
-};
 
 function CheckoutContent() {
     const { cartItems, cartCount, updateQuantity, removeFromCart, moveToList, clearCart } = useCart();
@@ -156,7 +154,7 @@ function CheckoutContent() {
     };
 
     const handleSaveAddress = async () => {
-        if (!formData.fullName || !formData.addressLine1 || !formData.city || !formData.state || !formData.zip || formData.phone.length !== 10) {
+        if (!formData.fullName || !formData.addressLine1 || !formData.city || !formData.state || !formData.zip || formData.zip.length !== 6 || formData.phone.length !== 10) {
             setShowErrors(true);
             return;
         }
@@ -184,263 +182,32 @@ function CheckoutContent() {
         }
     };
 
-    const addressFormUI = (
-        <div className="mt-6 ml-1 sm:ml-8" onClick={(e) => e.stopPropagation()}>
-            <form className="space-y-1.5 sm:space-y-3" onSubmit={(e) => { e.preventDefault(); handleSaveAddress(); }}>
-                <div className="relative pt-2">
-                    <input type="text" id="country" value="India" readOnly className="peer w-full border border-gray-300 rounded-md px-2 sm:px-3 py-2 sm:py-3 text-[13.5px] sm:text-sm text-gray-700 hover:cursor-not-allowed focus:outline-none focus:border-gray-300 focus:ring-0" />
-                    <label htmlFor="country" className="absolute left-2 -top-0 bg-white px-1 text-xs text-gray-500 transition-all peer-placeholder-shown:top-5 peer-placeholder-shown:text-xs sm:peer-placeholder-shown:text-sm peer-placeholder-shown:text-gray-400 peer-focus:-top-0 sm:peer-focus:-top-0 peer-focus:text-xs peer-focus:text-gray-500 z-10 pointer-events-none">
-                        Country / Region*
-                    </label>
-                </div>
 
-                <div className="relative pt-2">
-                    <input type="text" id="fullName" value={formData.fullName} onChange={(e) => setFormData({ ...formData, fullName: toTitleCase(e.target.value) })} className={`peer w-full border ${showErrors && !formData.fullName ? 'border-red-500' : 'border-gray-300'} rounded-md px-2 sm:px-3 py-2 sm:py-3 text-[13.5px] sm:text-sm focus:outline-none ${showErrors && !formData.fullName ? '' : 'focus:border-green-600 focus:ring-0.5 focus:ring-green-600'}`} placeholder=" " />
-                    <label htmlFor="fullName" className={`absolute left-2 -top-0 bg-white px-1 text-xs transition-all peer-placeholder-shown:top-[18px] sm:peer-placeholder-shown:top-5 peer-placeholder-shown:text-xs sm:peer-placeholder-shown:text-sm peer-placeholder-shown:text-gray-400 peer-focus:-top-0 sm:peer-focus:-top-0 peer-focus:text-xs z-10 pointer-events-none ${showErrors && !formData.fullName ? 'text-red-500 peer-focus:text-red-500' : 'text-gray-500 peer-focus:text-green-600'}`}>
-                        Full Name*
-                    </label>
-                    {showErrors && !formData.fullName && (
-                        <div className="absolute right-2 sm:right-3 top-[18px] sm:top-[21px] pointer-events-none">
-                            <svg className="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                        </div>
-                    )}
-                    {showErrors && !formData.fullName && <p className="text-[#d32f2f] text-xs mt-1">Full name is required. Please use a space to separate first and last names.</p>}
-                </div>
-
-                <div className="relative pt-2">
-                    <input type="text" id="addressLine1" maxLength={45} value={formData.addressLine1} onChange={(e) => setFormData({ ...formData, addressLine1: toTitleCase(e.target.value) })} className={`peer w-full border ${showErrors && !formData.addressLine1 ? 'border-red-500' : 'border-gray-300'} rounded-md pr-10 sm:pr-12 px-2 sm:px-3 py-2 sm:py-3 text-[13.5px] sm:text-sm focus:outline-none ${showErrors && !formData.addressLine1 ? '' : 'focus:border-green-600 focus:ring-0.5 focus:ring-green-600'}`} placeholder=" " />
-                    <label htmlFor="addressLine1" className={`absolute left-2 -top-0 bg-white px-1 text-xs transition-all peer-placeholder-shown:top-[18px] sm:peer-placeholder-shown:top-5 peer-placeholder-shown:text-xs sm:peer-placeholder-shown:text-sm peer-placeholder-shown:text-gray-400 peer-focus:-top-0 sm:peer-focus:-top-0 peer-focus:text-xs z-10 pointer-events-none ${showErrors && !formData.addressLine1 ? 'text-red-500 peer-focus:text-red-500' : 'text-gray-500 peer-focus:text-green-600'}`}>
-                        Address Line 1*
-                    </label>
-                    <div className="absolute right-2 sm:right-3 top-[19px] sm:top-[22px] text-xs text-gray-400 pointer-events-none">
-                        {45 - (formData.addressLine1?.length || 0)}
-                    </div>
-                    {showErrors && !formData.addressLine1 && (
-                        <div className="absolute right-10 sm:right-12 top-[18px] sm:top-[21px] pointer-events-none">
-                            <svg className="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                        </div>
-                    )}
-                    {showErrors && !formData.addressLine1 && <p className="text-[#d32f2f] text-xs mt-1">Address Line 1 is required.</p>}
-                </div>
-
-                {showAddressLine2 ? (
-                    <div className="relative pt-2">
-                        <input type="text" id="addressLine2" maxLength={25} value={formData.addressLine2} onChange={(e) => setFormData({ ...formData, addressLine2: toTitleCase(e.target.value) })} className="peer w-full border border-gray-300 rounded-md pr-10 sm:pr-12 px-2 sm:px-3 py-2 sm:py-3 text-[13.5px] sm:text-sm focus:outline-none focus:border-green-600 focus:ring-0.5 focus:ring-green-600" placeholder=" " />
-                        <label htmlFor="addressLine2" className="absolute left-2 -top-0 bg-white px-1 text-xs text-gray-500 transition-all peer-placeholder-shown:top-[18px] sm:peer-placeholder-shown:top-5 peer-placeholder-shown:text-xs sm:peer-placeholder-shown:text-sm peer-placeholder-shown:text-gray-400 peer-focus:-top-0 sm:peer-focus:-top-0 peer-focus:text-xs peer-focus:text-green-600 z-10 pointer-events-none">
-                            Address Line 2
-                        </label>
-                        <div className="absolute right-2 sm:right-3 top-[19px] sm:top-[22px] text-xs text-gray-400 pointer-events-none">
-                            {25 - (formData.addressLine2?.length || 0)}
-                        </div>
-                    </div>
-                ) : (
-                    <div className="pt-1">
-                        <button type="button" onClick={() => setShowAddressLine2(true)} className="text-[12px] sm:text-sm text-green-600 hover:underline text-left w-max cursor-pointer block">Add Address Line 2</button>
-                    </div>
-                )}
-
-                {showLandmark ? (
-                    <div className="relative pt-2">
-                        <input type="text" id="landmark" maxLength={10} value={formData.landmark} onChange={(e) => setFormData({ ...formData, landmark: toTitleCase(e.target.value) })} className="peer w-full border border-gray-300 rounded-md pr-10 sm:pr-12 px-2 sm:px-3 py-2 sm:py-3 text-[13.5px] sm:text-sm focus:outline-none focus:border-green-600 focus:ring-0.5 focus:ring-green-600" placeholder=" " />
-                        <label htmlFor="landmark" className="absolute left-2 -top-0 bg-white px-1 text-xs text-gray-500 transition-all peer-placeholder-shown:top-[18px] sm:peer-placeholder-shown:top-5 peer-placeholder-shown:text-xs sm:peer-placeholder-shown:text-sm peer-placeholder-shown:text-gray-400 peer-focus:-top-0 sm:peer-focus:-top-0 peer-focus:text-xs peer-focus:text-green-600 z-10 pointer-events-none">
-                            Landmarks
-                        </label>
-                        <div className="absolute right-2 sm:right-3 top-[19px] sm:top-[22px] text-xs text-gray-400 pointer-events-none">
-                            {10 - (formData.landmark?.length || 0)}
-                        </div>
-                    </div>
-                ) : (
-                    <div className="pt-1">
-                        <button type="button" onClick={() => setShowLandmark(true)} className="text-[12px] sm:text-sm text-green-600 hover:underline text-left w-max cursor-pointer block">Add landmarks</button>
-                    </div>
-                )}
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-1 sm:gap-3">
-                    <div className="relative pt-2">
-                        <input type="text" id="city" value={formData.city} onChange={(e) => setFormData({ ...formData, city: toTitleCase(e.target.value) })} className={`peer w-full border ${showErrors && !formData.city ? 'border-red-500' : 'border-gray-300'} rounded-md px-2 sm:px-3 py-2 sm:py-3 text-[13.5px] sm:text-sm focus:outline-none ${showErrors && !formData.city ? '' : 'focus:border-green-600 focus:ring-0.5 focus:ring-green-600'}`} placeholder=" " />
-                        <label htmlFor="city" className={`absolute left-2 -top-0 bg-white px-1 text-xs transition-all peer-placeholder-shown:top-[18px] sm:peer-placeholder-shown:top-5 peer-placeholder-shown:text-xs sm:peer-placeholder-shown:text-sm peer-placeholder-shown:text-gray-400 peer-focus:-top-0 sm:peer-focus:-top-0 peer-focus:text-xs z-10 pointer-events-none ${showErrors && !formData.city ? 'text-red-500 peer-focus:text-red-500' : 'text-gray-500 peer-focus:text-green-600'}`}>
-                            City*
-                        </label>
-                        {showErrors && !formData.city && (
-                            <div className="absolute right-2 sm:right-3 top-[18px] sm:top-[21px] pointer-events-none">
-                                <svg className="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                            </div>
-                        )}
-                        {showErrors && !formData.city && <p className="text-[#d32f2f] text-xs mt-1">City is required.</p>}
-                    </div>
-
-                    <div className="relative pt-2">
-                        <input type="text" id="state" value={formData.state} onChange={(e) => setFormData({ ...formData, state: toTitleCase(e.target.value) })} className={`peer w-full border ${showErrors && !formData.state ? 'border-red-500' : 'border-gray-300'} rounded-md px-2 sm:px-3 py-2 sm:py-3 text-[13.5px] sm:text-sm focus:outline-none ${showErrors && !formData.state ? '' : 'focus:border-green-600 focus:ring-0.5 focus:ring-green-600'}`} placeholder=" " />
-                        <label htmlFor="state" className={`absolute left-2 -top-0 bg-white px-1 text-xs transition-all peer-placeholder-shown:top-[18px] sm:peer-placeholder-shown:top-5 peer-placeholder-shown:text-xs sm:peer-placeholder-shown:text-sm peer-placeholder-shown:text-gray-400 peer-focus:-top-0 sm:peer-focus:-top-0 peer-focus:text-xs z-10 pointer-events-none ${showErrors && !formData.state ? 'text-red-500 peer-focus:text-red-500' : 'text-gray-500 peer-focus:text-green-600'}`}>
-                            State*
-                        </label>
-                        {showErrors && !formData.state && (
-                            <div className="absolute right-2 sm:right-3 top-[18px] sm:top-[21px] pointer-events-none">
-                                <svg className="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                            </div>
-                        )}
-                        {showErrors && !formData.state && <p className="text-[#d32f2f] text-xs mt-1">State/Province/Territory/Region is required.</p>}
-                    </div>
-
-                    <div className="relative pt-2">
-                        <input type="text" id="zip" value={formData.zip} onChange={(e) => setFormData({ ...formData, zip: e.target.value })} className={`peer w-full border ${showErrors && !formData.zip ? 'border-red-500' : 'border-gray-300'} rounded-md px-2 sm:px-3 py-2 sm:py-3 text-[13.5px] sm:text-sm focus:outline-none ${showErrors && !formData.zip ? '' : 'focus:border-green-600 focus:ring-0.5 focus:ring-green-600'}`} placeholder=" " />
-                        <label htmlFor="zip" className={`absolute left-2 -top-0 bg-white px-1 text-xs transition-all peer-placeholder-shown:top-[18px] sm:peer-placeholder-shown:top-5 peer-placeholder-shown:text-xs sm:peer-placeholder-shown:text-sm peer-placeholder-shown:text-gray-400 peer-focus:-top-0 sm:peer-focus:-top-0 peer-focus:text-xs z-10 pointer-events-none ${showErrors && !formData.zip ? 'text-red-500 peer-focus:text-red-500' : 'text-gray-500 peer-focus:text-green-600'}`}>
-                            Postal Code*
-                        </label>
-                        {showErrors && !formData.zip && (
-                            <div className="absolute right-2 sm:right-3 top-[18px] sm:top-[21px] pointer-events-none">
-                                <svg className="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                            </div>
-                        )}
-                        {showErrors && !formData.zip && <p className="text-[#d32f2f] text-xs mt-1">Postal Code is required.</p>}
-                    </div>
-                </div>
-
-                <div className="relative pt-2">
-                    <input type="text" id="phone" maxLength={10} value={formData.phone} onChange={(e) => {
-                        const val = e.target.value.replace(/\D/g, '');
-                        if (val.length <= 10) setFormData({ ...formData, phone: val });
-                    }} className={`peer w-full border ${showErrors && formData.phone.length !== 10 ? 'border-red-500' : 'border-gray-300'} rounded-md pl-[38px] sm:pl-[42px] px-2 sm:px-3 py-2 sm:py-3 text-[13.5px] sm:text-sm focus:outline-none ${showErrors && formData.phone.length !== 10 ? '' : 'focus:border-green-600 focus:ring-0.5 focus:ring-green-600'}`} placeholder=" " />
-                    <label htmlFor="phone" className={`absolute left-2 -top-0 bg-white px-1 text-xs transition-all peer-placeholder-shown:top-[18px] sm:peer-placeholder-shown:top-5 peer-placeholder-shown:left-[36px] sm:peer-placeholder-shown:left-[40px] peer-placeholder-shown:text-xs sm:peer-placeholder-shown:text-sm peer-placeholder-shown:text-gray-400 peer-focus:left-2 sm:peer-focus:left-2 peer-focus:-top-0 sm:peer-focus:-top-0 peer-focus:text-xs z-10 pointer-events-none ${showErrors && formData.phone.length !== 10 ? 'text-red-500 peer-focus:text-red-500' : 'text-gray-500 peer-focus:text-green-600'}`}>
-                        Mobile Number*
-                    </label>
-                    <div className="absolute left-3 top-[13px] sm:top-[18px] pointer-events-none">
-                        <span className="text-[13.5px] sm:text-sm text-green-700">+91</span>
-                    </div>
-                    {showErrors && formData.phone.length !== 10 && (
-                        <div className="absolute right-2 sm:right-3 top-[18px] sm:top-[21px] pointer-events-none">
-                            <svg className="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                        </div>
-                    )}
-                    {showErrors && formData.phone.length !== 10 && <p className="text-[#d32f2f] text-xs mt-1">A valid 10-digit phone number is required.</p>}
-                </div>
-
-                <div className="flex items-center gap-2 pt-2">
-                    <input type="checkbox" id="default-addr" checked={formData.isDefault} onChange={(e) => setFormData({ ...formData, isDefault: e.target.checked })} className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-green-600 border-gray-300 rounded focus:ring-green-500 cursor-pointer accent-[#458500]" />
-                    <label htmlFor="default-addr" className="text-[12px] sm:text-sm text-gray-700 cursor-pointer">Set as my default shipping address</label>
-                </div>
-
-                <div className="pt-4 flex flex-col md:flex-row justify-end gap-3 w-full">
-                    {editingAddressId !== 'new' && (
-                        <button type="button" onClick={() => setEditingAddressId(null)} className="w-full md:w-auto border border-gray-300 hover:bg-gray-50 text-gray-900 font-bold py-2 sm:py-3 px-4 sm:px-16 rounded-md transition-colors shadow-sm text-[14px] sm:text-[16px] cursor-pointer bg-white">
-                            Cancel
-                        </button>
-                    )}
-                    <button type="submit" className="w-full md:w-auto bg-[#458500] hover:bg-[#366800] text-white font-bold py-2 sm:py-3 px-10 sm:px-16 rounded-md transition-colors shadow-sm text-[15px] sm:text-[16px] cursor-pointer">
-                        Save and Continue
-                    </button>
-                </div>
-            </form>
-        </div>
-    );
 
     const activeAddress = savedAddresses.find(a => a._id === selectedAddressMode) || savedAddresses[0];
 
     const addressSelectionUI = (
-        <div className="space-y-2 sm:space-y-4">
-            {/* Saved Addresses */}
-            {savedAddresses.map((addr) => (
-                <div
-                    key={addr._id}
-                    className={`border rounded-md p-3 sm:p-4 cursor-pointer transition-colors ${selectedAddressMode === addr._id ? 'border-[#458500] bg-white' : 'border-gray-300 bg-white'}`}
-                    onClick={() => {
-                        setSelectedAddressMode(addr._id);
-                        setEditingAddressId(null);
-                    }}
-                >
-                    <div className="flex flex-col gap-1">
-                        <div className="flex justify-between items-start mb-1">
-                            <div className="flex items-center gap-2 sm:gap-3">
-                                <input
-                                    type="radio"
-                                    checked={selectedAddressMode === addr._id}
-                                    onChange={() => {
-                                        setSelectedAddressMode(addr._id);
-                                        setEditingAddressId(null);
-                                    }}
-                                    className="w-4 h-4 sm:w-5 sm:h-5 text-[#458500] border-gray-300 focus:ring-[#458500] accent-[#458500] cursor-pointer shrink-0"
-                                />
-                                <span className="font-bold text-gray-900 text-[14px] sm:text-[16px] leading-none">{addr.fullName}</span>
-                            </div>
-                            <div className="flex gap-3 text-gray-500">
-                                <button onClick={(e) => handleEditClick(e, addr)} className="hover:text-gray-700 cursor-pointer">
-                                    <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
-                                </button>
-                                <button onClick={(e) => handleDeleteClick(e, addr._id)} className="hover:text-gray-700 cursor-pointer">
-                                    <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                                </button>
-                            </div>
-                        </div>
-                        <div className="pl-6 sm:pl-8">
-                            <div className="text-[12px] sm:text-[14px] text-gray-500">
-                                <div>{addr.addressLine1},{addr.addressLine2}{addr.addressLine2 ? ' - ' : ''}{addr.zip},</div>
-                                <div>{addr.landmark ? addr.landmark + ', ' : ''}{addr.city}, {addr.state}</div>
-                            </div>
-                            {editingAddressId !== addr._id && (
-                                <div className="mt-3 flex justify-between items-center">
-                                    <div className="text-[12px] sm:text-sm">
-                                        {addr.isDefault ? (
-                                            <span className="font-semibold text-green-700 bg-green-50 px-2 py-0.5 rounded border border-green-200 inline-block">Default Address</span>
-                                        ) : (
-                                            <button type="button" onClick={(e) => handleSetDefault(e, addr._id)} className="text-[#458500] hover:underline hover:text-[#366800] cursor-pointer font-medium">Set as Default</button>
-                                        )}
-                                    </div>
-
-                                    {selectedAddressMode === addr._id && (
-                                        <button type="button" onClick={() => {
-                                            if (checkoutStep === 1) {
-                                                router.push('?step=2');
-                                            } else {
-                                                setIsAddressModalOpen(false);
-                                            }
-                                        }} className="bg-[#458500] hover:bg-[#366800] text-white font-normal py-1.5 sm:py-2.5 px-4 sm:px-12 rounded-md transition-colors font-bold text-[14px] sm:text-[15px] cursor-pointer">
-                                            Continue
-                                        </button>
-                                    )}
-                                </div>
-                            )}
-                        </div>
-                    </div>
-
-                    {editingAddressId === addr._id && addressFormUI}
-                </div>
-            ))}
-
-            {/* Add New Address Option */}
-            <div
-                className={`border rounded-md p-4 transition-colors ${selectedAddressMode === 'new' ? 'border-[#458500] bg-white border-2' : 'border-gray-300 bg-white cursor-pointer'}`}
-                onClick={() => {
-                    if (selectedAddressMode !== 'new') {
-                        setSelectedAddressMode('new');
-                        setEditingAddressId('new');
-                        setFormData({ fullName: '', addressLine1: '', addressLine2: '', landmark: '', city: '', state: '', zip: '', phone: '', isDefault: false });
-                    }
-                }}
-            >
-                <div className="flex items-center gap-2 sm:gap-3">
-                    <input
-                        type="radio"
-                        checked={selectedAddressMode === 'new'}
-                        onChange={() => {
-                            setSelectedAddressMode('new');
-                            setEditingAddressId('new');
-                            setFormData({ fullName: '', addressLine1: '', addressLine2: '', landmark: '', city: '', state: '', zip: '', phone: '', isDefault: false });
-                        }}
-                        className="w-4 h-4 sm:w-5 sm:h-5 text-green-600 border-gray-300 focus:ring-green-500 accent-[#458500] cursor-pointer shrink-0"
-                    />
-                    <span className="font-bold text-gray-900 text-[14px] sm:text-[18px] leading-none">Add shipping address</span>
-                </div>
-
-                {selectedAddressMode === 'new' && editingAddressId === 'new' && addressFormUI}
-                {selectedAddressMode === 'new' && editingAddressId !== 'new' && (
-                    <div className="mt-4 sm:ml-8 flex justify-end">
-                        <button type="button" onClick={() => { setEditingAddressId('new'); setFormData({ fullName: '', addressLine1: '', addressLine2: '', landmark: '', city: '', state: '', zip: '', phone: '', isDefault: false }); }} className="bg-[#458500] hover:bg-[#366800] text-white font-normal py-2 sm:py-3 px-6 sm:px-12 rounded-md transition-colors font-bold mb-2 sm:mb-4 text-[14px] sm:text-[16px] cursor-pointer">
-                            Fill New Address Form
-                        </button>
-                    </div>
-                )}
-            </div>
-        </div>
+        <AddressSection
+            savedAddresses={savedAddresses}
+            selectedAddressMode={selectedAddressMode}
+            setSelectedAddressMode={setSelectedAddressMode}
+            editingAddressId={editingAddressId}
+            setEditingAddressId={setEditingAddressId}
+            handleEditClick={handleEditClick}
+            handleDeleteClick={handleDeleteClick}
+            handleSetDefault={handleSetDefault}
+            handleSaveAddress={handleSaveAddress}
+            checkoutStep={checkoutStep}
+            router={router}
+            setIsAddressModalOpen={setIsAddressModalOpen}
+            formData={formData}
+            setFormData={setFormData}
+            showErrors={showErrors}
+            showAddressLine2={showAddressLine2}
+            setShowAddressLine2={setShowAddressLine2}
+            showLandmark={showLandmark}
+            setShowLandmark={setShowLandmark}
+        />
     );
 
     const cartSummaryUI = (

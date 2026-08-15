@@ -19,6 +19,7 @@ export default function EditBannerPage({ params }: { params: Promise<{ id: strin
     // Text states
     const [tabTitle, setTabTitle] = useState('');
     const [tabSubtitle, setTabSubtitle] = useState('');
+    const [showInputErrors, setShowInputErrors] = useState(false);
 
     // Upload state
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -116,6 +117,13 @@ export default function EditBannerPage({ params }: { params: Promise<{ id: strin
             toast.error('Please select a banner image');
             return;
         }
+
+        if (!tabTitle.trim() || !tabSubtitle.trim()) {
+            setShowInputErrors(true);
+            toast.error('Please fill out all fields');
+            return;
+        }
+        setShowInputErrors(false);
 
         try {
             setIsSaving(true);
@@ -235,27 +243,33 @@ export default function EditBannerPage({ params }: { params: Promise<{ id: strin
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
                             <div>
                                 <label className="block text-[11px] sm:text-xs font-bold text-gray-700 uppercase tracking-normal mb-1.5">
-                                    Tab Title <span className="text-gray-400 font-normal lowercase">(e.g. Up to 70% Off Deals)</span>
+                                    Tab Title <span className="text-red-500">*</span> <span className="text-gray-400 font-normal lowercase">(e.g. Up to 70% Off Deals)</span>
                                 </label>
                                 <input
                                     type="text"
                                     placeholder="Enter tab title"
                                     value={tabTitle}
-                                    onChange={(e) => setTabTitle(e.target.value)}
-                                    className="w-full px-3 py-2 text-[13px] sm:text-sm bg-white/50 border border-gray-200 rounded-md focus:outline-none focus:border-green-600 transition-all outline-none placeholder-gray-400"
+                                    onChange={(e) => {
+                                        setTabTitle(e.target.value);
+                                        if (showInputErrors && e.target.value.trim()) setShowInputErrors(false);
+                                    }}
+                                    className={`w-full px-3 py-2 text-[13px] sm:text-sm bg-white/50 border ${showInputErrors && !tabTitle.trim() ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-green-600'} rounded-md focus:outline-none transition-all outline-none placeholder-gray-400`}
                                 />
                             </div>
 
                             <div>
                                 <label className="block text-[11px] sm:text-xs font-bold text-gray-700 uppercase tracking-normal mb-1.5">
-                                    Tab Subtitle <span className="text-gray-400 font-normal lowercase">(e.g. Shop Now)</span>
+                                    Tab Subtitle <span className="text-red-500">*</span> <span className="text-gray-400 font-normal lowercase">(e.g. Shop Now)</span>
                                 </label>
                                 <input
                                     type="text"
                                     placeholder="Enter tab subtitle"
                                     value={tabSubtitle}
-                                    onChange={(e) => setTabSubtitle(e.target.value)}
-                                    className="w-full px-3 py-2 text-[13px] sm:text-sm bg-white/50 border border-gray-200 rounded-md focus:outline-none focus:border-green-600 transition-all outline-none placeholder-gray-400"
+                                    onChange={(e) => {
+                                        setTabSubtitle(e.target.value);
+                                        if (showInputErrors && e.target.value.trim()) setShowInputErrors(false);
+                                    }}
+                                    className={`w-full px-3 py-2 text-[13px] sm:text-sm bg-white/50 border ${showInputErrors && !tabSubtitle.trim() ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-green-600'} rounded-md focus:outline-none transition-all outline-none placeholder-gray-400`}
                                 />
                             </div>
                         </div>
