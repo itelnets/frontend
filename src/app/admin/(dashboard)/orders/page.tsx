@@ -120,11 +120,7 @@ function AdminOrdersContent() {
 
             <div className="bg-transparent sm:bg-white sm:rounded-lg sm:shadow-sm sm:border border-gray-200 flex flex-col flex-1 min-h-0 overflow-hidden">
                 <div className="flex-1 overflow-y-scroll overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent px-2 py-2 sm:p-0 flex flex-col">
-                    {isLoading && orders.length === 0 ? (
-                        <div className="flex-1 flex justify-center items-center p-10 text-center text-gray-500 min-h-[300px] w-full">
-                            <svg className="animate-spin h-8 w-8 sm:h-12 sm:w-12 text-green-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                        </div>
-                    ) : orders.length === 0 ? (
+                    {orders.length === 0 && !isLoading ? (
                         <div className="flex-1 flex flex-col items-center justify-center p-10 text-center text-gray-500 sm:bg-white sm:rounded-none">No orders found.</div>
                     ) : (
                         <table className="min-w-full divide-y divide-gray-200 block sm:table sm:table-fixed">
@@ -140,122 +136,122 @@ function AdminOrdersContent() {
                                 </tr>
                             </thead>
                             <tbody className={`bg-transparent sm:bg-white divide-y-0 sm:divide-y divide-gray-200 block sm:table-row-group transition-opacity duration-200 ${isLoading && orders.length > 0 ? 'opacity-40 pointer-events-none' : 'opacity-100'}`}>
-                            {orders.map((order) => (
-                                <tr key={order._id} className="hover:bg-gray-50 transition-colors block sm:table-row mb-2 sm:mb-0 bg-white border border-gray-200 sm:border-0 sm:border-b sm:border-gray-200 rounded-lg sm:rounded-none shadow-sm sm:shadow-none relative">
+                                {orders.map((order) => (
+                                    <tr key={order._id} className="hover:bg-gray-50 transition-colors block sm:table-row mb-2 sm:mb-0 bg-white border border-gray-200 sm:border-0 sm:border-b sm:border-gray-200 rounded-lg sm:rounded-none shadow-sm sm:shadow-none relative">
 
-                                    {/* Desktop Columns */}
-                                    <td className="hidden sm:table-cell px-3 sm:px-4 py-2.5 whitespace-nowrap text-left">
-                                        <div className="text-[14px] sm:text-[15px] font-medium text-gray-900 flex items-center">
-                                            <span className="break-words">{order.user?.name || 'Unknown'}</span>
-                                        </div>
-                                        <div className="text-[12px] sm:text-[13px] font-medium text-gray-500 flex items-center mt-0.5">
-                                            <span className="break-words">{order.user?.email}</span>
-                                            {order.user?.email && <CopyIcon text={order.user.email} label="Email" />}
-                                        </div>
-                                    </td>
-                                    <td className="hidden sm:table-cell px-3 sm:px-4 py-2.5 whitespace-nowrap text-center">
-                                        <div className="text-[13px] sm:text-[14px] font-semibold text-gray-800 flex items-center justify-center">
-                                            <span>{order._id}</span>
-                                            <CopyIcon text={order._id} label="Order ID" />
-                                        </div>
-                                    </td>
-                                    <td className="hidden sm:table-cell px-3 sm:px-4 py-2.5 whitespace-nowrap text-center">
-                                        <div className="text-[13px] sm:text-[14px] font-medium text-gray-600">{formatDate(order.createdAt)}</div>
-                                    </td>
-                                    <td className="hidden sm:table-cell px-3 sm:px-4 py-2.5 whitespace-nowrap text-center">
-                                        <div className="text-[13px] sm:text-[14px] font-medium text-gray-900">{order.orderItems?.length || 0}</div>
-                                    </td>
-                                    <td className="hidden sm:table-cell px-3 sm:px-4 py-2.5 whitespace-nowrap text-center">
-                                        <div className="text-[13px] sm:text-[14px] font-bold text-gray-900">₹{order.totalPrice.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</div>
-                                    </td>
-                                    <td className="hidden sm:table-cell px-3 sm:px-4 py-2.5 whitespace-nowrap text-center">
-                                        <span className={`inline-flex items-center justify-center text-[13px] sm:text-[14px] font-bold ${order.status === 'Refund Requested' ? 'text-blue-600' :
-                                            order.status === 'Captured' ? 'text-green-600' :
-                                                order.status === 'Refunded' ? 'text-orange-600' :
-                                                    (order.status === 'Cancelled' || order.status === 'Refund Failed') ? 'text-red-600' :
-                                                        'text-yellow-600'
-                                            }`}>
-                                            {order.status === 'Captured' ? 'Paid' : order.status}
-                                        </span>
-                                    </td>
-                                    <td className="hidden sm:table-cell px-3 sm:px-4 py-2.5 text-center font-medium whitespace-nowrap">
-                                        {order.status === 'Refund Requested' && (
-                                            <button
-                                                onClick={() => setShowRefundConfirm(order._id)}
-                                                disabled={isRefunding && showRefundConfirm === order._id}
-                                                className="text-white bg-green-600 hover:bg-green-700 px-2 sm:px-3 py-1 sm:py-1.5 rounded text-[11px] sm:text-xs font-bold shadow-sm disabled:opacity-50 cursor-pointer relative"
-                                            >
-                                                <span className={isRefunding && showRefundConfirm === order._id ? 'opacity-0' : ''}>Approve For Return</span>
-                                                {isRefunding && showRefundConfirm === order._id && (
-                                                    <div className="absolute inset-0 flex items-center justify-center">
-                                                        <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                                                    </div>
-                                                )}
-                                            </button>
-                                        )}
-                                    </td>
-
-                                    {/* Mobile Card Layout */}
-                                    <td className="sm:hidden block p-3">
-                                        <div className="flex justify-between items-start mb-2">
-                                            <div className="flex-1 pr-2">
-                                                <div className="text-[13px] sm:text-[14px] font-bold text-gray-900 flex items-center">
-                                                    <span className="break-words">{order.user?.name || 'Unknown'}</span>
-                                                </div>
-                                                <div className="text-[11px] sm:text-[12px] text-gray-500 flex items-center mt-0.5">
-                                                    <span className="break-words">{order.user?.email}</span>
-                                                    {order.user?.email && <CopyIcon text={order.user.email} label="Email" />}
-                                                </div>
+                                        {/* Desktop Columns */}
+                                        <td className="hidden sm:table-cell px-3 sm:px-4 py-2.5 whitespace-nowrap text-left">
+                                            <div className="text-[14px] sm:text-[15px] font-medium text-gray-900 flex items-center">
+                                                <span className="break-words">{order.user?.name || 'Unknown'}</span>
                                             </div>
-                                            <div className="flex-shrink-0">
-                                                <span className={`inline-flex items-center text-[12px] sm:text-[13px] font-bold ${order.status === 'Refund Requested' ? 'text-blue-600' :
-                                                    order.status === 'Captured' ? 'text-green-600' :
-                                                        order.status === 'Refunded' ? 'text-orange-600' :
-                                                            (order.status === 'Cancelled' || order.status === 'Refund Failed') ? 'text-red-600' :
-                                                                'text-yellow-600'
-                                                    }`}>
-                                                    {order.status === 'Captured' ? 'Paid' : order.status}
-                                                </span>
+                                            <div className="text-[12px] sm:text-[13px] font-medium text-gray-500 flex items-center mt-0.5">
+                                                <span className="break-words">{order.user?.email}</span>
+                                                {order.user?.email && <CopyIcon text={order.user.email} label="Email" />}
                                             </div>
-                                        </div>
-
-                                        <div className="mb-2">
-                                            <div className="text-[12px] sm:text-[13px] font-medium text-gray-600 flex items-center break-all">
+                                        </td>
+                                        <td className="hidden sm:table-cell px-3 sm:px-4 py-2.5 whitespace-nowrap text-center">
+                                            <div className="text-[13px] sm:text-[14px] font-semibold text-gray-800 flex items-center justify-center">
                                                 <span>{order._id}</span>
                                                 <CopyIcon text={order._id} label="Order ID" />
                                             </div>
-                                            <div className="text-[11px] sm:text-[12px] font-medium text-gray-500 mt-0.5">{formatDate(order.createdAt)}</div>
-                                        </div>
+                                        </td>
+                                        <td className="hidden sm:table-cell px-3 sm:px-4 py-2.5 whitespace-nowrap text-center">
+                                            <div className="text-[13px] sm:text-[14px] font-medium text-gray-600">{formatDate(order.createdAt)}</div>
+                                        </td>
+                                        <td className="hidden sm:table-cell px-3 sm:px-4 py-2.5 whitespace-nowrap text-center">
+                                            <div className="text-[13px] sm:text-[14px] font-medium text-gray-900">{order.orderItems?.length || 0}</div>
+                                        </td>
+                                        <td className="hidden sm:table-cell px-3 sm:px-4 py-2.5 whitespace-nowrap text-center">
+                                            <div className="text-[13px] sm:text-[14px] font-bold text-gray-900">₹{order.totalPrice.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</div>
+                                        </td>
+                                        <td className="hidden sm:table-cell px-3 sm:px-4 py-2.5 whitespace-nowrap text-center">
+                                            <span className={`inline-flex items-center justify-center text-[13px] sm:text-[14px] font-bold ${order.status === 'Refund Requested' ? 'text-blue-600' :
+                                                order.status === 'Captured' ? 'text-green-600' :
+                                                    order.status === 'Refunded' ? 'text-orange-600' :
+                                                        (order.status === 'Cancelled' || order.status === 'Refund Failed') ? 'text-red-600' :
+                                                            'text-yellow-600'
+                                                }`}>
+                                                {order.status === 'Captured' ? 'Paid' : order.status}
+                                            </span>
+                                        </td>
+                                        <td className="hidden sm:table-cell px-3 sm:px-4 py-2.5 text-center font-medium whitespace-nowrap">
+                                            {order.status === 'Refund Requested' && (
+                                                <button
+                                                    onClick={() => setShowRefundConfirm(order._id)}
+                                                    disabled={isRefunding && showRefundConfirm === order._id}
+                                                    className="text-white bg-green-600 hover:bg-green-700 px-2 sm:px-3 py-1 sm:py-1.5 rounded text-[11px] sm:text-xs font-bold shadow-sm disabled:opacity-50 cursor-pointer relative"
+                                                >
+                                                    <span className={isRefunding && showRefundConfirm === order._id ? 'opacity-0' : ''}>Approve For Return</span>
+                                                    {isRefunding && showRefundConfirm === order._id && (
+                                                        <div className="absolute inset-0 flex items-center justify-center">
+                                                            <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                                        </div>
+                                                    )}
+                                                </button>
+                                            )}
+                                        </td>
 
-                                        <div className="flex items-center justify-between mt-2 pt-2 border-t border-gray-100">
-                                            <div>
-                                                <div className="text-[10px] sm:text-[11px] font-semibold text-gray-400 uppercase">Total ({order.orderItems?.length || 0} items)</div>
-                                                <div className="text-[13px] sm:text-[14px] font-bold text-gray-900">₹{order.totalPrice.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</div>
+                                        {/* Mobile Card Layout */}
+                                        <td className="sm:hidden block p-3">
+                                            <div className="flex justify-between items-start mb-2">
+                                                <div className="flex-1 pr-2">
+                                                    <div className="text-[13px] sm:text-[14px] font-bold text-gray-900 flex items-center">
+                                                        <span className="break-words">{order.user?.name || 'Unknown'}</span>
+                                                    </div>
+                                                    <div className="text-[11px] sm:text-[12px] text-gray-500 flex items-center mt-0.5">
+                                                        <span className="break-words">{order.user?.email}</span>
+                                                        {order.user?.email && <CopyIcon text={order.user.email} label="Email" />}
+                                                    </div>
+                                                </div>
+                                                <div className="flex-shrink-0">
+                                                    <span className={`inline-flex items-center text-[12px] sm:text-[13px] font-bold ${order.status === 'Refund Requested' ? 'text-blue-600' :
+                                                        order.status === 'Captured' ? 'text-green-600' :
+                                                            order.status === 'Refunded' ? 'text-orange-600' :
+                                                                (order.status === 'Cancelled' || order.status === 'Refund Failed') ? 'text-red-600' :
+                                                                    'text-yellow-600'
+                                                        }`}>
+                                                        {order.status === 'Captured' ? 'Paid' : order.status}
+                                                    </span>
+                                                </div>
                                             </div>
-                                            <div>
-                                                {order.status === 'Refund Requested' && (
-                                                    <button
-                                                        onClick={() => setShowRefundConfirm(order._id)}
-                                                        disabled={isRefunding && showRefundConfirm === order._id}
-                                                        className="text-white bg-green-600 hover:bg-green-700 px-2 py-1.5 rounded text-[10px] font-bold shadow-sm disabled:opacity-50 cursor-pointer flex-shrink-0 relative"
-                                                    >
-                                                        <span className={isRefunding && showRefundConfirm === order._id ? 'opacity-0' : ''}>Approve For Return</span>
-                                                        {isRefunding && showRefundConfirm === order._id && (
-                                                            <div className="absolute inset-0 flex items-center justify-center">
-                                                                <svg className="animate-spin h-3.5 w-3.5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                                                            </div>
-                                                        )}
-                                                    </button>
-                                                )}
+
+                                            <div className="mb-2">
+                                                <div className="text-[12px] sm:text-[13px] font-medium text-gray-600 flex items-center break-all">
+                                                    <span>{order._id}</span>
+                                                    <CopyIcon text={order._id} label="Order ID" />
+                                                </div>
+                                                <div className="text-[11px] sm:text-[12px] font-medium text-gray-500 mt-0.5">{formatDate(order.createdAt)}</div>
                                             </div>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                )}
-            </div>
+
+                                            <div className="flex items-center justify-between mt-2 pt-2 border-t border-gray-100">
+                                                <div>
+                                                    <div className="text-[10px] sm:text-[11px] font-semibold text-gray-400 uppercase">Total ({order.orderItems?.length || 0} items)</div>
+                                                    <div className="text-[13px] sm:text-[14px] font-bold text-gray-900">₹{order.totalPrice.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</div>
+                                                </div>
+                                                <div>
+                                                    {order.status === 'Refund Requested' && (
+                                                        <button
+                                                            onClick={() => setShowRefundConfirm(order._id)}
+                                                            disabled={isRefunding && showRefundConfirm === order._id}
+                                                            className="text-white bg-green-600 hover:bg-green-700 px-2 py-1.5 rounded text-[10px] font-bold shadow-sm disabled:opacity-50 cursor-pointer flex-shrink-0 relative"
+                                                        >
+                                                            <span className={isRefunding && showRefundConfirm === order._id ? 'opacity-0' : ''}>Approve For Return</span>
+                                                            {isRefunding && showRefundConfirm === order._id && (
+                                                                <div className="absolute inset-0 flex items-center justify-center">
+                                                                    <svg className="animate-spin h-3.5 w-3.5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                                                </div>
+                                                            )}
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    )}
+                </div>
             </div>
             {showRefundConfirm && (
                 <ConfirmModal

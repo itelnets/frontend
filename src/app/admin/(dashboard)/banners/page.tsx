@@ -69,10 +69,6 @@ export default function BannersPage() {
             return;
         }
 
-        if (file.size > 5 * 1024 * 1024) {
-            toast.error(`Image size must be less than 5MB`);
-            return;
-        }
 
         const reader = new FileReader();
         reader.onload = (event) => {
@@ -159,7 +155,7 @@ export default function BannersPage() {
                 { tabTitle, tabSubtitle }
             );
 
-            setBanners(prev => [newBanner, ...prev]);
+            await loadBanners();
             toast.success('Banner uploaded successfully');
 
             setSelectedFile(null);
@@ -255,13 +251,7 @@ export default function BannersPage() {
         return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
     };
 
-    if (isLoading) {
-        return (
-            <div className="flex items-center justify-center min-h-[90vh]">
-                <Spinner className="w-8 h-8 text-green-600 animate-spin" />
-            </div>
-        );
-    }
+
 
     return (
         <div className="p-3 sm:p-6 max-w-6xl mx-auto select-none">

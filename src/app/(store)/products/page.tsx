@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import { getProducts, getFilters } from '@/services/product';
 import toast from 'react-hot-toast';
 import ProductCard from '@/components/ProductCard';
-import Spinner from '@/components/Spinner';
 import SortDropdown from '@/components/SortDropdown';
 import MobileFilterDrawer from '@/components/MobileFilterDrawer';
 import MobileSortDrawer from '@/components/MobileSortDrawer';
@@ -303,42 +302,36 @@ export default function ProductsPage() {
                         </div>
                     </div>
 
-                    {isLoading && products.length === 0 ? (
-                        <div className="w-full flex items-center justify-center min-h-[70vh]">
-                            <Spinner className="w-8 h-8 sm:w-12 sm:h-12 text-[#458500]" />
-                        </div>
-                    ) : (
-                        <div className={`transition-opacity duration-200 ${isLoading ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
-                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-5 gap-2 sm:gap-3">
-                                {products.map((product) => (
-                                    <div key={product._id} className="h-full">
-                                        <ProductCard product={product} />
-                                    </div>
-                                ))}
-                            </div>
-
-                            {!isLoading && products.length === 0 && (
-                                <div className="flex flex-col items-center justify-center w-full py-16 sm:py-24 text-center px-4 bg-white rounded-xl border border-gray-100 shadow-sm mt-4">
-                                    <div className="w-20 h-20 sm:w-24 sm:h-24 bg-gray-50 rounded-full flex items-center justify-center mb-4 sm:mb-6">
-                                        <svg className="w-10 h-10 sm:w-12 sm:h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 13.5l1.5-1.5m0 0l1.5-1.5m-1.5 1.5l-1.5-1.5m1.5 1.5l1.5 1.5" />
-                                        </svg>
-                                    </div>
-                                    <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">No products found</h3>
-                                    <p className="text-sm sm:text-base text-gray-500 max-w-sm">
-                                        We couldn't find any products matching your current filters. Try adjusting your search criteria to find what you're looking for.
-                                    </p>
-                                    <button
-                                        onClick={() => setFilters({ inStock: false, brands: [], price: [], rating: [] })}
-                                        className="mt-6 px-6 py-2.5 bg-[#458500] text-white font-medium rounded-lg hover:bg-[#366800] transition-colors shadow-sm text-sm"
-                                    >
-                                        Clear all filters
-                                    </button>
+                    <div className={`transition-opacity duration-200 ${isLoading && products.length > 0 ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-5 gap-2 sm:gap-3">
+                            {products.map((product) => (
+                                <div key={product._id} className="h-full">
+                                    <ProductCard product={product} />
                                 </div>
-                            )}
+                            ))}
                         </div>
-                    )}
+
+                        {!isLoading && products.length === 0 && (
+                            <div className="flex flex-col items-center justify-center w-full py-16 sm:py-24 text-center px-4 bg-white rounded-xl border border-gray-100 shadow-sm mt-4">
+                                <div className="w-12 h-12 sm:w-16 sm:h-16 lg:w-24 lg:h-24 bg-gray-50 rounded-full flex items-center justify-center mb-4 sm:mb-6">
+                                    <svg className="w-10 h-10 sm:w-12 sm:h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 13.5l1.5-1.5m0 0l1.5-1.5m-1.5 1.5l-1.5-1.5m1.5 1.5l1.5 1.5" />
+                                    </svg>
+                                </div>
+                                <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">No products found</h3>
+                                <p className="text-sm sm:text-base text-gray-500 max-w-sm">
+                                    We couldn't find any products matching your current filters. Try adjusting your search criteria to find what you're looking for.
+                                </p>
+                                <button
+                                    onClick={() => setFilters({ inStock: false, brands: [], price: [], rating: [] })}
+                                    className="mt-6 px-6 py-2.5 bg-[#458500] text-white font-medium rounded-lg hover:bg-[#366800] transition-colors shadow-sm text-sm"
+                                >
+                                    Clear all filters
+                                </button>
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
 

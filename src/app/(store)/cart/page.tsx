@@ -4,7 +4,6 @@ import React, { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-hot-toast';
-import Spinner from '@/components/Spinner';
 import { useCart } from '@/context/CartContext';
 import { getProducts } from '@/services/product';
 import { fetchAddresses } from '@/services/addressService';
@@ -90,15 +89,7 @@ export default function CartPage() {
         fetchRecs();
     }, []);
 
-    if (isCartLoading || isRecsLoading) {
-        return (
-            <div className="font-sans min-h-screen bg-white">
-                <div className="flex justify-center items-center h-[100vh]">
-                    <Spinner className="w-8 h-8 sm:h-12 sm:w-12 text-[#458500]" />
-                </div>
-            </div>
-        );
-    }
+
 
     const RecommendedCarousel = () => {
         const scrollRef = useRef<HTMLDivElement>(null);

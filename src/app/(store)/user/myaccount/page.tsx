@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Spinner from '@/components/Spinner';
 import { getProfile, updateProfile, requestEmailChange, verifyEmailChange, forgotPassword, deleteAccount } from '@/services/user';
 import toast from 'react-hot-toast';
 
@@ -10,6 +9,7 @@ export default function MyAccountPage() {
     const [user, setUser] = useState<any>(null);
     const [addresses, setAddresses] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [isAddressLoading, setIsAddressLoading] = useState(true);
 
     // Edit state
     const [editingId, setEditingId] = useState<string | null>(null);
@@ -49,6 +49,10 @@ export default function MyAccountPage() {
             if (userInfo) {
                 const parsedUser = JSON.parse(userInfo);
                 setUser(parsedUser);
+                if (parsedUser.addresses) {
+                    setAddresses(Array.isArray(parsedUser.addresses) ? parsedUser.addresses : []);
+                    setIsAddressLoading(false);
+                }
                 setIsLoading(false); // Render immediately using cached data
 
                 try {
@@ -66,22 +70,19 @@ export default function MyAccountPage() {
                     }
                 } catch (error) {
                     console.error('Failed to fetch user data', error);
+                } finally {
+                    setIsAddressLoading(false);
                 }
             } else {
                 router.push('/login');
                 setIsLoading(false);
+                setIsAddressLoading(false);
             }
         };
         loadProfileData();
     }, [router]);
 
-    if (isLoading) {
-        return (
-            <div className="flex justify-center items-center h-[60vh]">
-                <Spinner className="w-8 h-8 sm:w-12 sm:h-12 text-[#458500]" />
-            </div>
-        );
-    }
+
 
     if (!user) return null;
 
@@ -183,7 +184,7 @@ export default function MyAccountPage() {
             const newUserInfo = { ...user, ...updatedUser, token: user.token };
             if (payload.name) newUserInfo.name = payload.name;
             if (payload.mobileNumber) newUserInfo.mobileNumber = payload.mobileNumber;
-            
+
             console.log("newUserInfo before set:", newUserInfo);
             setUser(newUserInfo);
             localStorage.setItem('userInfo', JSON.stringify(newUserInfo));

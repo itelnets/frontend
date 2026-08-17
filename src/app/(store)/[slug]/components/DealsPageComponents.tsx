@@ -4,7 +4,6 @@ import React from 'react';
 import Image from 'next/image';
 import { BannerItem } from '@/services/banner';
 import ProductCard from '@/components/ProductCard';
-import Spinner from '@/components/Spinner';
 import SortDropdown from '@/components/SortDropdown';
 import { Product, FilterState, SORT_OPTIONS, PRODUCT_TYPES } from './constants';
 
@@ -21,14 +20,12 @@ export function DealsHeroBanner({
 }) {
     if (isBannerLoading) {
         return (
-            <div className="w-full aspect-[1368/260] rounded-none overflow-hidden relative bg-gray-100 animate-pulse flex items-center justify-center">
-                <Spinner className="w-8 h-8 text-[#458500]" />
-            </div>
+            <div className="w-full aspect-[1368/260] bg-gray-100 animate-pulse rounded-md sm:rounded-2xl relative overflow-hidden" />
         );
     }
 
     return (
-        <div className="w-full aspect-[1368/260] rounded-none overflow-hidden relative">
+        <div className="w-full aspect-[1368/260] rounded-md sm:rounded-2xl overflow-hidden relative">
             {banner?.imageUrl ? (
                 <Image
                     src={banner.imageUrl}
@@ -38,7 +35,7 @@ export function DealsHeroBanner({
                     className="object-cover"
                 />
             ) : (
-                <div className="w-full h-full bg-gradient-to-r from-[#fae6e9] via-[#f7d9dc] to-[#fce4e6] flex flex-col items-center justify-center p-6 text-center">
+                <div className="w-full h-full bg-white flex flex-col items-center justify-center p-6 text-center">
                     <h2 className="text-xl sm:text-3xl lg:text-4xl font-extrabold text-gray-900 tracking-tight leading-tight">
                         {pageTitle}
                     </h2>
@@ -309,13 +306,7 @@ export function DealsProductGrid({
     hasActiveFilters: boolean;
     clearAllFilters: () => void;
 }) {
-    if (isLoading && products.length === 0) {
-        return (
-            <div className="w-full flex items-center justify-center min-h-[70vh]">
-                <Spinner className="w-8 h-8 sm:w-12 sm:h-12 text-[#458500]" />
-            </div>
-        );
-    }
+
 
     return (
         <div className={`transition-opacity duration-200 ${isLoading ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>

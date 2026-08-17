@@ -1,9 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import PageLoader from './PageLoader';
 
 interface AdminTopbarProps {
     onMenuClick: () => void;
@@ -12,14 +10,8 @@ interface AdminTopbarProps {
 export default function AdminTopbar({ onMenuClick }: AdminTopbarProps) {
     const pathname = usePathname();
     const router = useRouter();
-    const [isCancelling, setIsCancelling] = useState(false);
-
-    useEffect(() => {
-        setIsCancelling(false);
-    }, [pathname]);
 
     const handleCancel = () => {
-        setIsCancelling(true);
         router.push('/admin/products');
     };
 
@@ -92,7 +84,6 @@ export default function AdminTopbar({ onMenuClick }: AdminTopbarProps) {
                     </div>
                 )}
             </header>
-            {isCancelling && <PageLoader />}
         </>
     );
 }

@@ -202,7 +202,7 @@ export default function BannerDealsPage() {
         <div className="flex flex-col min-h-screen bg-white">
 
             {/* Top Banner & Category Icons Section - Matches Home Page Edge-to-Edge Container */}
-            <div className="w-full max-w-[1400px] mx-auto mt-0 sm:mt-2">
+            <div className="w-full max-w-[1400px] mx-auto p-1 sm:p-4">
                 <DealsHeroBanner
                     banner={banner}
                     pageTitle={pageTitle}

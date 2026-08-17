@@ -3,7 +3,6 @@
 import { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 import { getFilters } from '@/services/product';
-import Spinner from '@/components/Spinner';
 
 export default function BrandsPage() {
     const [groupedBrands, setGroupedBrands] = useState<{ [key: string]: string[] }>({});
@@ -55,13 +54,7 @@ export default function BrandsPage() {
         }
     };
 
-    if (isLoading) {
-        return (
-            <div className="min-h-[80vh] flex items-center justify-center">
-                <Spinner className="w-8 h-8 text-[#458500]" />
-            </div>
-        );
-    }
+
 
     return (
         <div className="h-[calc(100dvh-125px)] md:h-[calc(100dvh-155px)] flex flex-col bg-gray-50 py-2.5 sm:py-6 px-2.5 sm:px-6 lg:px-6">

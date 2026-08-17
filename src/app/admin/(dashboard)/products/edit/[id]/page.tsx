@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { getProductById, updateProduct } from '@/services/product';
 import toast from 'react-hot-toast';
 import Spinner from '@/components/Spinner';
-import PageLoader from '@/components/PageLoader';
 import CustomDropdown from '@/components/CustomDropdown';
 
 type ImageItem =
@@ -73,10 +72,6 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
 
         const validFiles = [];
         for (const file of files) {
-            if (file.size > 5 * 1024 * 1024) {
-                toast.error(`Image size must be less than 5MB`);
-                continue;
-            }
             const fileExtension = file.name.split('.').pop()?.toLowerCase() || '';
             if (fileExtension !== 'jpg' && fileExtension !== 'jpeg') {
                 toast.error(`Only JPG/JPEG files are allowed`);
@@ -176,25 +171,24 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
     };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-        let value = e.target.value;
-        if (e.target.name !== 'price' && e.target.name !== 'discount' && value.length > 0) {
-            value = value.charAt(0).toUpperCase() + value.slice(1);
+        const { name, value } = e.target;
+        if (name === 'hsn') {
+            const cleanVal = value.replace(/\D/g, '');
+            setFormData({ ...formData, hsn: cleanVal });
+            return;
         }
-        setFormData({ ...formData, [e.target.name]: value });
+        let formattedValue = value;
+        if (name !== 'price' && name !== 'discount' && formattedValue.length > 0) {
+            formattedValue = formattedValue.charAt(0).toUpperCase() + formattedValue.slice(1);
+        }
+        setFormData({ ...formData, [name]: formattedValue });
     };
 
     const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = Array.from(e.target.files || []);
         if (files.length === 0) return;
 
-        const validFiles = [];
-        for (const file of files) {
-            if (file.size > 5 * 1024 * 1024) {
-                toast.error(`Image size must be less than 5MB`);
-                continue;
-            }
-            validFiles.push(file);
-        }
+        const validFiles = files;
 
         if (validFiles.length === 0) {
             e.target.value = '';
@@ -259,38 +253,84 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
     };
 
     const handleSpecificationChange = (index: number, field: 'key' | 'value', val: string) => {
+        let cleanValue = val;
+        const key = specifications[index]?.key || '';
+
+        if (field === 'value' && (key.toLowerCase().includes('weight') || key.toLowerCase().includes('quantity') || index === 0 || index === 1)) {
+            cleanValue = val.replace(/\D/g, '');
+        }
+
         setSpecifications(prev => {
             const newSpecs = [...prev];
-            newSpecs[index] = { ...newSpecs[index], [field]: val };
+            newSpecs[index] = { ...newSpecs[index], [field]: cleanValue };
             return newSpecs;
         });
     };
 
     const handleDimensionChange = (index: number, partIndex: number, val: string) => {
+        let cleanVal = val.replace(/\D/g, '');
+        if (cleanVal.length > 2) {
+            cleanVal = cleanVal.slice(-1);
+        }
+
         const spec = specifications[index];
         const parts = (spec.value || '').split(' x ');
         const paddedParts = [parts[0] || '', parts[1] || '', parts[2] || ''];
-        paddedParts[partIndex] = val;
+        paddedParts[partIndex] = cleanVal;
 
         setSpecifications(prev => {
             const newSpecs = [...prev];
             newSpecs[index] = { ...newSpecs[index], value: paddedParts.join(' x ') };
             return newSpecs;
         });
+
+        if (cleanVal.length === 2) {
+            if (partIndex === 0) {
+                document.getElementById(`edit-dim-B-${index}`)?.focus();
+            } else if (partIndex === 1) {
+                document.getElementById(`edit-dim-H-${index}`)?.focus();
+            }
+        }
     };
 
     const handleRemoveSpecification = (index: number) => {
         setSpecifications(specifications.filter((_, i) => i !== index));
     };
 
+    const [showFormErrors, setShowFormErrors] = useState(false);
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (images.length === 0) {
-            toast.error('Please have at least one image.');
+        const isImagesMissing = images.length === 0;
+        const isNameMissing = !formData.name.trim();
+        const isBrandMissing = !formData.brand.trim();
+        const isManufacturerMissing = !formData.manufacturer.trim();
+        const isPriceMissing = !formData.price || Number(formData.price) <= 0;
+        const isCategoriesMissing = !formData.categories.trim();
+        const isHsnMissing = !formData.hsn.trim();
+        const isBatchNoMissing = !formData.batchNo.trim();
+        const isExpiredOnMissing = !formData.expiredOn.trim();
+        const isOverviewMissing = !formData.overview.trim();
+        const isSuggestedUseMissing = !formData.suggestedUse.trim();
+        const isOtherIngredientsMissing = !formData.otherIngredients.trim();
+        const isWarningsMissing = !formData.warnings.trim();
+        const isDisclaimerMissing = !formData.disclaimer.trim();
+        const isAnySpecMissing = specifications.some((s, idx) => {
+            if (idx < 5) {
+                return !s.value || !s.value.trim();
+            } else {
+                return (!s.key || !s.key.trim()) || (!s.value || !s.value.trim());
+            }
+        });
+
+        if (isImagesMissing || isNameMissing || isBrandMissing || isManufacturerMissing || isPriceMissing || isCategoriesMissing || isHsnMissing || isBatchNoMissing || isExpiredOnMissing || isOverviewMissing || isSuggestedUseMissing || isOtherIngredientsMissing || isWarningsMissing || isDisclaimerMissing || isAnySpecMissing) {
+            setShowFormErrors(true);
+            toast.error('Please add all required fields');
             return;
         }
 
+        setShowFormErrors(false);
         setIsSaving(true);
 
         try {
@@ -348,14 +388,10 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
     return (
         <div className="font-sans p-0 sm:p-4 lg:h-full lg:flex lg:flex-col lg:overflow-hidden">
             <div className="relative w-full lg:flex-1 bg-white/80 backdrop-blur-xl border border-white/50 rounded-md shadow-[0_8px_30px_rgb(0,0,0,0.08)] p-3 sm:p-6 transition-all lg:overflow-hidden lg:flex lg:flex-col">
-                {(isLoading || isCancelling || isSaving) && (
-                    <div className="absolute inset-0 z-50 bg-white/60 backdrop-blur-sm rounded-md">
-                        <div className="sticky top-0 h-[80vh] lg:h-full flex flex-col items-center justify-center">
-                            <Spinner className="w-10 h-10 sm:w-12 sm:h-12 text-green-600 mb-4" />
-                            <span className="text-gray-700 font-medium">
-                                {isLoading && !isSaving ? 'Loading product...' : isCancelling ? 'Cancelling...' : 'Processing, please wait...'}
-                            </span>
-                        </div>
+                {isSaving && (
+                    <div className="absolute inset-0 z-50 bg-white/60 backdrop-blur-sm rounded-md flex flex-col items-center justify-center">
+                        <Spinner className="w-10 h-10 sm:w-12 sm:h-12 text-green-600 mb-4" />
+                        <span className="text-gray-700 font-medium">Processing, please wait...</span>
                     </div>
                 )}
                 <form id="product-form" onSubmit={handleSubmit} noValidate className="flex flex-col lg:flex-row gap-8 items-start lg:flex-1 lg:overflow-hidden">
@@ -385,7 +421,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                                     <span className="text-xs font-semibold text-gray-600">
                                         Drag &amp; Drop or <span className="text-green-600 hover:underline">Browse</span>
                                     </span>
-                                    <p className="text-[10px] text-gray-400">JPG, JPEG · Max 5MB · Up to 5 images</p>
+                                    <p className="text-[10px] text-gray-400">JPG, JPEG · Up to 5 images</p>
                                 </div>
                                 <input
                                     id="product-image-input"
@@ -455,20 +491,20 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-sm font-semibold text-gray-700 mb-2">Brand</label>
-                                    <input name="brand" value={formData.brand} onChange={handleChange} className="w-full px-3 py-2 text-sm bg-white/50 border border-gray-200 rounded-md focus:outline-none focus:border-green-600 transition-all outline-none placeholder-gray-400" placeholder="e.g. Itelents Brands" />
+                                    <label className="block text-sm font-semibold text-gray-700 mb-2">Brand <span className="text-red-500">*</span></label>
+                                    <input name="brand" value={formData.brand} onChange={handleChange} className={`w-full px-3 py-2 text-sm bg-white/50 border ${showFormErrors && !formData.brand.trim() ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-green-600'} rounded-md focus:outline-none transition-all outline-none placeholder-gray-400`} placeholder="e.g. Itelents Brands" />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-semibold text-gray-700 mb-2">Manufacturer</label>
-                                    <input name="manufacturer" value={formData.manufacturer} onChange={handleChange} className="w-full px-3 py-2 text-sm bg-white/50 border border-gray-200 rounded-md focus:outline-none focus:border-green-600 transition-all outline-none placeholder-gray-400" placeholder="e.g. Itelents Brands" />
+                                    <label className="block text-sm font-semibold text-gray-700 mb-2">Manufacturer <span className="text-red-500">*</span></label>
+                                    <input name="manufacturer" value={formData.manufacturer} onChange={handleChange} className={`w-full px-3 py-2 text-sm bg-white/50 border ${showFormErrors && !formData.manufacturer.trim() ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-green-600'} rounded-md focus:outline-none transition-all outline-none placeholder-gray-400`} placeholder="e.g. Itelents Brands" />
                                 </div>
                             </div>
 
 
                             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                                 <div>
-                                    <label className="block text-sm font-semibold text-gray-700 mb-2">Price (₹)</label>
-                                    <input name="price" value={formData.price} type="number" onChange={handleChange} className="w-full px-3 py-2 text-sm bg-white/50 border border-gray-200 rounded-md focus:outline-none focus:border-green-600 transition-all outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" placeholder="0.00" />
+                                    <label className="block text-sm font-semibold text-gray-700 mb-2">Price (₹) <span className="text-red-500">*</span></label>
+                                    <input name="price" value={formData.price} type="number" onChange={handleChange} className={`w-full px-3 py-2 text-sm bg-white/50 border ${showFormErrors && (!formData.price || Number(formData.price) <= 0) ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-green-600'} rounded-md focus:outline-none transition-all outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none`} placeholder="0.00" />
                                 </div>
                                 <div>
                                     <label className="block text-sm font-semibold text-gray-700 mb-2">Discount (%)</label>
@@ -488,18 +524,18 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                             </div>
 
                             <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-2">Categories (comma-separated)</label>
-                                <input name="categories" value={formData.categories} onChange={handleChange} className="w-full px-3 py-2 text-sm bg-white/50 border border-gray-200 rounded-md focus:outline-none focus:border-green-600 transition-all outline-none placeholder-gray-400" placeholder="e.g. Supplements, Vitamins" />
+                                <label className="block text-sm font-semibold text-gray-700 mb-2">Categories (comma-separated) <span className="text-red-500">*</span></label>
+                                <input name="categories" value={formData.categories} onChange={handleChange} className={`w-full px-3 py-2 text-sm bg-white/50 border ${showFormErrors && !formData.categories.trim() ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-green-600'} rounded-md focus:outline-none transition-all outline-none placeholder-gray-400`} placeholder="e.g. Supplements, Vitamins" />
                             </div>
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-sm font-semibold text-gray-700 mb-2">HSN Code</label>
-                                    <input name="hsn" value={formData.hsn} onChange={handleChange} className="w-full px-3 py-2 text-sm bg-white/50 border border-gray-200 rounded-md focus:outline-none focus:border-green-600 transition-all outline-none placeholder-gray-400 h-[38px]" placeholder="e.g. 123456" />
+                                    <label className="block text-sm font-semibold text-gray-700 mb-2">HSN Code <span className="text-red-500">*</span></label>
+                                    <input name="hsn" value={formData.hsn} onChange={handleChange} className={`w-full px-3 py-2 text-sm bg-white/50 border ${showFormErrors && !formData.hsn.trim() ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-green-600'} rounded-md focus:outline-none transition-all outline-none placeholder-gray-400 h-[38px]`} placeholder="e.g. 123456" />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-semibold text-gray-700 mb-2">Batch No.</label>
-                                    <input name="batchNo" value={formData.batchNo} onChange={handleChange} className="w-full px-3 py-2 text-sm bg-white/50 border border-gray-200 rounded-md focus:outline-none focus:border-green-600 transition-all outline-none placeholder-gray-400 h-[38px]" placeholder="e.g. BATCH-001" />
+                                    <label className="block text-sm font-semibold text-gray-700 mb-2">Batch No. <span className="text-red-500">*</span></label>
+                                    <input name="batchNo" value={formData.batchNo} onChange={handleChange} className={`w-full px-3 py-2 text-sm bg-white/50 border ${showFormErrors && !formData.batchNo.trim() ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-green-600'} rounded-md focus:outline-none transition-all outline-none placeholder-gray-400 h-[38px]`} placeholder="e.g. BATCH-001" />
                                 </div>
                             </div>
                         </div>
@@ -528,7 +564,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-2">Expired On</label>
+                                <label className="block text-sm font-semibold text-gray-700 mb-2">Expired On <span className="text-red-500">*</span></label>
                                 <input
                                     name="expiredOn"
                                     value={formData.expiredOn || ''}
@@ -539,7 +575,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                                         }
                                         setFormData({ ...formData, expiredOn: val });
                                     }}
-                                    className="w-full px-3 py-2 text-sm bg-white/50 border border-gray-200 rounded-md focus:outline-none focus:border-green-600 transition-all outline-none placeholder-gray-400 h-[38px]"
+                                    className={`w-full px-3 py-2 text-sm bg-white/50 border ${showFormErrors && !formData.expiredOn.trim() ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-green-600'} rounded-md focus:outline-none transition-all outline-none placeholder-gray-400 h-[38px]`}
                                     placeholder="08-2026"
                                     maxLength={7}
                                 />
@@ -547,38 +583,38 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                         </div>
 
                         <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-2">Overview</label>
-                            <textarea name="overview" value={formData.overview} rows={6} onChange={handleChange} className="w-full px-3 py-2 text-sm bg-white/50 border border-gray-200 rounded-md focus:outline-none focus:border-green-600 transition-all outline-none placeholder-gray-400" placeholder="Extensive product overview..." />
+                            <label className="block text-sm font-semibold text-gray-700 mb-2">Overview <span className="text-red-500">*</span></label>
+                            <textarea name="overview" value={formData.overview} rows={6} onChange={handleChange} className={`w-full px-3 py-2 text-sm bg-white/50 border ${showFormErrors && !formData.overview.trim() ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-green-600'} rounded-md focus:outline-none transition-all outline-none placeholder-gray-400`} placeholder="Extensive product overview..." />
                         </div>
 
-                        <div className="bg-green-50/30 rounded-md border border-green-50/50">
-                            <label className="block text-sm font-semibold text-gray-800 mb-2">Specifications</label>
+                        <div className="bg-green-50/30 rounded-md border border-green-50/50 p-2 sm:p-3">
+                            <label className="block text-sm font-semibold text-gray-800 mb-2">Specifications <span className="text-red-500">*</span></label>
                             {specifications.map((spec, index) => (
                                 <div key={index} className={`relative flex flex-col sm:flex-row gap-1 sm:gap-3 p-2 rounded-md border ${index < 5 ? 'bg-gray-50 border-gray-200' : 'bg-white/60 border-gray-100 pr-11 sm:pr-2'}`}>
                                     {index < 5 ? (
-                                        <div className="w-full sm:w-1/2 px-3 py-2 text-sm bg-white border border-gray-200 rounded-md text-gray-700 flex items-center">{spec.key}</div>
+                                        <div className="w-full sm:w-1/2 px-3 py-2 text-sm bg-white border border-gray-200 rounded-md text-gray-700 flex items-center font-medium">{spec.key}</div>
                                     ) : (
                                         <input
                                             type="text"
                                             placeholder="e.g. Dosage"
                                             value={spec.key}
                                             onChange={(e) => handleSpecificationChange(index, 'key', e.target.value)}
-                                            className="w-full sm:w-1/2 px-3 py-2 text-sm bg-white border border-gray-200 rounded-md focus:outline-none focus:border-green-600 outline-none transition-all"
+                                            className={`w-full sm:w-1/2 px-3 py-2 text-sm bg-white border ${showFormErrors && !spec.key.trim() ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-green-600'} rounded-md focus:outline-none transition-all`}
                                         />
                                     )}
                                     {spec.key === 'Dimensions (l x b h)' ? (
                                         <div className="w-full sm:w-1/2 flex items-center gap-1 sm:gap-2">
-                                            <input type="text" placeholder="L" value={(spec.value || '').split(' x ')[0] || ''} onChange={(e) => handleDimensionChange(index, 0, e.target.value)} className="w-full min-w-0 px-2 py-2 text-sm bg-white border border-gray-200 rounded-md focus:outline-none focus:border-green-600 outline-none text-center" />
+                                            <input id={`edit-dim-L-${index}`} type="text" placeholder="L" onFocus={(e) => e.target.select()} value={(spec.value || '').split(' x ')[0] || ''} onChange={(e) => handleDimensionChange(index, 0, e.target.value)} className={`w-full min-w-0 px-2 py-2 text-sm bg-white border ${showFormErrors && !(spec.value || '').split(' x ')[0]?.trim() ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-green-600'} rounded-md focus:outline-none text-center transition-all`} />
                                             <span className="text-gray-400 font-bold text-xs sm:text-sm">x</span>
-                                            <input type="text" placeholder="B" value={(spec.value || '').split(' x ')[1] || ''} onChange={(e) => handleDimensionChange(index, 1, e.target.value)} className="w-full min-w-0 px-2 py-2 text-sm bg-white border border-gray-200 rounded-md focus:outline-none focus:border-green-600 outline-none text-center" />
+                                            <input id={`edit-dim-B-${index}`} type="text" placeholder="B" onFocus={(e) => e.target.select()} value={(spec.value || '').split(' x ')[1] || ''} onChange={(e) => handleDimensionChange(index, 1, e.target.value)} className={`w-full min-w-0 px-2 py-2 text-sm bg-white border ${showFormErrors && !(spec.value || '').split(' x ')[1]?.trim() ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-green-600'} rounded-md focus:outline-none text-center transition-all`} />
                                             <span className="text-gray-400 font-bold text-xs sm:text-sm">x</span>
-                                            <input type="text" placeholder="H" value={(spec.value || '').split(' x ')[2] || ''} onChange={(e) => handleDimensionChange(index, 2, e.target.value)} className="w-full min-w-0 px-2 py-2 text-sm bg-white border border-gray-200 rounded-md focus:outline-none focus:border-green-600 outline-none text-center" />
+                                            <input id={`edit-dim-H-${index}`} type="text" placeholder="H" onFocus={(e) => e.target.select()} value={(spec.value || '').split(' x ')[2] || ''} onChange={(e) => handleDimensionChange(index, 2, e.target.value)} className={`w-full min-w-0 px-2 py-2 text-sm bg-white border ${showFormErrors && !(spec.value || '').split(' x ')[2]?.trim() ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-green-600'} rounded-md focus:outline-none text-center transition-all`} />
                                         </div>
                                     ) : (
                                         <input
                                             type="text"
                                             placeholder={
-                                                index === 0 ? "e.g. 200 gm" :
+                                                index === 0 ? "e.g. 200" :
                                                     index === 1 ? "e.g. 100" :
                                                         index === 2 ? "e.g. MLI-00952" :
                                                             index === 4 ? "e.g. Tablet,Capsule,Syrup,Oil etc." :
@@ -586,7 +622,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                                             }
                                             value={spec.value}
                                             onChange={(e) => handleSpecificationChange(index, 'value', e.target.value)}
-                                            className="w-full sm:w-1/2 px-3 py-2 text-sm bg-white border border-gray-200 rounded-md focus:outline-none focus:border-green-600 outline-none transition-all"
+                                            className={`w-full sm:w-1/2 px-3 py-2 text-sm bg-white border ${showFormErrors && !spec.value.trim() ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-green-600'} rounded-md focus:outline-none transition-all`}
                                         />
                                     )}
                                     {/* Delete button: top-right corner on mobile, inline on sm+ */}
@@ -616,23 +652,23 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                         </div>
 
                         <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-2">Suggested Use</label>
-                            <textarea name="suggestedUse" value={formData.suggestedUse} rows={3} onChange={handleChange} className="w-full px-3 py-2 text-sm bg-white/50 border border-gray-200 rounded-md focus:outline-none focus:border-green-600 transition-all outline-none" />
+                            <label className="block text-sm font-semibold text-gray-700 mb-2">Suggested Use <span className="text-red-500">*</span></label>
+                            <textarea name="suggestedUse" value={formData.suggestedUse} rows={3} onChange={handleChange} className={`w-full px-3 py-2 text-sm bg-white/50 border ${showFormErrors && !formData.suggestedUse.trim() ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-green-600'} rounded-md focus:outline-none transition-all outline-none`} />
                         </div>
 
                         <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-2">Other Ingredients</label>
-                            <textarea name="otherIngredients" value={formData.otherIngredients} rows={3} onChange={handleChange} className="w-full px-3 py-2 text-sm bg-white/50 border border-gray-200 rounded-md focus:outline-none focus:border-green-600 transition-all outline-none" />
+                            <label className="block text-sm font-semibold text-gray-700 mb-2">Other Ingredients <span className="text-red-500">*</span></label>
+                            <textarea name="otherIngredients" value={formData.otherIngredients} rows={3} onChange={handleChange} className={`w-full px-3 py-2 text-sm bg-white/50 border ${showFormErrors && !formData.otherIngredients.trim() ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-green-600'} rounded-md focus:outline-none transition-all outline-none`} />
                         </div>
 
                         <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-2">Warnings</label>
-                            <textarea name="warnings" value={formData.warnings} rows={3} onChange={handleChange} className="w-full px-3 py-2 text-sm bg-white/50 border border-gray-200 rounded-md focus:outline-none focus:border-green-600 transition-all outline-none" />
+                            <label className="block text-sm font-semibold text-gray-700 mb-2">Warnings <span className="text-red-500">*</span></label>
+                            <textarea name="warnings" value={formData.warnings} rows={3} onChange={handleChange} className={`w-full px-3 py-2 text-sm bg-white/50 border ${showFormErrors && !formData.warnings.trim() ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-green-600'} rounded-md focus:outline-none transition-all outline-none`} />
                         </div>
 
                         <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-2">Disclaimer</label>
-                            <textarea name="disclaimer" value={formData.disclaimer} rows={3} onChange={handleChange} className="w-full px-3 py-2 text-sm bg-white/50 border border-gray-200 rounded-md focus:outline-none focus:border-green-600 transition-all outline-none" />
+                            <label className="block text-sm font-semibold text-gray-700 mb-2">Disclaimer <span className="text-red-500">*</span></label>
+                            <textarea name="disclaimer" value={formData.disclaimer} rows={3} onChange={handleChange} className={`w-full px-3 py-2 text-sm bg-white/50 border ${showFormErrors && !formData.disclaimer.trim() ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-green-600'} rounded-md focus:outline-none transition-all outline-none`} />
                         </div>
                         <div className="flex items-center justify-between px-3 py-2.5 bg-white/50 border border-gray-200 rounded-md transition-all hover:border-green-600/30">
                             <label className="text-sm font-semibold text-gray-700 cursor-pointer" onClick={() => setFormData(prev => ({ ...prev, bestSeller: prev.bestSeller.toLowerCase() === 'yes' ? '' : 'Yes' }))}>

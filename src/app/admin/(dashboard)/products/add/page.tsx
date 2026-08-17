@@ -6,7 +6,7 @@ import { createProduct } from '@/services/product';
 import toast from 'react-hot-toast';
 import Spinner from '@/components/Spinner';
 import CustomDropdown from '@/components/CustomDropdown';
-import * as XLSX from 'xlsx';
+import BulkUploadModal from '@/components/BulkUploadModal';
 
 export default function AddProductPage() {
     const router = useRouter();
@@ -22,124 +22,6 @@ export default function AddProductPage() {
         const timestamp = Math.floor(new Date().getTime() / 1000).toString(16);
         const randomHex = 'xxxxxxxxxxxxxxxx'.replace(/[x]/g, () => Math.floor(Math.random() * 16).toString(16));
         return timestamp + randomHex;
-    };
-
-    const handleBulkUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
-
-        setIsLoading(true);
-
-        const reader = new FileReader();
-        reader.onload = async (evt) => {
-            try {
-                const arrayBuffer = evt.target?.result as ArrayBuffer;
-                const wb = XLSX.read(arrayBuffer, { type: 'array' });
-                const wsname = wb.SheetNames[0];
-                const ws = wb.Sheets[wsname];
-                const data = XLSX.utils.sheet_to_json(ws);
-
-                if (!data || data.length === 0) {
-                    toast.error("No data found in the Excel file");
-                    setIsLoading(false);
-                    return;
-                }
-
-                let successCount = 0;
-                let errorCount = 0;
-
-                const headerMap: Record<string, string> = {
-                    'Product Name': 'name',
-                    'Product Type': 'type',
-                    'Description': 'description',
-                    'Price (₹)': 'price',
-                    'Price': 'price',
-                    'Discount (%)': 'discount',
-                    'Discount': 'discount',
-                    'Overview': 'overview',
-                    'Suggested Use': 'suggestedUse',
-                    'Other Ingredients': 'otherIngredients',
-                    'Warnings': 'warnings',
-                    'Disclaimer': 'disclaimer',
-                    'Brand': 'brand',
-                    'Manufacturer': 'manufacturer',
-                    'In Stock': 'inStock',
-                    'Best Seller': 'bestSeller',
-                    'Categories (comma-separated)': 'categories',
-                    'Categories': 'categories',
-                    'HSN Code': 'hsn',
-                    'Batch No.': 'batchNo',
-                    'Expired On': 'expiredOn'
-                };
-
-                for (let i = 0; i < data.length; i++) {
-                    const originalRow: any = data[i];
-                    const row: any = {};
-
-                    // Normalize the row keys based on the header map
-                    Object.keys(originalRow).forEach(key => {
-                        const trimmedKey = key.trim();
-                        // Match with mapping, or fallback to exact string if it's already camelCase or custom spec
-                        const mappedKey = headerMap[trimmedKey] || trimmedKey;
-                        row[mappedKey] = originalRow[key];
-                    });
-
-                    try {
-                        const standardFields = [
-                            'name', 'type', 'description', 'price', 'discount', 'overview',
-                            'suggestedUse', 'otherIngredients', 'warnings', 'disclaimer',
-                            'brand', 'manufacturer', 'inStock', 'bestSeller', 'categories',
-                            'hsn', 'batchNo', 'expiredOn', 'images', 'specifications'
-                        ];
-
-                        const specs = Object.keys(row)
-                            .filter(key => !standardFields.includes(key) && row[key] !== undefined && String(row[key]).trim() !== '')
-                            .map(key => ({ key: key.trim(), value: String(row[key]).trim() }));
-
-                        const productData = {
-                            name: row.name || '',
-                            type: row.type || '',
-                            description: row.description || '',
-                            price: Number(row.price) || 0,
-                            discount: Number(row.discount) || 0,
-                            overview: row.overview || '',
-                            suggestedUse: row.suggestedUse || '',
-                            otherIngredients: row.otherIngredients || '',
-                            warnings: row.warnings || '',
-                            disclaimer: row.disclaimer || '',
-                            brand: row.brand || '',
-                            manufacturer: row.manufacturer || '',
-                            inStock: row.inStock !== undefined ? String(row.inStock) : 'Yes',
-                            bestSeller: row.bestSeller !== undefined ? String(row.bestSeller) : '',
-                            categories: row.categories ? String(row.categories).split(',').map((c: string) => c.trim()).filter(Boolean) : [],
-                            hsn: row.hsn || '',
-                            batchNo: row.batchNo || '',
-                            expiredOn: row.expiredOn || '',
-                            images: [],
-                            specifications: specs
-                        };
-
-                        await createProduct(productData);
-                        successCount++;
-                    } catch (err) {
-                        console.error(`Error uploading row ${i + 1}:`, err);
-                        errorCount++;
-                    }
-                }
-
-                toast.success(`Bulk upload complete: ${successCount} added, ${errorCount} failed.`);
-                if (successCount > 0) {
-                    router.push('/admin/products');
-                }
-            } catch (error) {
-                console.error(error);
-                toast.error("Failed to parse Excel file");
-            } finally {
-                setIsLoading(false);
-                if (e.target) e.target.value = '';
-            }
-        };
-        reader.readAsArrayBuffer(file);
     };
 
     useEffect(() => {
@@ -195,10 +77,6 @@ export default function AddProductPage() {
         if (files.length === 0) return;
 
         const validFiles = files.filter(file => {
-            if (file.size > 5 * 1024 * 1024) {
-                toast.error(`Upload image under 5MB`);
-                return false;
-            }
             const fileExtension = file.name.split('.').pop()?.toLowerCase() || '';
             if (fileExtension !== 'jpg' && fileExtension !== 'jpeg') {
                 toast.error(`Only JPG/JPEG files are allowed`);
@@ -228,33 +106,46 @@ export default function AddProductPage() {
     const [specifications, setSpecifications] = useState<{ key: string, value: string }[]>(defaultSpecs);
 
     const handleDimensionChange = (index: number, partIndex: number, val: string) => {
+        let cleanVal = val.replace(/\D/g, '');
+        if (cleanVal.length > 2) {
+            cleanVal = cleanVal.slice(-1);
+        }
+
         const spec = specifications[index];
         const parts = (spec.value || '').split(' x ');
         const paddedParts = [parts[0] || '', parts[1] || '', parts[2] || ''];
-        paddedParts[partIndex] = val;
+        paddedParts[partIndex] = cleanVal;
 
         setSpecifications(prev => {
             const newSpecs = [...prev];
             newSpecs[index] = { ...newSpecs[index], value: paddedParts.join(' x ') };
             return newSpecs;
         });
+
+        if (cleanVal.length === 2) {
+            if (partIndex === 0) {
+                document.getElementById(`dim-B-${index}`)?.focus();
+            } else if (partIndex === 1) {
+                document.getElementById(`dim-H-${index}`)?.focus();
+            }
+        }
     };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
+        const { name, value } = e.target;
+        if (name === 'hsn') {
+            const cleanVal = value.replace(/\D/g, '');
+            setFormData({ ...formData, hsn: cleanVal });
+            return;
+        }
+        setFormData({ ...formData, [name]: value });
     };
 
     const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = Array.from(e.target.files || []);
         if (files.length === 0) return;
 
-        const validFiles = files.filter(file => {
-            if (file.size > 5 * 1024 * 1024) {
-                toast.error(`Upload image under 5MB`);
-                return false;
-            }
-            return true;
-        });
+        const validFiles = files;
 
         if (validFiles.length === 0) {
             e.target.value = '';
@@ -313,8 +204,15 @@ export default function AddProductPage() {
     };
 
     const handleSpecificationChange = (index: number, field: 'key' | 'value', value: string) => {
+        let cleanValue = value;
+        const key = specifications[index]?.key || '';
+
+        if (field === 'value' && (key.toLowerCase().includes('weight') || key.toLowerCase().includes('quantity') || index === 0 || index === 1)) {
+            cleanValue = value.replace(/\D/g, '');
+        }
+
         const newSpecs = [...specifications];
-        newSpecs[index][field] = value;
+        newSpecs[index][field] = cleanValue;
         setSpecifications(newSpecs);
     };
 
@@ -322,14 +220,40 @@ export default function AddProductPage() {
         setSpecifications(specifications.filter((_, i) => i !== index));
     };
 
+    const [showFormErrors, setShowFormErrors] = useState(false);
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (selectedImages.length === 0) {
-            toast.error('Please add at least one image');
+        const isImagesMissing = selectedImages.length === 0;
+        const isNameMissing = !formData.name.trim();
+        const isBrandMissing = !formData.brand.trim();
+        const isManufacturerMissing = !formData.manufacturer.trim();
+        const isPriceMissing = !formData.price || Number(formData.price) <= 0;
+        const isCategoriesMissing = !formData.categories.trim();
+        const isHsnMissing = !formData.hsn.trim();
+        const isBatchNoMissing = !formData.batchNo.trim();
+        const isExpiredOnMissing = !formData.expiredOn.trim();
+        const isOverviewMissing = !formData.overview.trim();
+        const isSuggestedUseMissing = !formData.suggestedUse.trim();
+        const isOtherIngredientsMissing = !formData.otherIngredients.trim();
+        const isWarningsMissing = !formData.warnings.trim();
+        const isDisclaimerMissing = !formData.disclaimer.trim();
+        const isAnySpecMissing = specifications.some((s, idx) => {
+            if (idx < 5) {
+                return !s.value || !s.value.trim();
+            } else {
+                return (!s.key || !s.key.trim()) || (!s.value || !s.value.trim());
+            }
+        });
+
+        if (isImagesMissing || isNameMissing || isBrandMissing || isManufacturerMissing || isPriceMissing || isCategoriesMissing || isHsnMissing || isBatchNoMissing || isExpiredOnMissing || isOverviewMissing || isSuggestedUseMissing || isOtherIngredientsMissing || isWarningsMissing || isDisclaimerMissing || isAnySpecMissing) {
+            setShowFormErrors(true);
+            toast.error('Please add all required fields');
             return;
         }
 
+        setShowFormErrors(false);
         setIsLoading(true);
 
         try {
@@ -396,8 +320,8 @@ export default function AddProductPage() {
                         </div>
                     </div>
                 )}
-                {/* Hidden Bulk Upload Input (Triggered from Topbar) */}
-                <input type="file" id="bulk-upload-input" accept=".csv" className="hidden" onChange={handleBulkUpload} />
+                {/* Bulk Upload Component & Modal */}
+                <BulkUploadModal />
 
                 <form id="product-form" onSubmit={handleSubmit} noValidate className="flex flex-col lg:flex-row gap-8 items-start lg:flex-1 lg:overflow-hidden">
 
@@ -407,7 +331,7 @@ export default function AddProductPage() {
                             <div className="flex items-center justify-between gap-4 mb-3">
                                 <label className="block text-sm font-semibold text-gray-700">Product Images <span className="text-red-500">*</span></label>
                                 {/* Mobile Only Bulk Upload Button */}
-                                <label htmlFor="bulk-upload-input" className="sm:hidden bg-[#0052A5] text-white px-3 py-1.5 border border-transparent rounded-md hover:bg-[#003d7a] transition font-medium text-[13px] flex items-center gap-1.5 cursor-pointer shadow-sm shrink-0">
+                                <label htmlFor="bulk-upload-input" className="sm:hidden bg-[#0052A5] text-white px-2 sm:px-3 py-1 sm:py-1.5 border border-transparent rounded-md hover:bg-[#003d7a] transition font-medium text-[13px] flex items-center gap-1.5 cursor-pointer shadow-sm shrink-0">
                                     <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
                                     Bulk Upload (.csv)
                                 </label>
@@ -419,9 +343,11 @@ export default function AddProductPage() {
                                 onDragLeave={handleFileDragLeave}
                                 onDrop={handleFileDrop}
                                 onClick={() => document.getElementById('product-image-input')?.click()}
-                                className={`border-2 border-dashed rounded-lg py-2 px-3 flex items-center gap-3 cursor-pointer transition-all mb-4 ${isDraggingOver
-                                    ? 'border-green-600 bg-green-50/30 scale-[0.99]'
-                                    : 'border-gray-300 hover:border-green-500 bg-gray-50/50 hover:bg-gray-50'
+                                className={`border-2 border-dashed rounded-lg py-2 px-3 flex items-center gap-3 cursor-pointer transition-all mb-4 ${showFormErrors && selectedImages.length === 0
+                                    ? 'border-red-500 bg-red-50/20'
+                                    : isDraggingOver
+                                        ? 'border-green-600 bg-green-50/30 scale-[0.99]'
+                                        : 'border-gray-300 hover:border-green-500 bg-gray-50/50 hover:bg-gray-50'
                                     }`}
                             >
                                 <svg className="w-5 h-5 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -431,7 +357,7 @@ export default function AddProductPage() {
                                     <span className="text-xs font-semibold text-gray-600">
                                         Drag & Drop or <span className="text-green-600 hover:underline">Browse</span>
                                     </span>
-                                    <p className="text-[10px] text-gray-400">JPG, JPEG · Max 5MB · Up to 5 images</p>
+                                    <p className="text-[10px] text-gray-400">JPG, JPEG · Up to 5 images</p>
                                 </div>
                                 <input
                                     id="product-image-input"
@@ -487,26 +413,26 @@ export default function AddProductPage() {
                         {/* Moved Fields */}
                         <div className="space-y-4 sm:space-y-6 mt-6 pt-6 border-t-2 border-green-200">
                             <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-2">Product Name</label>
-                                <input name="name" value={formData.name} onChange={handleChange} className="w-full px-3 py-2 text-sm bg-white/50 border border-gray-200 rounded-md focus:outline-none focus:border-green-600 transition-all outline-none placeholder-gray-400" placeholder="e.g. Premium Widget" />
+                                <label className="block text-sm font-semibold text-gray-700 mb-2">Product Name <span className="text-red-500">*</span></label>
+                                <input name="name" value={formData.name} onChange={handleChange} className={`w-full px-3 py-2 text-sm bg-white/50 border ${showFormErrors && !formData.name.trim() ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-green-600'} rounded-md focus:outline-none transition-all outline-none placeholder-gray-400`} placeholder="e.g. Premium Widget" />
                             </div>
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-sm font-semibold text-gray-700 mb-2">Brand</label>
-                                    <input name="brand" value={formData.brand} onChange={handleChange} className="w-full px-3 py-2 text-sm bg-white/50 border border-gray-200 rounded-md focus:outline-none focus:border-green-600 transition-all outline-none placeholder-gray-400" placeholder="e.g. Itelents Brands" />
+                                    <label className="block text-sm font-semibold text-gray-700 mb-2">Brand <span className="text-red-500">*</span></label>
+                                    <input name="brand" value={formData.brand} onChange={handleChange} className={`w-full px-3 py-2 text-sm bg-white/50 border ${showFormErrors && !formData.brand.trim() ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-green-600'} rounded-md focus:outline-none transition-all outline-none placeholder-gray-400`} placeholder="e.g. Itelents Brands" />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-semibold text-gray-700 mb-2">Manufacturer</label>
-                                    <input name="manufacturer" value={formData.manufacturer} onChange={handleChange} className="w-full px-3 py-2 text-sm bg-white/50 border border-gray-200 rounded-md focus:outline-none focus:border-green-600 transition-all outline-none placeholder-gray-400" placeholder="e.g. Itelents Brands" />
+                                    <label className="block text-sm font-semibold text-gray-700 mb-2">Manufacturer <span className="text-red-500">*</span></label>
+                                    <input name="manufacturer" value={formData.manufacturer} onChange={handleChange} className={`w-full px-3 py-2 text-sm bg-white/50 border ${showFormErrors && !formData.manufacturer.trim() ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-green-600'} rounded-md focus:outline-none transition-all outline-none placeholder-gray-400`} placeholder="e.g. Itelents Brands" />
                                 </div>
                             </div>
 
 
                             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                                 <div>
-                                    <label className="block text-sm font-semibold text-gray-700 mb-2">Price (₹)</label>
-                                    <input name="price" value={formData.price} type="number" onChange={handleChange} className="w-full px-3 py-2 text-sm bg-white/50 border border-gray-200 rounded-md focus:outline-none focus:border-green-600 transition-all outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" placeholder="0.00" />
+                                    <label className="block text-sm font-semibold text-gray-700 mb-2">Price (₹) <span className="text-red-500">*</span></label>
+                                    <input name="price" value={formData.price} type="number" onChange={handleChange} className={`w-full px-3 py-2 text-sm bg-white/50 border ${showFormErrors && (!formData.price || Number(formData.price) <= 0) ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-green-600'} rounded-md focus:outline-none transition-all outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none`} placeholder="0.00" />
                                 </div>
                                 <div>
                                     <label className="block text-sm font-semibold text-gray-700 mb-2">Discount (%)</label>
@@ -526,18 +452,18 @@ export default function AddProductPage() {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-2">Categories (comma-separated)</label>
-                                <input name="categories" value={formData.categories} onChange={handleChange} className="w-full px-3 py-2 text-sm bg-white/50 border border-gray-200 rounded-md focus:outline-none focus:border-green-600 transition-all outline-none placeholder-gray-400" placeholder="e.g. Supplements, Vitamins" />
+                                <label className="block text-sm font-semibold text-gray-700 mb-2">Categories (comma-separated) <span className="text-red-500">*</span></label>
+                                <input name="categories" value={formData.categories} onChange={handleChange} className={`w-full px-3 py-2 text-sm bg-white/50 border ${showFormErrors && !formData.categories.trim() ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-green-600'} rounded-md focus:outline-none transition-all outline-none placeholder-gray-400`} placeholder="e.g. Supplements, Vitamins" />
                             </div>
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-sm font-semibold text-gray-700 mb-2">HSN Code</label>
-                                    <input name="hsn" value={formData.hsn} onChange={handleChange} className="w-full px-3 py-2 text-sm bg-white/50 border border-gray-200 rounded-md focus:outline-none focus:border-green-600 transition-all outline-none placeholder-gray-400 h-[38px]" placeholder="e.g. 123456" />
+                                    <label className="block text-sm font-semibold text-gray-700 mb-2">HSN Code <span className="text-red-500">*</span></label>
+                                    <input name="hsn" value={formData.hsn} onChange={handleChange} className={`w-full px-3 py-2 text-sm bg-white/50 border ${showFormErrors && !formData.hsn.trim() ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-green-600'} rounded-md focus:outline-none transition-all outline-none placeholder-gray-400 h-[38px]`} placeholder="e.g. 123456" />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-semibold text-gray-700 mb-2">Batch No.</label>
-                                    <input name="batchNo" value={formData.batchNo} onChange={handleChange} className="w-full px-3 py-2 text-sm bg-white/50 border border-gray-200 rounded-md focus:outline-none focus:border-green-600 transition-all outline-none placeholder-gray-400 h-[38px]" placeholder="e.g. BATCH-001" />
+                                    <label className="block text-sm font-semibold text-gray-700 mb-2">Batch No. <span className="text-red-500">*</span></label>
+                                    <input name="batchNo" value={formData.batchNo} onChange={handleChange} className={`w-full px-3 py-2 text-sm bg-white/50 border ${showFormErrors && !formData.batchNo.trim() ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-green-600'} rounded-md focus:outline-none transition-all outline-none placeholder-gray-400 h-[38px]`} placeholder="e.g. BATCH-001" />
                                 </div>
                             </div>
 
@@ -568,7 +494,7 @@ export default function AddProductPage() {
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-2">Expired On</label>
+                                <label className="block text-sm font-semibold text-gray-700 mb-2">Expired On <span className="text-red-500">*</span></label>
                                 <input
                                     name="expiredOn"
                                     value={formData.expiredOn || ''}
@@ -579,7 +505,7 @@ export default function AddProductPage() {
                                         }
                                         setFormData({ ...formData, expiredOn: val });
                                     }}
-                                    className="w-full px-3 py-2 text-sm bg-white/50 border border-gray-200 rounded-md focus:outline-none focus:border-green-600 transition-all outline-none placeholder-gray-400 h-[38px]"
+                                    className={`w-full px-3 py-2 text-sm bg-white/50 border ${showFormErrors && !formData.expiredOn.trim() ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-green-600'} rounded-md focus:outline-none transition-all outline-none placeholder-gray-400 h-[38px]`}
                                     placeholder="08-2026"
                                     maxLength={7}
                                 />
@@ -589,38 +515,38 @@ export default function AddProductPage() {
 
 
                         <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-2">Overview</label>
-                            <textarea name="overview" value={formData.overview} rows={6} onChange={handleChange} className="w-full px-3 py-2 text-sm bg-white/50 border border-gray-200 rounded-md focus:outline-none focus:border-green-600 transition-all outline-none placeholder-gray-400" placeholder="Extensive product overview..." />
+                            <label className="block text-sm font-semibold text-gray-700 mb-2">Overview <span className="text-red-500">*</span></label>
+                            <textarea name="overview" value={formData.overview} rows={6} onChange={handleChange} className={`w-full px-3 py-2 text-sm bg-white/50 border ${showFormErrors && !formData.overview.trim() ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-green-600'} rounded-md focus:outline-none transition-all outline-none placeholder-gray-400`} placeholder="Extensive product overview..." />
                         </div>
 
-                        <div className="bg-green-50/30 rounded-md border border-green-50/50">
-                            <label className="block text-sm font-semibold text-gray-800 mb-2">Specifications</label>
+                        <div className="bg-green-50/30 rounded-md border border-green-50/50 p-2 sm:p-3">
+                            <label className="block text-sm font-semibold text-gray-800 mb-2">Specifications <span className="text-red-500">*</span></label>
                             {specifications.map((spec, index) => (
                                 <div key={index} className={`relative flex flex-col sm:flex-row gap-1 sm:gap-3 p-2 rounded-md border ${index < 5 ? 'bg-gray-50 border-gray-200' : 'bg-white/60 border-gray-100 pr-11 sm:pr-2'}`}>
                                     {index < 5 ? (
-                                        <div className="w-full sm:w-1/2 px-3 py-2 text-sm bg-white border border-gray-200 rounded-md text-gray-700 flex items-center">{spec.key}</div>
+                                        <div className="w-full sm:w-1/2 px-3 py-2 text-sm bg-white border border-gray-200 rounded-md text-gray-700 flex items-center font-medium">{spec.key}</div>
                                     ) : (
                                         <input
                                             type="text"
                                             placeholder="e.g. Dosage"
                                             value={spec.key}
                                             onChange={(e) => handleSpecificationChange(index, 'key', e.target.value)}
-                                            className="w-full sm:w-1/2 px-3 py-2 text-sm bg-white border border-gray-200 rounded-md focus:outline-none focus:border-green-600 outline-none transition-all"
+                                            className={`w-full sm:w-1/2 px-3 py-2 text-sm bg-white border ${showFormErrors && !spec.key.trim() ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-green-600'} rounded-md focus:outline-none transition-all`}
                                         />
                                     )}
                                     {spec.key === 'Dimensions (l x b h)' ? (
                                         <div className="w-full sm:w-1/2 flex items-center gap-1 sm:gap-2">
-                                            <input type="text" placeholder="L" value={(spec.value || '').split(' x ')[0] || ''} onChange={(e) => handleDimensionChange(index, 0, e.target.value)} className="w-full min-w-0 px-2 py-2 text-sm bg-white border border-gray-200 rounded-md focus:outline-none focus:border-green-600 outline-none text-center" />
+                                            <input id={`dim-L-${index}`} type="text" placeholder="L" onFocus={(e) => e.target.select()} value={(spec.value || '').split(' x ')[0] || ''} onChange={(e) => handleDimensionChange(index, 0, e.target.value)} className={`w-full min-w-0 px-2 py-2 text-sm bg-white border ${showFormErrors && !(spec.value || '').split(' x ')[0]?.trim() ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-green-600'} rounded-md focus:outline-none text-center transition-all`} />
                                             <span className="text-gray-400 font-bold text-xs sm:text-sm">x</span>
-                                            <input type="text" placeholder="B" value={(spec.value || '').split(' x ')[1] || ''} onChange={(e) => handleDimensionChange(index, 1, e.target.value)} className="w-full min-w-0 px-2 py-2 text-sm bg-white border border-gray-200 rounded-md focus:outline-none focus:border-green-600 outline-none text-center" />
+                                            <input id={`dim-B-${index}`} type="text" placeholder="B" onFocus={(e) => e.target.select()} value={(spec.value || '').split(' x ')[1] || ''} onChange={(e) => handleDimensionChange(index, 1, e.target.value)} className={`w-full min-w-0 px-2 py-2 text-sm bg-white border ${showFormErrors && !(spec.value || '').split(' x ')[1]?.trim() ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-green-600'} rounded-md focus:outline-none text-center transition-all`} />
                                             <span className="text-gray-400 font-bold text-xs sm:text-sm">x</span>
-                                            <input type="text" placeholder="H" value={(spec.value || '').split(' x ')[2] || ''} onChange={(e) => handleDimensionChange(index, 2, e.target.value)} className="w-full min-w-0 px-2 py-2 text-sm bg-white border border-gray-200 rounded-md focus:outline-none focus:border-green-600 outline-none text-center" />
+                                            <input id={`dim-H-${index}`} type="text" placeholder="H" onFocus={(e) => e.target.select()} value={(spec.value || '').split(' x ')[2] || ''} onChange={(e) => handleDimensionChange(index, 2, e.target.value)} className={`w-full min-w-0 px-2 py-2 text-sm bg-white border ${showFormErrors && !(spec.value || '').split(' x ')[2]?.trim() ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-green-600'} rounded-md focus:outline-none text-center transition-all`} />
                                         </div>
                                     ) : (
                                         <input
                                             type="text"
                                             placeholder={
-                                                index === 0 ? "e.g. 200 gm" :
+                                                index === 0 ? "e.g. 200" :
                                                     index === 1 ? "e.g. 100" :
                                                         index === 2 ? "e.g. MLI-00952" :
                                                             index === 4 ? "e.g. Tablet,Capsule,Syrup,Oil etc." :
@@ -628,7 +554,7 @@ export default function AddProductPage() {
                                             }
                                             value={spec.value}
                                             onChange={(e) => handleSpecificationChange(index, 'value', e.target.value)}
-                                            className="w-full sm:w-1/2 px-3 py-2 text-sm bg-white border border-gray-200 rounded-md focus:outline-none focus:border-green-600 outline-none transition-all"
+                                            className={`w-full sm:w-1/2 px-3 py-2 text-sm bg-white border ${showFormErrors && !spec.value.trim() ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-green-600'} rounded-md focus:outline-none transition-all`}
                                         />
                                     )}
                                     {/* Delete button: top-right corner on mobile, inline on sm+ */}
@@ -658,23 +584,23 @@ export default function AddProductPage() {
                         </div>
 
                         <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-2">Suggested Use</label>
-                            <textarea name="suggestedUse" value={formData.suggestedUse} rows={3} onChange={handleChange} className="w-full px-3 py-2 text-sm bg-white/50 border border-gray-200 rounded-md focus:outline-none focus:border-green-600 transition-all outline-none" />
+                            <label className="block text-sm font-semibold text-gray-700 mb-2">Suggested Use <span className="text-red-500">*</span></label>
+                            <textarea name="suggestedUse" value={formData.suggestedUse} rows={3} onChange={handleChange} className={`w-full px-3 py-2 text-sm bg-white/50 border ${showFormErrors && !formData.suggestedUse.trim() ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-green-600'} rounded-md focus:outline-none transition-all outline-none`} />
                         </div>
 
                         <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-2">Other Ingredients</label>
-                            <textarea name="otherIngredients" value={formData.otherIngredients} rows={3} onChange={handleChange} className="w-full px-3 py-2 text-sm bg-white/50 border border-gray-200 rounded-md focus:outline-none focus:border-green-600 transition-all outline-none" />
+                            <label className="block text-sm font-semibold text-gray-700 mb-2">Other Ingredients <span className="text-red-500">*</span></label>
+                            <textarea name="otherIngredients" value={formData.otherIngredients} rows={3} onChange={handleChange} className={`w-full px-3 py-2 text-sm bg-white/50 border ${showFormErrors && !formData.otherIngredients.trim() ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-green-600'} rounded-md focus:outline-none transition-all outline-none`} />
                         </div>
 
                         <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-2">Warnings</label>
-                            <textarea name="warnings" value={formData.warnings} rows={3} onChange={handleChange} className="w-full px-3 py-2 text-sm bg-white/50 border border-gray-200 rounded-md focus:outline-none focus:border-green-600 transition-all outline-none" />
+                            <label className="block text-sm font-semibold text-gray-700 mb-2">Warnings <span className="text-red-500">*</span></label>
+                            <textarea name="warnings" value={formData.warnings} rows={3} onChange={handleChange} className={`w-full px-3 py-2 text-sm bg-white/50 border ${showFormErrors && !formData.warnings.trim() ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-green-600'} rounded-md focus:outline-none transition-all outline-none`} />
                         </div>
 
                         <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-2">Disclaimer</label>
-                            <textarea name="disclaimer" value={formData.disclaimer} rows={3} onChange={handleChange} className="w-full px-3 py-2 text-sm bg-white/50 border border-gray-200 rounded-md focus:outline-none focus:border-green-600 transition-all outline-none" />
+                            <label className="block text-sm font-semibold text-gray-700 mb-2">Disclaimer <span className="text-red-500">*</span></label>
+                            <textarea name="disclaimer" value={formData.disclaimer} rows={3} onChange={handleChange} className={`w-full px-3 py-2 text-sm bg-white/50 border ${showFormErrors && !formData.disclaimer.trim() ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-green-600'} rounded-md focus:outline-none transition-all outline-none`} />
                         </div>
                         <div className="flex items-center justify-between px-3 py-2.5 bg-white/50 border border-gray-200 rounded-md transition-all hover:border-green-600/30">
                             <label className="text-sm font-semibold text-gray-700 cursor-pointer" onClick={() => setFormData(prev => ({ ...prev, bestSeller: prev.bestSeller.toLowerCase() === 'yes' ? '' : 'Yes' }))}>

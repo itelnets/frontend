@@ -13,6 +13,7 @@ interface CustomDropdownProps {
     onChange: (value: string) => void;
     placeholder?: string;
     className?: string;
+    hasError?: boolean;
 }
 
 export default function CustomDropdown({
@@ -20,7 +21,8 @@ export default function CustomDropdown({
     value,
     onChange,
     placeholder = 'Select...',
-    className = 'w-48'
+    className = 'w-48',
+    hasError = false
 }: CustomDropdownProps) {
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
@@ -49,7 +51,7 @@ export default function CustomDropdown({
                 type="button"
                 draggable={false}
                 onClick={() => setIsOpen(!isOpen)}
-                className="flex cursor-pointer items-center justify-between w-full border border-gray-300 rounded-md px-3 py-1.5 text-sm text-gray-700 bg-white focus:outline-none focus:border-green-600 transition-colors"
+                className={`flex cursor-pointer items-center justify-between w-full border ${hasError ? 'border-red-500 text-gray-700' : 'border-gray-300 text-gray-700'} rounded-md px-3 py-1.5 text-sm bg-white focus:outline-none focus:border-green-600 transition-colors`}
             >
                 <span className="truncate">{displayLabel}</span>
                 <svg className={`flex-shrink-0 w-4 h-4 ml-2 text-green-600 transition-transform ${isOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { updateBanner, BannerItem } from '../../../../../../services/banner';
 import toast from 'react-hot-toast';
 import Spinner from '@/components/Spinner';
-import PageLoader from '@/components/PageLoader';
 
 export default function EditBannerPage({ params }: { params: Promise<{ id: string }> }) {
     const router = useRouter();
@@ -178,9 +177,7 @@ export default function EditBannerPage({ params }: { params: Promise<{ id: strin
         }
     };
 
-    if (isLoading) {
-        return <PageLoader />;
-    }
+
 
     return (
         <div className="flex-1 w-full min-h-[calc(100vh-100px)] flex flex-col justify-center p-4 sm:p-6 lg:p-8 animate-in fade-in duration-500 max-w-[1400px] mx-auto bg-gray-50/50">

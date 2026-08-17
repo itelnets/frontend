@@ -7,11 +7,11 @@ import Spinner from './Spinner';
 import { getBanners, BannerItem } from '../services/banner';
 
 const BG_CLASSES = [
-    "from-[#fae6e9] via-[#f7d9dc] to-[#fce4e6]",
-    "from-[#eef9f0] via-[#def2e3] to-[#e8f7ec]",
-    "from-[#e0f2fe] via-[#bae6fd] to-[#e0f2fe]",
-    "from-[#fef3c7] via-[#fde68a] to-[#fef3c7]",
-    "from-[#f5f3ff] via-[#ede9fe] to-[#f5f3ff]"
+    "bg-white",
+    "bg-white",
+    "bg-white",
+    "bg-white",
+    "bg-white"
 ];
 
 export const getBannerSlug = (title?: string) => {
@@ -25,7 +25,10 @@ export default function HeroCarousel() {
     const [currentSlide, setCurrentSlide] = useState(0);
     const [isHovered, setIsHovered] = useState(false);
     const [isPlaying, setIsPlaying] = useState(true);
+    const [isNavigating, setIsNavigating] = useState(false);
     const autoPlayRef = useRef<NodeJS.Timeout | null>(null);
+    const touchStartX = useRef<number>(0);
+    const touchEndX = useRef<number>(0);
 
     // Fetch uploaded banners from the database
     useEffect(() => {
@@ -63,7 +66,7 @@ export default function HeroCarousel() {
     // Start auto scroll
     const startAutoPlay = () => {
         stopAutoPlay();
-        if (!isPlaying || totalSlides === 0) return;
+        if (!isPlaying || totalSlides === 0 || isNavigating) return;
         autoPlayRef.current = setInterval(() => {
             setCurrentSlide((prev) => (prev + 1) % totalSlides);
         }, 5000);
@@ -79,17 +82,25 @@ export default function HeroCarousel() {
 
     // Control auto scroll based on hover and play/pause state
     useEffect(() => {
-        if (!isHovered && isPlaying) {
+        if (!isHovered && isPlaying && !isNavigating) {
             startAutoPlay();
         } else {
             stopAutoPlay();
         }
         return () => stopAutoPlay();
-    }, [isHovered, isPlaying, totalSlides]);
+    }, [isHovered, isPlaying, totalSlides, isNavigating]);
 
     const handleTabHover = (index: number) => {
+        if (isNavigating) return;
         setCurrentSlide(index);
         setIsHovered(true);
+    };
+
+    const handleTabClick = (index: number) => {
+        setCurrentSlide(index);
+        setIsNavigating(true);
+        setIsPlaying(false);
+        stopAutoPlay();
     };
 
     const nextSlide = () => {
@@ -104,12 +115,7 @@ export default function HeroCarousel() {
     const currentBanner = (hasBanners && currentSlide < banners.length) ? banners[currentSlide] : undefined;
     const uploadedBanner = (currentBanner && currentBanner.imageUrl) ? currentBanner : undefined;
     const activeSlide = activeSlides[currentSlide];
-    const isBannerLoading = banners === null;
-
     // Touch swipe support for mobile
-    const touchStartX = useRef<number>(0);
-    const touchEndX = useRef<number>(0);
-
     const handleTouchStart = (e: React.TouchEvent) => {
         touchStartX.current = e.changedTouches[0].screenX;
     };
@@ -123,6 +129,13 @@ export default function HeroCarousel() {
         }
     };
 
+    const isBannerLoading = banners === null;
+    if (isBannerLoading) {
+        return (
+            <div className="w-full aspect-[1368/260] bg-gray-100 animate-pulse rounded-md sm:rounded-2xl relative overflow-hidden mb-2 sm:mb-10 md:mb-16" />
+        );
+    }
+
     return (
         <div
             className="w-full relative select-none mb-2 sm:mb-10 md:mb-16"
@@ -131,14 +144,16 @@ export default function HeroCarousel() {
         >
             {/* Banner Main Body - true aspect ratio so it looks identical on all screen sizes */}
             <div
-                className="w-full aspect-[1368/260] rounded-none overflow-hidden transition-all duration-500 relative"
+                className="w-full aspect-[1368/260] rounded-md sm:rounded-2xl overflow-hidden transition-all duration-500 relative"
                 onTouchStart={handleTouchStart}
                 onTouchEnd={handleTouchEnd}
             >
 
-                {/* Background: uploaded S3 image or fallback gradient */}
-                {uploadedBanner ? (
-                    <Link href={`/${getBannerSlug(activeSlide?.tabTitle)}`} className="absolute inset-0 z-0 cursor-pointer block">
+                {/* Background: uploaded S3 image or waving skeleton shimmer loader */}
+                {isBannerLoading ? (
+                    <div className="absolute inset-0 z-10 bg-gray-100 animate-pulse" />
+                ) : uploadedBanner ? (
+                    <Link href={`/${getBannerSlug(activeSlide?.tabTitle)}`} onClick={() => handleTabClick(currentSlide)} className="absolute inset-0 z-0 cursor-pointer block">
                         <Image
                             src={uploadedBanner.imageUrl}
                             alt={activeSlide?.tabTitle || "Promotion Background"}
@@ -149,14 +164,10 @@ export default function HeroCarousel() {
                         />
                     </Link>
                 ) : (
-                    <Link href={`/${getBannerSlug(activeSlide?.tabTitle)}`} className="absolute inset-0 w-full h-full bg-gradient-to-r from-[#fae6e9] via-[#f7d9dc] to-[#fce4e6] z-0 block" />
+                    <Link href={`/${getBannerSlug(activeSlide?.tabTitle)}`} onClick={() => handleTabClick(currentSlide)} className="absolute inset-0 w-full h-full bg-white z-0 block" />
                 )}
 
-                {isBannerLoading && (
-                    <div className="absolute inset-0 z-10 flex items-center justify-center bg-gray-50">
-                        <Spinner className="w-8 h-8 text-[#458500]" />
-                    </div>
-                )}
+
 
                 {/* Navigation Arrows — hidden on mobile, visible on sm+ */}
                 <button
@@ -196,7 +207,7 @@ export default function HeroCarousel() {
                 </button>
 
                 {/* Mobile dot indicators */}
-                <div className="flex sm:hidden absolute bottom-1.5 left-1/2 -translate-x-1/2 gap-1 z-20">
+                <div className="flex sm:hidden absolute bottom-1 left-1/2 -translate-x-1/2 gap-1 z-20">
                     {activeSlides.map((_, idx) => (
                         <button
                             key={idx}
@@ -217,6 +228,7 @@ export default function HeroCarousel() {
                             key={item.id}
                             href={`/${getBannerSlug(item.tabTitle)}`}
                             onMouseEnter={() => handleTabHover(idx)}
+                            onClick={() => handleTabClick(idx)}
                             className={`flex flex-col justify-center py-2.5 px-5 text-center cursor-pointer transition-all duration-300 rounded-xl whitespace-nowrap ${isActive
                                 ? 'bg-white border border-gray-300 shadow-xs'
                                 : 'bg-transparent border border-transparent hover:bg-white/40'

@@ -78,13 +78,7 @@ export default function ProductDetailsPage() {
     const originalPrice = displayProduct.price;
     const currentPrice = displayProduct.discount > 0 ? Math.round(originalPrice * (1 - displayProduct.discount / 100)) : originalPrice;
 
-    if (isLoading) {
-        return (
-            <div className="min-h-[80vh] flex items-center justify-center bg-white">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-700 -mt-4"></div>
-            </div>
-        );
-    }
+
 
     const renderReviewsPopover = () => {
         const reviews = product?.reviews || [];

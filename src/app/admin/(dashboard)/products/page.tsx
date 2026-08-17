@@ -7,7 +7,6 @@ import Link from 'next/link';
 import { getProducts, deleteProduct, updateProduct, reorderProducts } from '@/services/product';
 import toast from 'react-hot-toast';
 import ConfirmModal from '@/components/ConfirmModal';
-import Spinner from '@/components/Spinner';
 import { formatDate } from '@/utils/formatDate';
 import CopyIcon from '@/components/CopyIcon';
 import SortDropdown from '@/components/SortDropdown';
@@ -231,11 +230,7 @@ export default function AdminDashboard() {
 
             <div className="bg-transparent sm:bg-white sm:rounded-lg sm:shadow-sm sm:border border-gray-200 flex flex-col flex-1 min-h-0 overflow-hidden">
                 <div className="flex-1 overflow-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent px-2 py-2 sm:p-0 flex flex-col">
-                    {isLoading ? (
-                        <div className="p-10 text-center text-gray-500 flex justify-center items-center h-full min-h-[400px]">
-                            <Spinner className="w-8 h-8 sm:w-12 sm:h-12 text-green-600" />
-                        </div>
-                    ) : paginatedProducts.length === 0 ? (
+                    {paginatedProducts.length === 0 && !isLoading ? (
                         <div className="flex-1 flex flex-col items-center justify-center p-10 text-center text-gray-500 sm:bg-white sm:rounded-none">No products found.</div>
                     ) : (
                         <table className="min-w-full divide-y divide-gray-200 block sm:table">

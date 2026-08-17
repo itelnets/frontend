@@ -6,7 +6,7 @@ export default function CustomToaster() {
   return (
     <Toaster
       position="top-right"
-      containerClassName="!top-[120px] sm:!top-[170px] max-sm:![&>div]:justify-center max-sm:![&>div]:items-center overflow-hidden"
+      containerClassName="!top-[50px] sm:!top-[65px] max-sm:![&>div]:justify-center max-sm:![&>div]:items-center overflow-hidden"
       toastOptions={{
         style: {
           background: '#388e3c',
@@ -18,7 +18,7 @@ export default function CustomToaster() {
             secondary: '#388e3c',
           },
         },
-        className: '!text-[13px] sm:!text-[15px] !px-2.5 !py-2 sm:!px-3 sm:!py-2.5 max-w-[90vw] sm:!max-w-fit sm:whitespace-nowrap [&>div:first-child]:!mr-1.5 sm:[&>div:first-child]:!mr-3 [&>div:first-child]:scale-90 sm:[&>div:first-child]:scale-110 [&>div[role="status"]]:!m-0 max-sm:!mx-auto'
+        className: '!text-[13px] sm:!text-[15px] !px-2.5 !py-1.5 sm:!px-3 sm:!py-2.5 max-w-[90vw] sm:!max-w-fit sm:whitespace-nowrap [&>div:first-child]:!mr-1.5 sm:[&>div:first-child]:!mr-3 [&>div:first-child]:scale-90 sm:[&>div:first-child]:scale-110 [&>div[role="status"]]:!m-0 max-sm:!mx-auto'
       }}
     >
       {(t) => (
