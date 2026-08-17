@@ -25,7 +25,7 @@ export default async function Home() {
             {isMaintenance && <TriggerMaintenance />}
             <main className="w-full flex-1 mb-20">
                 {/* Hero Banner Section */}
-                <div className="max-w-[1400px] mx-auto p-1 sm:p-4">
+                <div className="max-w-[1400px] mx-auto p-1 sm:p-4 mt-0 sm:mt-2">
                     <HeroCarousel />
                 </div>
 
