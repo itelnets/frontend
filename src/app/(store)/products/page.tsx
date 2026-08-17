@@ -156,7 +156,7 @@ export default function ProductsPage() {
                                             setFilters({ ...filters, brands: newBrands });
                                         }}
                                     />
-                                    <div className="flex-1 flex justify-between items-start leading-snug group-hover:text-[#458500] transition-colors">
+                                    <div className="flex-1 flex justify-between items-start leading-snug">
                                         <span className="pr-2">{brand}</span>
                                     </div>
                                 </label>

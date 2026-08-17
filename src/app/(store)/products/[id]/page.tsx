@@ -53,6 +53,7 @@ export default function ProductDetailsPage() {
     const displayProduct = {
         name: product?.name,
         brand: product?.brand,
+        type: product?.type,
         manufacturer: product?.manufacturer,
         rating: product?.rating || 0,
         numReviews: product?.numReviews || 0,
@@ -504,18 +505,20 @@ export default function ProductDetailsPage() {
             <div className="border-b border-gray-200">
                 <div className="max-w-[1400px] mx-auto px-4 py-2 lg:py-3 text-[10px] lg:text-xs text-gray-500 flex flex-col gap-0.5 lg:gap-1">
                     <div className="flex flex-wrap items-center gap-1">
-                        <Link href="#" className="hover:underline whitespace-nowrap">Brands A-Z</Link>
+                        <Link href="/brands" className="hover:underline whitespace-nowrap">Brands A-Z</Link>
                         <span>&gt;</span>
-                        <Link href="#" className="hover:underline text-gray-800 whitespace-nowrap">{displayProduct.brand}</Link>
+                        <Link href="/brands" className="hover:underline text-gray-800 whitespace-nowrap">{displayProduct.brand || 'Brands'}</Link>
                     </div>
                     <div className="flex flex-wrap items-center gap-1">
-                        <Link href="#" className="hover:underline whitespace-nowrap">Categories</Link>
+                        <Link href="/" className="hover:underline whitespace-nowrap">Categories</Link>
                         <span>&gt;</span>
-                        <Link href="#" className="hover:underline whitespace-nowrap">Supplements</Link>
+                        <Link href={`/type/${displayProduct.type || 'supplements'}`} className="hover:underline whitespace-nowrap">
+                            {displayProduct.type ? (String(displayProduct.type).charAt(0).toUpperCase() + String(displayProduct.type).slice(1)) : 'Supplements'}
+                        </Link>
                         <span>&gt;</span>
-                        <Link href="#" className="hover:underline whitespace-nowrap">Omegas & Fish Oils (EPA DHA)</Link>
-                        <span>&gt;</span>
-                        <Link href="#" className="hover:underline whitespace-nowrap">Omega-3 Fish Oil</Link>
+                        <span className="text-gray-800 font-medium truncate max-w-[200px] sm:max-w-xs md:max-w-md lg:max-w-xl">
+                            {displayProduct.name}
+                        </span>
                     </div>
                 </div>
             </div>

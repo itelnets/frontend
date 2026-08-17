@@ -53,7 +53,7 @@ export function DealsHeroBanner({
 
 export function DealsTypeCategories({ selectedType, onSelectType }: { selectedType: string; onSelectType: (type: string) => void }) {
     return (
-        <div className="w-full overflow-x-auto scrollbar-none px-2.5 sm:px-4 pt-1 pb-1.5 lg:pb-3">
+        <div className="w-full overflow-x-auto scrollbar-none px-2.5 sm:px-4 pt-1.5 sm:pt-3 pb-1.5 lg:pb-3">
             <div className="flex items-center justify-start md:justify-center gap-3 md:gap-4 lg:gap-5 min-w-max mx-auto">
                 {PRODUCT_TYPES.map((pt) => {
                     const isSelected = selectedType.toLowerCase() === pt.type.toLowerCase();
@@ -129,7 +129,7 @@ export function DealsSidebarFilters({
                                     setFilters(prev => ({ ...prev, brands: newBrands }));
                                 }}
                             />
-                            <div className="flex-1 flex justify-between items-start leading-snug group-hover:text-[#458500] transition-colors">
+                            <div className="flex-1 flex justify-between items-start leading-snug">
                                 <span className="pr-2">{brand}</span>
                             </div>
                         </label>

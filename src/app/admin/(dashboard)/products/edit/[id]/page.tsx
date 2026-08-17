@@ -400,7 +400,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                     <div className="w-full lg:w-5/12 space-y-4 lg:h-full lg:overflow-y-auto lg:pr-2 scrollbar-thin scrollbar-thumb-gray-200">
                         <div>
                             <div className="flex items-center gap-4 mb-3">
-                                <label className="block text-sm font-semibold text-gray-700">Product Images</label>
+                                <label className="block text-sm font-semibold text-gray-700">Product Images <span className="text-red-500">*</span></label>
                             </div>
 
                             {/* Drag and Drop Upload Container */}
@@ -409,9 +409,11 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                                 onDragLeave={handleFileDragLeave}
                                 onDrop={handleFileDrop}
                                 onClick={() => document.getElementById('product-image-input')?.click()}
-                                className={`border-2 border-dashed rounded-lg py-2 px-3 flex items-center gap-3 cursor-pointer transition-all mb-4 ${isDraggingOver
-                                    ? 'border-green-600 bg-green-50/30 scale-[0.99]'
-                                    : 'border-gray-300 hover:border-green-500 bg-gray-50/50 hover:bg-gray-50'
+                                className={`border-2 border-dashed rounded-lg py-2 px-3 flex items-center gap-3 cursor-pointer transition-all mb-4 ${showFormErrors && images.length === 0
+                                    ? 'border-red-500 bg-red-50/20'
+                                    : isDraggingOver
+                                        ? 'border-green-600 bg-green-50/30 scale-[0.99]'
+                                        : 'border-gray-300 hover:border-green-500 bg-gray-50/50 hover:bg-gray-50'
                                     }`}
                             >
                                 <svg className="w-5 h-5 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
