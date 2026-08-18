@@ -272,7 +272,7 @@ export default function ProductDetailsPage() {
 
     const renderCartBox = () => (
         <div className="w-full space-y-4">
-            <div className="border border-gray-200 rounded-xl p-3 lg:p-5 bg-white">
+            <div className="border border-gray-200 rounded-lg p-3 lg:p-5 bg-white">
                 <div className="flex flex-row items-center gap-1 lg:gap-2 mb-4 lg:mb-6">
                     <span className="text-[18px] sm:text-[20px] lg:text-[22px] font-extrabold text-gray-900">₹{(currentPrice * quantity).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                     {displayProduct.discount > 0 && (
@@ -296,7 +296,7 @@ export default function ProductDetailsPage() {
                 <button
                     onClick={() => { if (displayProduct.inStock?.toLowerCase() === 'yes') addToCart(displayProduct, quantity); }}
                     disabled={displayProduct.inStock?.toLowerCase() !== 'yes'}
-                    className={`w-full ${displayProduct.inStock?.toLowerCase() === 'yes' ? 'bg-[#f38700] hover:bg-[#e07b00] cursor-pointer text-white' : 'bg-gray-300 text-gray-500 cursor-not-allowed'} font-bold py-[9px] lg:py-3 rounded-md transition-colors shadow-sm mb-3 lg:mb-4 text-sm lg:text-base`}
+                    className={`w-full ${displayProduct.inStock?.toLowerCase() === 'yes' ? 'bg-[#f38700] hover:bg-[#e07b00] cursor-pointer text-white' : 'bg-gray-300 text-gray-500 cursor-not-allowed'} font-bold py-[9px] lg:py-[11px] rounded-md transition-colors shadow-sm mb-3 lg:mb-4 text-sm lg:text-base`}
                 >
                     {displayProduct.inStock?.toLowerCase() === 'yes' ? 'Add to Cart' : 'Out of Stock'}
                 </button>
@@ -319,7 +319,7 @@ export default function ProductDetailsPage() {
                 onRemoved={() => { }}
             />
 
-            <div className="bg-[#f0f7f4] border border-[#e2efe9] rounded-xl p-3 lg:p-5">
+            <div className="bg-[#f0f7f4] border border-[#e2efe9] rounded-lg p-3 lg:p-5">
                 <div className="flex items-center gap-1.5 lg:gap-2 mb-1 lg:mb-2 font-bold text-green-800 text-xs lg:text-sm">
                     <svg className="w-4 h-4 lg:w-5 lg:h-5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" /></svg>
                     Quality Promise
@@ -329,7 +329,7 @@ export default function ProductDetailsPage() {
                 </p>
             </div>
 
-            <div className="border border-gray-200 rounded-xl p-3 lg:p-5 bg-white">
+            <div className="border border-gray-200 rounded-lg p-3 lg:p-5 bg-white">
                 {recommendedProducts.length > 0 ? (
                     <>
                         <div className="flex justify-center gap-2 mb-2">
@@ -370,7 +370,7 @@ export default function ProductDetailsPage() {
 
             <div className="space-y-6 lg:space-y-8 text-sm lg:text-base">
                 {displayProduct.specifications?.length > 0 && (
-                    <div>
+                    <div className='mt-2 sm:mt-4 mb-2 sm:mb-0'>
                         <h3 className="font-bold text-gray-900 mb-3 lg:mb-4 text-base lg:text-lg">Specifications</h3>
                         <div className="flex flex-col gap-1.5 sm:gap-2.5">
                             {displayProduct.specifications.map((spec: any, idx: number) => (
