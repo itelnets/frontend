@@ -223,7 +223,7 @@ export default function AdminDoctorRequestsPage() {
                                             {/* Desktop Actions */}
                                             <td className="hidden sm:table-cell px-3 sm:px-4 py-3 text-center">
                                                 <div className="flex items-center justify-center gap-3">
-                                                    {/* Eye View Document Button (Matching Users table) */}
+                                                    {/* Eye View Document Button */}
                                                     {fullDocUrl ? (
                                                         <button
                                                             type="button"
@@ -238,26 +238,21 @@ export default function AdminDoctorRequestsPage() {
                                                         </button>
                                                     ) : null}
 
-                                                    {req.status === 'pending' ? (
-                                                        <div className="flex items-center gap-1.5 shrink-0">
-                                                            <button
-                                                                onClick={() => handleOpenApproveModal(req)}
-                                                                className="h-[26px] sm:h-[32px] bg-green-600 hover:bg-green-700 text-white font-bold px-3 text-[11px] sm:text-xs rounded-[4px] sm:rounded-md transition-colors cursor-pointer shadow-xs whitespace-nowrap inline-flex items-center justify-center"
-                                                            >
-                                                                Approve
-                                                            </button>
-                                                            <button
-                                                                onClick={() => setRejectModalItem(req)}
-                                                                className="h-[26px] sm:h-[32px] bg-red-50 hover:bg-red-100 text-red-600 font-bold px-3 text-[11px] sm:text-xs rounded-[4px] sm:rounded-md transition-colors border border-red-200 cursor-pointer whitespace-nowrap inline-flex items-center justify-center"
-                                                            >
-                                                                Reject
-                                                            </button>
-                                                        </div>
-                                                     ) : (
-                                                        <span className={`text-[11px] sm:text-xs font-bold whitespace-nowrap ${req.status === 'approved' ? 'text-green-600' : 'text-red-600'}`}>
-                                                            {req.status === 'approved' ? 'Approved' : 'Rejected'}
-                                                        </span>
-                                                     )}
+                                                    {/* Desktop Verification Toggle Switch (h-5 w-9) */}
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => {
+                                                            if (req.status === 'approved') {
+                                                                setRejectModalItem(req);
+                                                            } else {
+                                                                handleOpenApproveModal(req);
+                                                            }
+                                                        }}
+                                                        className={`cursor-pointer relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none ${req.status === 'approved' ? 'bg-green-600' : 'bg-gray-300'}`}
+                                                        title={req.status === 'approved' ? 'Verified (Click to unverify)' : 'Unverified (Click to verify)'}
+                                                    >
+                                                        <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform ${req.status === 'approved' ? 'translate-x-4.5' : 'translate-x-0.5'}`} />
+                                                    </button>
                                                 </div>
                                             </td>
 
@@ -282,8 +277,8 @@ export default function AdminDoctorRequestsPage() {
                                                     <p className="text-[11px] text-gray-400">Submitted: {formatSubmittedDate(req.createdAt)}</p>
                                                 </div>
 
-                                                <div className="flex items-center justify-between pt-2 border-t border-gray-100 gap-2">
-                                                    {/* Eye View Document Button (26px x 26px on Mobile) */}
+                                                <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-gray-100">
+                                                    {/* Eye View Document Button + Mobile Toggle Switch besides each other */}
                                                     {fullDocUrl ? (
                                                         <button
                                                             type="button"
@@ -296,24 +291,23 @@ export default function AdminDoctorRequestsPage() {
                                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                                                             </svg>
                                                         </button>
-                                                    ) : <span />}
+                                                    ) : null}
 
-                                                    {req.status === 'pending' && (
-                                                        <div className="flex items-center gap-1.5">
-                                                            <button
-                                                                onClick={() => handleOpenApproveModal(req)}
-                                                                className="h-[26px] bg-green-600 hover:bg-green-700 text-white font-bold px-2.5 text-[11px] rounded-[4px] sm:rounded-md transition-colors cursor-pointer shadow-xs inline-flex items-center justify-center"
-                                                            >
-                                                                Approve
-                                                            </button>
-                                                            <button
-                                                                onClick={() => setRejectModalItem(req)}
-                                                                className="h-[26px] bg-red-50 hover:bg-red-100 text-red-600 font-bold px-2.5 text-[11px] rounded-[4px] sm:rounded-md transition-colors border border-red-200 cursor-pointer inline-flex items-center justify-center"
-                                                            >
-                                                                Reject
-                                                            </button>
-                                                        </div>
-                                                    )}
+                                                    {/* Mobile Verification Toggle Switch (h-4 w-7) */}
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => {
+                                                            if (req.status === 'approved') {
+                                                                setRejectModalItem(req);
+                                                            } else {
+                                                                handleOpenApproveModal(req);
+                                                            }
+                                                        }}
+                                                        className={`cursor-pointer relative inline-flex h-4 w-7 items-center rounded-full transition-colors focus:outline-none ${req.status === 'approved' ? 'bg-green-600' : 'bg-gray-300'}`}
+                                                        title={req.status === 'approved' ? 'Verified (Click to unverify)' : 'Unverified (Click to verify)'}
+                                                    >
+                                                        <span className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${req.status === 'approved' ? 'translate-x-3.5' : 'translate-x-0.5'}`} />
+                                                    </button>
                                                 </div>
                                             </td>
                                         </tr>

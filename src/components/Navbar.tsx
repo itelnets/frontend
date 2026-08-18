@@ -22,6 +22,18 @@ const Navbar = () => {
     const { cartCount } = useCart();
     const headerRef = useRef<HTMLElement | null>(null);
 
+    const [productTypes, setProductTypes] = useState<string[]>(['Supplements', 'Sports', 'Bath', 'Beauty', 'Grocery', 'Home', 'Baby', 'Pets']);
+
+    useEffect(() => {
+        api.get('/products/types')
+            .then(res => {
+                if (res.data?.types && Array.isArray(res.data.types) && res.data.types.length > 0) {
+                    setProductTypes(res.data.types);
+                }
+            })
+            .catch(() => { });
+    }, [pathname]);
+
     useEffect(() => {
         setIsMobileMenuOpen(false);
         setIsAuthOpen(false);
@@ -262,14 +274,11 @@ const Navbar = () => {
                     <div className="max-w-[1400px] mx-auto px-2 sm:px-4">
                         <div className="flex items-center justify-between h-8 sm:h-12 overflow-x-auto whitespace-nowrap text-[12px] sm:text-sm font-semibold text-gray-700 hide-scrollbar">
                             <div className="flex items-center gap-6">
-                                <Link href="/type/supplements" className="hover:text-[#458500]">Supplements</Link>
-                                <Link href="/type/sports" className="hover:text-[#458500]">Sports</Link>
-                                <Link href="/type/bath" className="hover:text-[#458500]">Bath</Link>
-                                <Link href="/type/beauty" className="hover:text-[#458500]">Beauty</Link>
-                                <Link href="/type/grocery" className="hover:text-[#458500]">Grocery</Link>
-                                <Link href="/type/home" className="hover:text-[#458500]">Home</Link>
-                                <Link href="/type/baby" className="hover:text-[#458500]">Baby</Link>
-                                <Link href="/type/pets" className="hover:text-[#458500]">Pets</Link>
+                                {productTypes.map((type) => (
+                                    <Link key={type} href={`/type/${encodeURIComponent(type.toLowerCase())}`} className="hover:text-[#458500] capitalize">
+                                        {type}
+                                    </Link>
+                                ))}
                                 <Link href="/brands" className="hover:text-[#458500] ml-4 text-gray-400">Brands A-Z</Link>
                                 <Link href="/products" className="hover:text-[#458500] text-gray-400">Health Topics</Link>
                             </div>
@@ -353,9 +362,9 @@ const Navbar = () => {
                                     )}
                                     {/* Main Categories */}
                                     <div className="flex flex-col">
-                                        {['Supplements', 'Sports', 'Bath', 'Beauty', 'Grocery', 'Home', 'Baby', 'Pets'].map((cat) => (
-                                            <Link key={cat} href={`/type/${cat.toLowerCase()}`} onClick={() => setIsMobileMenuOpen(false)} className="flex items-center justify-between px-3 sm:px-4 py-2.5 sm:py-3.5 hover:bg-gray-50 border-b border-gray-50">
-                                                <span className="text-base font-medium text-gray-900">{cat}</span>
+                                        {productTypes.map((cat) => (
+                                            <Link key={cat} href={`/type/${encodeURIComponent(cat.toLowerCase())}`} onClick={() => setIsMobileMenuOpen(false)} className="flex items-center justify-between px-3 sm:px-4 py-2.5 sm:py-3.5 hover:bg-gray-50 border-b border-gray-50">
+                                                <span className="text-base font-medium text-gray-900 capitalize">{cat}</span>
                                                 <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
                                             </Link>
                                         ))}

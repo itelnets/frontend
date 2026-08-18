@@ -6,6 +6,7 @@ import { getProductById, updateProduct } from '@/services/product';
 import toast from 'react-hot-toast';
 import Spinner from '@/components/Spinner';
 import CustomDropdown from '@/components/CustomDropdown';
+import ProductTypeField from '@/components/ProductTypeField';
 
 type ImageItem =
     | { type: 'existing', id: string, url: string }
@@ -558,22 +559,9 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                     <div className="w-full lg:w-7/12 space-y-4 lg:h-full lg:overflow-y-auto lg:pr-2 lg:pb-10 scrollbar-thin scrollbar-thumb-gray-200">
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-2">Product Type</label>
-                                <CustomDropdown
-                                    options={[
-                                        { label: 'Supplements', value: 'Supplements' },
-                                        { label: 'Sports', value: 'Sports' },
-                                        { label: 'Bath', value: 'Bath' },
-                                        { label: 'Beauty', value: 'Beauty' },
-                                        { label: 'Grocery', value: 'Grocery' },
-                                        { label: 'Home', value: 'Home' },
-                                        { label: 'Baby', value: 'Baby' },
-                                        { label: 'Pets', value: 'Pets' }
-                                    ]}
+                                <ProductTypeField
                                     value={formData.type || ''}
                                     onChange={(val) => setFormData({ ...formData, type: val })}
-                                    placeholder="Select Product Type"
-                                    className="w-full h-[38px]"
                                 />
                             </div>
                             <div>

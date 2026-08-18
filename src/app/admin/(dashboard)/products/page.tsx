@@ -33,6 +33,12 @@ export default function AdminDashboard() {
     const [totalPages, setTotalPages] = useState(1);
     const [typeFilter, setTypeFilter] = useState('All Types');
     const itemsPerPage = 20;
+
+    const dynamicTypeOptions = Array.from(new Set([
+        'All Types',
+        'Supplements', 'Sports', 'Bath', 'Beauty', 'Grocery', 'Home', 'Baby', 'Pets',
+        ...products.map(p => p.type).filter((t): t is string => Boolean(t))
+    ]));
     const [portalNode, setPortalNode] = useState<HTMLElement | null>(null);
     const [paginationPortalNode, setPaginationPortalNode] = useState<HTMLElement | null>(null);
 
@@ -217,7 +223,7 @@ export default function AdminDashboard() {
                 <div className="flex items-center gap-1 shrink-0">
                     <SortDropdown
                         isAdmin={true}
-                        options={['All Types', 'Supplements', 'Sports', 'Bath', 'Beauty', 'Grocery', 'Home', 'Baby', 'Pets']}
+                        options={dynamicTypeOptions}
                         value={typeFilter}
                         onChange={(val) => setTypeFilter(val)}
                         className="z-30 w-[110px] sm:w-[130px]"
@@ -497,7 +503,7 @@ export default function AdminDashboard() {
                     <div className="hidden lg:flex items-center gap-2 sm:gap-3 shrink-0">
                         <SortDropdown
                             isAdmin={true}
-                            options={['All Types', 'Supplements', 'Sports', 'Bath', 'Beauty', 'Grocery', 'Home', 'Baby', 'Pets']}
+                            options={dynamicTypeOptions}
                             value={typeFilter}
                             onChange={(val) => setTypeFilter(val)}
                             className="z-30 w-[120px] sm:w-[140px]"
