@@ -51,6 +51,12 @@ export default function AdminDashboard() {
     const [draggableRowId, setDraggableRowId] = useState<string | null>(null);
     const imageScrollRef = useRef<HTMLDivElement>(null);
 
+    useEffect(() => {
+        if (viewImagesProduct && imageScrollRef.current) {
+            imageScrollRef.current.scrollLeft = 0;
+        }
+    }, [viewImagesProduct]);
+
     const dragIndex = useRef<number | null>(null);
     const hoverIndex = useRef<number | null>(null);
 
@@ -423,7 +429,7 @@ export default function AdminDashboard() {
             {viewImagesProduct && (
                 <div className="fixed inset-0 bg-slate-900/60 flex items-center justify-center z-[60] p-4 backdrop-blur-sm transition-all duration-300" onClick={() => setViewImagesProduct(null)}>
                     <div className="bg-white rounded-lg shadow-2xl max-w-5xl w-full p-4 sm:p-6 flex flex-col gap-2 sm:gap-4 animate-in fade-in zoom-in duration-300 max-h-[90vh]" onClick={(e) => e.stopPropagation()}>
-                        <div className="flex justify-between items-center border-b border-gray-100 pb-3 gap-2">
+                        <div className="flex justify-between items-center gap-1 sm:gap-2">
                             <h3 className="text-sm sm:text-lg font-bold text-gray-800 line-clamp-1">{viewImagesProduct.name}</h3>
                             <button
                                 onClick={() => setViewImagesProduct(null)}
@@ -449,10 +455,10 @@ export default function AdminDashboard() {
 
                                 <div
                                     ref={imageScrollRef}
-                                    className="flex overflow-x-auto gap-4 items-center justify-center min-h-[18rem] sm:min-h-[26rem] lg:min-h-[30rem] w-full [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden py-2"
+                                    className={`flex overflow-x-auto gap-4 items-center ${viewImagesProduct.images.length === 1 ? 'justify-center' : 'justify-start'} min-h-[18rem] sm:min-h-[26rem] lg:min-h-[30rem] w-full snap-x snap-mandatory scroll-smooth [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden py-2 px-2`}
                                 >
                                     {viewImagesProduct.images.map((img, idx) => (
-                                        <div key={idx} className="flex-shrink-0 h-64 w-64 sm:h-[400px] sm:w-[400px] lg:h-[480px] lg:w-[480px] bg-gray-50 rounded-lg overflow-hidden border border-gray-200 shadow-sm flex items-center justify-center">
+                                        <div key={idx} className="snap-start flex-shrink-0 h-64 w-64 sm:h-[400px] sm:w-[400px] lg:h-[480px] lg:w-[480px] bg-gray-50 rounded-lg overflow-hidden border border-gray-200 shadow-sm flex items-center justify-center">
                                             <img
                                                 className="h-full w-full object-contain p-2"
                                                 src={img.startsWith('http') ? img : `${process.env.NEXT_PUBLIC_API_URL}/upload/file/${img}`}
