@@ -14,7 +14,7 @@ import { getDoctorStatus } from '@/services/doctor';
 import PromoCodeSection from '@/components/PromoCodeSection';
 
 export default function CartPage() {
-    const { cartItems, cartCount, removeFromCart, addToCart, updateQuantity, myLists, moveToCartFromList, moveToList, clearCart, removeFromList, savedForLater, saveForLater, moveToCartFromSaved, removeFromSaved, isCartLoading } = useCart();
+    const { cartItems, cartCount, removeFromCart, addToCart, updateQuantity, myLists, moveToCartFromList, moveToList, clearCart, removeFromList, savedForLater, saveForLater, moveToCartFromSaved, removeFromSaved, isCartLoading, appliedPromo, setAppliedPromo } = useCart();
     const router = useRouter();
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [recommended, setRecommended] = useState<any[]>([]);
@@ -30,7 +30,6 @@ export default function CartPage() {
 
     // Promo Code States
     const [promoCodeInput, setPromoCodeInput] = useState('');
-    const [appliedPromo, setAppliedPromo] = useState<{ code: string; discountPercent: number } | null>(null);
     const [promoError, setPromoError] = useState('');
     const [doctorPromo, setDoctorPromo] = useState<string | null>(null);
 

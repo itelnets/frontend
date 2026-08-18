@@ -14,7 +14,7 @@ import PromoCodeSection from '@/components/PromoCodeSection';
 
 
 function CheckoutContent() {
-    const { cartItems, cartCount, updateQuantity, removeFromCart, moveToList, clearCart } = useCart();
+    const { cartItems, cartCount, updateQuantity, removeFromCart, moveToList, clearCart, appliedPromo, setAppliedPromo } = useCart();
     const [showErrors, setShowErrors] = useState(false);
     const [savedAddresses, setSavedAddresses] = useState<any[]>([]);
     const [isLoadingAddresses, setIsLoadingAddresses] = useState(true);
@@ -49,7 +49,6 @@ function CheckoutContent() {
 
     // Promo Code States
     const [promoCodeInput, setPromoCodeInput] = useState('');
-    const [appliedPromo, setAppliedPromo] = useState<{ code: string; discountPercent: number } | null>(null);
     const [promoError, setPromoError] = useState('');
     const [doctorPromo, setDoctorPromo] = useState<string | null>(null);
 

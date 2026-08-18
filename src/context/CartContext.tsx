@@ -11,6 +11,8 @@ type CartItem = {
     [key: string]: any;
 };
 
+type AppliedPromo = { code: string; discountPercent: number } | null;
+
 type CartContextType = {
     cartItems: CartItem[];
     addToCart: (product: any, quantity?: number) => void;
@@ -30,6 +32,8 @@ type CartContextType = {
     removeFromSaved: (item: any) => void;
     clearCart: () => void;
     isCartLoading: boolean;
+    appliedPromo: AppliedPromo;
+    setAppliedPromo: (promo: AppliedPromo) => void;
 };
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -40,6 +44,34 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
     const [wishlist, setWishlist] = useState<any[]>([]);
     const [savedForLater, setSavedForLater] = useState<any[]>([]);
     const [isCartLoading, setIsCartLoading] = useState(false);
+
+    const [appliedPromo, setAppliedPromoState] = useState<AppliedPromo>(() => {
+        if (typeof window !== 'undefined') {
+            const saved = localStorage.getItem('appliedPromo');
+            if (saved) {
+                try { return JSON.parse(saved); } catch (e) { }
+            }
+        }
+        return null;
+    });
+
+    const setAppliedPromo = (promo: AppliedPromo) => {
+        setAppliedPromoState(promo);
+        if (typeof window !== 'undefined') {
+            if (promo) {
+                localStorage.setItem('appliedPromo', JSON.stringify(promo));
+            } else {
+                localStorage.removeItem('appliedPromo');
+            }
+        }
+    };
+
+    // Reset promo code whenever cart becomes empty
+    useEffect(() => {
+        if (cartItems.length === 0 && appliedPromo !== null) {
+            setAppliedPromo(null);
+        }
+    }, [cartItems.length]);
 
     const getProductFromItem = (item: any) => item?.product || item;
     const getProductIdFromItem = (item: any) => getProductFromItem(item)?._id;
@@ -337,7 +369,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
             myLists, moveToList, moveToCartFromList, removeFromList,
             wishlist, addToWishlist: moveToList, removeFromWishlist: removeFromList,
             savedForLater, saveForLater, moveToCartFromSaved, removeFromSaved,
-            clearCart, isCartLoading
+            clearCart, isCartLoading, appliedPromo, setAppliedPromo
         }}>
             {children}
         </CartContext.Provider>
