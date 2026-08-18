@@ -49,13 +49,14 @@ export default function BannerDealsPage() {
     // Parse discount number and direction from slug or banner title (e.g., 10% off -> maxDiscount: 10; 20% off -> maxDiscount: 20; 30% off -> maxDiscount: 30)
     useEffect(() => {
         if (typeof window !== 'undefined') {
+            window.scrollTo(0, 0);
             const params = new URLSearchParams(window.location.search);
             const sort = params.get('sort');
             if (sort) {
                 setSortOption(sort);
             }
         }
-    }, []);
+    }, [slug]);
 
     const handleSortChange = (newSort: string) => {
         setSortOption(newSort);
@@ -194,12 +195,12 @@ export default function BannerDealsPage() {
         setSelectedType('');
     };
 
-    if (isValidating || isValidSlug === false) {
+    if (isValidSlug === false) {
         return null;
     }
 
     return (
-        <div className="flex flex-col min-h-screen bg-white">
+        <div className="flex flex-col min-h-screen bg-white overflow-x-hidden max-w-full">
 
             {/* Top Banner & Category Icons Section - Matches Home Page Edge-to-Edge Container */}
             <div className="w-full max-w-[1400px] mx-auto p-1 sm:p-4 mt-0 sm:mt-2">

@@ -220,7 +220,7 @@ export default function HeroCarousel() {
             </div>
 
             {/* Bottom Overlay Tabs - Centered, half on banner and half off banner */}
-            <div className="hidden md:flex absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 bg-[#f5f5f5] rounded-2xl shadow-lg border border-gray-200/80 p-1 z-30 items-stretch gap-1">
+            <div className="hidden md:flex absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 bg-[#f5f5f5] rounded-2xl shadow-lg border border-gray-200/80 p-1 z-30 items-stretch gap-1 max-w-[95%] overflow-x-auto scrollbar-none">
                 {activeSlides.map((item, idx) => {
                     const isActive = idx === currentSlide;
                     return (
