@@ -142,7 +142,7 @@ function CheckoutContent() {
         try {
             const userInfo = localStorage.getItem('userInfo');
             const token = userInfo ? JSON.parse(userInfo).token : null;
-            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
             const res = await fetch(`${apiUrl}/promo/verify`, {
                 method: 'POST',

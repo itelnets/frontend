@@ -96,7 +96,7 @@ export default function DoctorCornerPage() {
                 } catch (err) { }
             }
 
-            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL;
             const res = await fetch(`${apiUrl}/upload?type=doctor`, {
                 method: 'POST',
                 headers: token ? { Authorization: `Bearer ${token}` } : {},
@@ -125,7 +125,7 @@ export default function DoctorCornerPage() {
         try {
             const userInfo = localStorage.getItem('userInfo');
             const token = userInfo ? JSON.parse(userInfo).token : null;
-            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
             await fetch(`${apiUrl}/upload`, {
                 method: 'DELETE',
@@ -378,7 +378,7 @@ export default function DoctorCornerPage() {
                                                 <div className="relative shrink-0 pr-1">
                                                     {formData.documentUrl.match(/\.(jpeg|jpg|gif|png|webp)($|\?)/i) || formData.documentUrl.startsWith('data:image') || !formData.documentUrl.toLowerCase().endsWith('.pdf') ? (
                                                         <img
-                                                            src={formData.documentUrl.startsWith('http') ? formData.documentUrl : `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/upload/file/${formData.documentUrl}`}
+                                                            src={formData.documentUrl.startsWith('http') ? formData.documentUrl : `${process.env.NEXT_PUBLIC_API_URL}/upload/file/${formData.documentUrl}`}
                                                             alt="Certificate Preview"
                                                             className="w-9 h-9 sm:w-10 sm:h-10 object-cover rounded-lg shadow-xs"
                                                             onError={(e) => {
