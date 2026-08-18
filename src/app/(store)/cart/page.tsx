@@ -10,6 +10,8 @@ import { fetchAddresses } from '@/services/addressService';
 import ConfirmModal from '@/components/ConfirmModal';
 import QuantityDropdown from '@/components/QuantityDropdown';
 import ProductCard from '@/components/ProductCard';
+import { getDoctorStatus } from '@/services/doctor';
+import PromoCodeSection from '@/components/PromoCodeSection';
 
 export default function CartPage() {
     const { cartItems, cartCount, removeFromCart, addToCart, updateQuantity, myLists, moveToCartFromList, moveToList, clearCart, removeFromList, savedForLater, saveForLater, moveToCartFromSaved, removeFromSaved, isCartLoading } = useCart();
@@ -26,6 +28,12 @@ export default function CartPage() {
     const [isAddressDropdownOpen, setIsAddressDropdownOpen] = useState(false);
     const addressDropdownRef = useRef<HTMLDivElement>(null);
 
+    // Promo Code States
+    const [promoCodeInput, setPromoCodeInput] = useState('');
+    const [appliedPromo, setAppliedPromo] = useState<{ code: string; discountPercent: number } | null>(null);
+    const [promoError, setPromoError] = useState('');
+    const [doctorPromo, setDoctorPromo] = useState<string | null>(null);
+
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (addressDropdownRef.current && !addressDropdownRef.current.contains(event.target as Node)) {
@@ -40,6 +48,15 @@ export default function CartPage() {
         };
     }, [isAddressDropdownOpen]);
 
+    // Reset promo code whenever cart is empty
+    useEffect(() => {
+        if (cartItems.length === 0) {
+            setAppliedPromo(null);
+            setPromoCodeInput('');
+            setPromoError('');
+        }
+    }, [cartItems.length]);
+
     // Estimated delivery date: 7-12 days from today
     const getDeliveryDateRange = () => {
         const today = new Date();
@@ -53,9 +70,54 @@ export default function CartPage() {
 
     // Total calculation
     const subtotal = cartItems.reduce((acc, item) => acc + (item.product.discount > 0 ? Math.round(item.product.price * (1 - item.product.discount / 100)) : item.product.price) * item.quantity, 0);
-    const shipping = subtotal > 1000 ? 0 : 99;
-    const taxes = subtotal * 0.05; // 5% taxes
-    const total = subtotal + (cartItems.length > 0 ? shipping + taxes : 0);
+    const promoDiscountAmount = appliedPromo ? Math.round(subtotal * (appliedPromo.discountPercent / 100)) : 0;
+    const discountedSubtotal = Math.max(0, subtotal - promoDiscountAmount);
+    const shipping = discountedSubtotal > 1000 ? 0 : (cartItems.length > 0 ? 99 : 0);
+    const taxes = discountedSubtotal * 0.05; // 5% taxes
+    const total = discountedSubtotal + (cartItems.length > 0 ? shipping + taxes : 0);
+
+    const handleApplyPromoCode = async (codeToApply?: string) => {
+        const targetCode = (codeToApply || promoCodeInput).trim().toUpperCase();
+        setPromoError('');
+
+        if (!targetCode) {
+            setPromoError('Please enter a promo code');
+            return;
+        }
+
+        try {
+            const userInfo = localStorage.getItem('userInfo');
+            const token = userInfo ? JSON.parse(userInfo).token : null;
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+
+            const res = await fetch(`${apiUrl}/promo/verify`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(token ? { Authorization: `Bearer ${token}` } : {})
+                },
+                body: JSON.stringify({ code: targetCode })
+            });
+
+            const data = await res.json();
+            if (!res.ok || !data.valid) {
+                const errMsg = data.message || 'Invalid or expired promo code';
+                setPromoError(errMsg);
+                toast.error(errMsg);
+                return;
+            }
+
+            const appliedObj = { code: data.code, discountPercent: data.discountPercent };
+            setAppliedPromo(appliedObj);
+            setPromoCodeInput(data.code);
+            toast.success(data.message || `Promo Code ${data.code} applied (${data.discountPercent}% OFF)!`);
+        } catch (err: any) {
+            console.error('Promo verification error:', err);
+            const errMsg = 'Invalid or expired promo code';
+            setPromoError(errMsg);
+            toast.error(errMsg);
+        }
+    };
 
     useEffect(() => {
         // Check Auth
@@ -72,6 +134,30 @@ export default function CartPage() {
                     }
                 })
                 .catch(err => console.error("Failed to load addresses", err));
+
+            try {
+                const parsed = JSON.parse(userInfo);
+                const userObj = parsed.user || parsed;
+                if (userObj.doctorPromoCode) {
+                    setDoctorPromo(userObj.doctorPromoCode);
+                } else {
+                    getDoctorStatus()
+                        .then(res => {
+                            if (res?.doctorRequest?.status === 'approved' && res?.doctorRequest?.promoCode) {
+                                setDoctorPromo(res.doctorRequest.promoCode);
+                            }
+                        })
+                        .catch(() => { });
+                }
+            } catch (e) {
+                getDoctorStatus()
+                    .then(res => {
+                        if (res?.doctorRequest?.status === 'approved' && res?.doctorRequest?.promoCode) {
+                            setDoctorPromo(res.doctorRequest.promoCode);
+                        }
+                    })
+                    .catch(() => { });
+            }
         }
 
         // Fetch recommendations
@@ -345,7 +431,32 @@ export default function CartPage() {
                                                     <span className="text-gray-600 flex items-center gap-1">Rewards Credit <svg onClick={() => setInfoModal('rewards')} className="w-3.5 h-3.5 sm:w-4.5 sm:h-4.5 text-gray-500 cursor-pointer hover:text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></span>
                                                     <span className="text-red-500 font-medium">₹0.00</span>
                                                 </div>
+                                                {appliedPromo && (
+                                                    <div className="flex justify-between text-[12px] sm:text-[14px]">
+                                                        <span className="text-green-700 font-bold flex items-center gap-1">Promo Discount ({appliedPromo.code})</span>
+                                                        <span className="text-green-700 font-bold">-₹{promoDiscountAmount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+                                                    </div>
+                                                )}
                                             </div>
+
+                                            {/* Promo Code Input Box */}
+                                            <PromoCodeSection
+                                                isLoggedIn={isLoggedIn}
+                                                doctorPromo={doctorPromo}
+                                                appliedPromo={appliedPromo}
+                                                promoCodeInput={promoCodeInput}
+                                                promoError={promoError}
+                                                onApplyPromo={handleApplyPromoCode}
+                                                onRemovePromo={() => {
+                                                    setAppliedPromo(null);
+                                                    setPromoCodeInput('');
+                                                    toast.success('Promo code removed');
+                                                }}
+                                                onInputChange={(val) => {
+                                                    setPromoCodeInput(val);
+                                                    setPromoError('');
+                                                }}
+                                            />
                                         </div>
 
                                         <div className="flex justify-between items-center mb-6">
@@ -448,6 +559,9 @@ export default function CartPage() {
                 onCancel={() => setIsRemoveAllModalOpen(false)}
                 onConfirm={() => {
                     clearCart();
+                    setAppliedPromo(null);
+                    setPromoCodeInput('');
+                    setPromoError('');
                     setIsRemoveAllModalOpen(false);
                 }}
                 cancelText="Cancel"
@@ -464,6 +578,9 @@ export default function CartPage() {
                     if (deleteTarget) {
                         if (deleteTarget.type === 'cart') {
                             removeFromCart(deleteTarget.item.product._id);
+                            setAppliedPromo(null);
+                            setPromoCodeInput('');
+                            setPromoError('');
                         } else if (deleteTarget.type === 'saved') {
                             removeFromSaved(deleteTarget.item);
                         } else if (deleteTarget.type === 'myList') {

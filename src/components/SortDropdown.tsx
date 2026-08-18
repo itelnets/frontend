@@ -41,7 +41,7 @@ export default function SortDropdown({ options, value, onChange, className = '',
             >
                 <span className="truncate">{value}</span>
                 <svg
-                    className={`h-3.5 w-3.5 sm:h-4 sm:w-4 text-gray-500 transition-transform duration-200 ml-2 flex-shrink-0 ${isOpen ? 'rotate-180' : ''}`}
+                    className={`h-3.5 w-3.5 text-gray-500 transition-transform duration-200 flex-shrink-0 ${isOpen ? 'rotate-180' : ''}`}
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -62,7 +62,7 @@ export default function SortDropdown({ options, value, onChange, className = '',
                                     key={option}
                                     type="button"
                                     onClick={() => handleSelect(option)}
-                                    className={`w-full text-left px-2 sm:px-3 py-1 sm:py-1.5 text-[12px] sm:text-sm transition-colors cursor-pointer block rounded-md mb-0.5 ${isSelected
+                                    className={`w-full text-left px-2 sm:px-2.5 py-1 sm:py-1.5 text-[12px] sm:text-sm transition-colors cursor-pointer block rounded-md mb-0.5 ${isSelected
                                         ? (isAdmin ? 'bg-green-600 text-white font-bold' : 'bg-[#458500] text-white font-bold')
                                         : 'text-gray-700 hover:bg-gray-100 font-medium'
                                         }`}

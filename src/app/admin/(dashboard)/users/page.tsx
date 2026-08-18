@@ -62,7 +62,7 @@ export default function AdminUsersPage() {
 
 
     return (
-        <div className="sm:p-4 w-full h-[calc(100vh-65px)] flex flex-col mx-auto font-sans">
+        <div className="sm:p-4 w-full h-full flex-1 min-h-0 flex flex-col mx-auto font-sans">
             {/* Mobile Controls */}
             <div className="sm:hidden px-2 py-2 bg-gray-50 flex items-center justify-between gap-2 shrink-0 border-b border-gray-200">
                 <div className="relative flex items-center flex-1">
@@ -147,7 +147,7 @@ export default function AdminUsersPage() {
             )}
 
             <div className="bg-transparent sm:bg-white sm:rounded-lg sm:shadow-sm sm:border border-gray-200 flex flex-col flex-1 min-h-0 overflow-hidden">
-                <div className="flex-1 overflow-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent px-2 py-2 sm:p-0 flex flex-col">
+                <div className="flex-1 overflow-y-auto overflow-x-auto px-2 py-2 sm:p-0 flex flex-col">
                     {users.length === 0 && !isLoading ? (
                         <div className="flex-1 flex flex-col items-center justify-center p-10 text-center text-gray-500 sm:bg-white sm:rounded-none">No users found.</div>
                     ) : (
@@ -222,14 +222,6 @@ export default function AdminUsersPage() {
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                                                     </svg>
                                                 </div>
-                                                {user.latitude && user.longitude && (
-                                                    <a href={`https://maps.google.com/?q=${user.latitude},${user.longitude}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center p-1.5 border border-transparent rounded-md text-green-700 bg-green-50 hover:bg-green-100 focus:outline-none transition-colors shadow-sm" title="View Location">
-                                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                        </svg>
-                                                    </a>
-                                                )}
                                             </div>
                                         </td>
 
@@ -261,14 +253,6 @@ export default function AdminUsersPage() {
                                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                                                         </svg>
                                                     </div>
-                                                    {user.latitude && user.longitude && (
-                                                        <a href={`https://maps.google.com/?q=${user.latitude},${user.longitude}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center p-1 rounded text-green-700 bg-green-50 hover:bg-green-100 transition-colors" title="View Location">
-                                                            <svg className="h-4.5 w-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                            </svg>
-                                                        </a>
-                                                    )}
                                                 </div>
                                             </div>
 

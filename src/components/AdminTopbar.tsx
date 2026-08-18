@@ -18,6 +18,8 @@ export default function AdminTopbar({ onMenuClick }: AdminTopbarProps) {
     let pageTitle = 'Products';
     if (pathname.includes('/banners')) {
         pageTitle = 'Banners';
+    } else if (pathname.includes('/doctors')) {
+        pageTitle = 'Doctor Verification';
     } else if (pathname.includes('/products/add')) {
         pageTitle = 'Add Product';
     } else if (pathname.includes('/products/edit')) {
@@ -48,7 +50,7 @@ export default function AdminTopbar({ onMenuClick }: AdminTopbarProps) {
                     <h1 className="text-base sm:text-xl font-bold text-gray-900 tracking-tight">{pageTitle}</h1>
                 </div>
 
-                {!pathname.includes('/products/add') && !pathname.includes('/products/edit') && !pathname.includes('/orders') && !pathname.includes('/users') && !pathname.includes('/banners') ? (
+                {!pathname.includes('/products/add') && !pathname.includes('/products/edit') && !pathname.includes('/orders') && !pathname.includes('/doctors') && !pathname.includes('/users') && !pathname.includes('/banners') ? (
                     <div className="flex items-center gap-2 sm:gap-2.5 flex-1 justify-end">
                         <div id="products-topbar-portal" className="contents"></div>
                         <Link href="/admin/products/add" className="bg-green-600 cursor-pointer hover:bg-green-700 text-white px-2 sm:px-4 py-1 sm:py-1.5 border border-transparent rounded-md text-[13px] sm:text-sm font-medium transition-colors shrink-0">
@@ -60,6 +62,11 @@ export default function AdminTopbar({ onMenuClick }: AdminTopbarProps) {
                     <div className="flex items-center gap-2 sm:gap-2.5 flex-1 justify-end">
                         <div id="orders-topbar-portal" className="contents"></div>
                         <div id="orders-pagination-portal" className="contents"></div>
+                    </div>
+                ) : pathname.includes('/doctors') ? (
+                    <div className="flex items-center gap-2 sm:gap-2.5 flex-1 justify-end">
+                        <div id="doctors-topbar-portal" className="contents"></div>
+                        <div id="doctors-pagination-portal" className="contents"></div>
                     </div>
                 ) : pathname.includes('/users') || pathname.includes('/banners') ? (
                     <div id="topbar-portal" className="contents"></div>

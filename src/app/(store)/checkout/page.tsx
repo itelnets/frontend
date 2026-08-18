@@ -9,6 +9,8 @@ import toast from 'react-hot-toast';
 import PaymentMethod from '@/components/PaymentMethod';
 import AddressSection from '@/components/AddressSection';
 import { useRazorpayPayment } from './useRazorpayPayment';
+import { getDoctorStatus } from '@/services/doctor';
+import PromoCodeSection from '@/components/PromoCodeSection';
 
 
 function CheckoutContent() {
@@ -44,6 +46,12 @@ function CheckoutContent() {
     const [userEmail, setUserEmail] = useState<string>('');
     const [userName, setUserName] = useState<string>('');
     const [infoModal, setInfoModal] = useState<string | null>(null);
+
+    // Promo Code States
+    const [promoCodeInput, setPromoCodeInput] = useState('');
+    const [appliedPromo, setAppliedPromo] = useState<{ code: string; discountPercent: number } | null>(null);
+    const [promoError, setPromoError] = useState('');
+    const [doctorPromo, setDoctorPromo] = useState<string | null>(null);
 
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -84,6 +92,31 @@ function CheckoutContent() {
         };
 
         loadAddresses();
+
+        try {
+            const parsed = JSON.parse(userInfo);
+            const userObj = parsed.user || parsed;
+            if (userObj.isDoctorVerified || userObj.doctorPromoCode) {
+                setDoctorPromo(userObj.doctorPromoCode);
+            } else {
+                getDoctorStatus()
+                    .then(res => {
+                        if (res?.doctorRequest?.status === 'approved') {
+                            setDoctorPromo(res.doctorRequest.promoCode);
+                        }
+                    })
+                    .catch(() => { });
+            }
+        } catch (e) {
+            getDoctorStatus()
+                .then(res => {
+                    if (res?.doctorRequest?.status === 'approved' && res?.doctorRequest?.promoCode) {
+                        setDoctorPromo(res.doctorRequest.promoCode);
+                    }
+                })
+                .catch(() => { });
+        }
+
     }, [router]);
 
     const handleGPayProcess = () => {
@@ -92,9 +125,54 @@ function CheckoutContent() {
 
     // Total calculation
     const subtotal = cartItems.reduce((acc, item) => acc + (item.product.discount > 0 ? Math.round(item.product.price * (1 - item.product.discount / 100)) : item.product.price) * item.quantity, 0);
-    const shipping = cartItems.length === 0 ? 0 : (subtotal > 1000 ? 0 : 99);
-    const taxes = subtotal * 0.05; // 5% taxes
-    const total = subtotal + (cartItems.length > 0 ? shipping + taxes : 0);
+    const promoDiscountAmount = appliedPromo ? Math.round(subtotal * (appliedPromo.discountPercent / 100)) : 0;
+    const discountedSubtotal = Math.max(0, subtotal - promoDiscountAmount);
+    const shipping = cartItems.length === 0 ? 0 : (discountedSubtotal > 1000 ? 0 : 99);
+    const taxes = discountedSubtotal * 0.05; // 5% taxes
+    const total = discountedSubtotal + (cartItems.length > 0 ? shipping + taxes : 0);
+
+    const handleApplyPromoCode = async (codeToApply?: string) => {
+        const targetCode = (codeToApply || promoCodeInput).trim().toUpperCase();
+        setPromoError('');
+
+        if (!targetCode) {
+            setPromoError('Please enter a promo code');
+            return;
+        }
+
+        try {
+            const userInfo = localStorage.getItem('userInfo');
+            const token = userInfo ? JSON.parse(userInfo).token : null;
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+
+            const res = await fetch(`${apiUrl}/promo/verify`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(token ? { Authorization: `Bearer ${token}` } : {})
+                },
+                body: JSON.stringify({ code: targetCode })
+            });
+
+            const data = await res.json();
+            if (!res.ok || !data.valid) {
+                const errMsg = data.message || 'Invalid or expired promo code';
+                setPromoError(errMsg);
+                toast.error(errMsg);
+                return;
+            }
+
+            const appliedObj = { code: data.code, discountPercent: data.discountPercent };
+            setAppliedPromo(appliedObj);
+            setPromoCodeInput(data.code);
+            toast.success(data.message || `Promo Code ${data.code} applied (${data.discountPercent}% OFF)!`);
+        } catch (err: any) {
+            console.error('Promo verification error:', err);
+            const errMsg = 'Invalid or expired promo code';
+            setPromoError(errMsg);
+            toast.error(errMsg);
+        }
+    };
 
     const { handleRazorpayPayment: processRazorpayPayment } = useRazorpayPayment();
 
@@ -379,6 +457,34 @@ function CheckoutContent() {
                                 <span className="text-gray-600 flex items-center gap-1">Duties & Taxes <svg onClick={() => setInfoModal('duties')} className="w-3.5 h-3.5 sm:w-4.5 sm:h-4.5 text-gray-500 cursor-pointer hover:text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></span>
                                 <span className="text-gray-900">₹{taxes.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
                             </div>
+                            {appliedPromo && (
+                                <div className="flex justify-between text-sm sm:text-[15px]">
+                                    <span className="text-green-700 font-bold">Promo Discount ({appliedPromo.code})</span>
+                                    <span className="text-green-700 font-bold">-₹{promoDiscountAmount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Promo Code Input Box */}
+                        <div className="mb-4">
+                            <PromoCodeSection
+                                isLoggedIn={true}
+                                doctorPromo={doctorPromo}
+                                appliedPromo={appliedPromo}
+                                promoCodeInput={promoCodeInput}
+                                promoError={promoError}
+                                onApplyPromo={handleApplyPromoCode}
+                                onRemovePromo={() => {
+                                    setAppliedPromo(null);
+                                    setPromoCodeInput('');
+                                    sessionStorage.removeItem('appliedPromo');
+                                    toast.success('Promo code removed');
+                                }}
+                                onInputChange={(val) => {
+                                    setPromoCodeInput(val);
+                                    setPromoError('');
+                                }}
+                            />
                         </div>
 
                         <div className="flex justify-between items-center mb-4 sm:mb-6 mt-2">

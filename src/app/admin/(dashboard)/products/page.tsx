@@ -194,7 +194,7 @@ export default function AdminDashboard() {
 
 
     return (
-        <div className="sm:p-4 w-full h-[calc(100vh-65px)] flex flex-col mx-auto font-sans">
+        <div className="sm:p-4 w-full h-full flex-1 min-h-0 flex flex-col mx-auto font-sans">
             {/* Mobile & Tablet Controls (Below Topbar for screens < 1024px) */}
             <div className="lg:hidden px-2 sm:px-0 pt-2 sm:pt-0 pb-2 bg-gray-50 flex items-center justify-between gap-2 shrink-0 border-b border-gray-200 shadow-2xs">
                 <div className="relative flex items-center flex-1">
@@ -229,7 +229,7 @@ export default function AdminDashboard() {
             </div>
 
             <div className="bg-transparent sm:bg-white sm:rounded-lg sm:shadow-sm sm:border border-gray-200 flex flex-col flex-1 min-h-0 overflow-hidden">
-                <div className="flex-1 overflow-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent px-2 py-2 sm:p-0 flex flex-col">
+                <div className="flex-1 overflow-y-auto overflow-x-auto px-2 py-2 sm:p-0 flex flex-col">
                     {paginatedProducts.length === 0 && !isLoading ? (
                         <div className="flex-1 flex flex-col items-center justify-center p-10 text-center text-gray-500 sm:bg-white sm:rounded-none">No products found.</div>
                     ) : (
@@ -416,18 +416,26 @@ export default function AdminDashboard() {
             {/* Image Viewer Modal */}
             {viewImagesProduct && (
                 <div className="fixed inset-0 bg-slate-900/60 flex items-center justify-center z-[60] p-4 backdrop-blur-sm transition-all duration-300" onClick={() => setViewImagesProduct(null)}>
-                    <div className="bg-white rounded-lg shadow-2xl max-w-4xl w-full p-3 sm:p-6 flex flex-col gap-1 sm:gap-4 animate-in fade-in zoom-in duration-300" onClick={(e) => e.stopPropagation()}>
-                        <div className="flex justify-between items-start border-b border-gray-100 pb-3 gap-2">
-                            <h3 className="text-[12px] sm:text-[16px] font-bold text-gray-800 line-clamp-2">{viewImagesProduct.name}</h3>
+                    <div className="bg-white rounded-lg shadow-2xl max-w-5xl w-full p-4 sm:p-6 flex flex-col gap-2 sm:gap-4 animate-in fade-in zoom-in duration-300 max-h-[90vh]" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex justify-between items-center border-b border-gray-100 pb-3 gap-2">
+                            <h3 className="text-sm sm:text-lg font-bold text-gray-800 line-clamp-1">{viewImagesProduct.name}</h3>
+                            <button
+                                onClick={() => setViewImagesProduct(null)}
+                                className="p-1 rounded-full text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer"
+                            >
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
                         </div>
                         {viewImagesProduct.images && viewImagesProduct.images.length > 0 ? (
-                            <div className="relative group flex items-center justify-center w-full">
+                            <div className="relative group flex items-center justify-center w-full my-auto">
                                 {viewImagesProduct.images.length > 1 && (
                                     <button
                                         onClick={() => scrollByOneImage('left')}
-                                        className="absolute left-[-10px] sm:left-[-14px] z-10 p-1 sm:p-1.5 rounded-full bg-white hover:bg-gray-100 shadow-md text-gray-800 border border-gray-200 cursor-pointer transition-colors"
+                                        className="absolute left-[-10px] sm:left-[-14px] z-10 p-2 rounded-full bg-white hover:bg-gray-100 shadow-md text-gray-800 border border-gray-200 cursor-pointer transition-colors"
                                     >
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                                         </svg>
                                     </button>
@@ -435,10 +443,10 @@ export default function AdminDashboard() {
 
                                 <div
                                     ref={imageScrollRef}
-                                    className="flex overflow-x-auto gap-4 items-center min-h-[11rem] sm:min-h-[12rem] w-full [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+                                    className="flex overflow-x-auto gap-4 items-center justify-center min-h-[18rem] sm:min-h-[26rem] lg:min-h-[30rem] w-full [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden py-2"
                                 >
                                     {viewImagesProduct.images.map((img, idx) => (
-                                        <div key={idx} className="flex-shrink-0 h-40 w-40 sm:h-64 sm:w-64 bg-gray-50 rounded-md overflow-hidden border border-gray-200 shadow-sm flex items-center justify-center">
+                                        <div key={idx} className="flex-shrink-0 h-64 w-64 sm:h-[400px] sm:w-[400px] lg:h-[480px] lg:w-[480px] bg-gray-50 rounded-lg overflow-hidden border border-gray-200 shadow-sm flex items-center justify-center">
                                             <img
                                                 className="h-full w-full object-contain p-2"
                                                 src={img.startsWith('http') ? img : `${process.env.NEXT_PUBLIC_API_URL}/upload/file/${img}`}
@@ -452,9 +460,9 @@ export default function AdminDashboard() {
                                 {viewImagesProduct.images.length > 1 && (
                                     <button
                                         onClick={() => scrollByOneImage('right')}
-                                        className="absolute right-[-10px] sm:right-[-14px] z-10 p-1 sm:p-1.5 rounded-full bg-white hover:bg-gray-100 shadow-md text-gray-800 border border-gray-200 cursor-pointer transition-colors"
+                                        className="absolute right-[-10px] sm:right-[-14px] z-10 p-2 rounded-full bg-white hover:bg-gray-100 shadow-md text-gray-800 border border-gray-200 cursor-pointer transition-colors"
                                     >
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                                         </svg>
                                     </button>

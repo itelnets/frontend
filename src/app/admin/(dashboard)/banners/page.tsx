@@ -7,7 +7,6 @@ import { getBanners, createBanner, deleteBanner, updateBanner, BannerItem, reord
 import toast from 'react-hot-toast';
 import ConfirmModal from '@/components/ConfirmModal';
 import Spinner from '@/components/Spinner';
-
 import { formatDate } from '@/utils/formatDate';
 
 export default function BannersPage() {
@@ -254,7 +253,7 @@ export default function BannersPage() {
 
 
     return (
-        <div className="p-3 sm:p-6 max-w-6xl mx-auto select-none">
+        <div className="px-2 py-2.5 sm:p-6 max-w-6xl mx-auto select-none w-full">
             {/* Compact, Space-Optimized Banner upload form */}
             <form onSubmit={handleSubmit} className="bg-white border border-gray-200 rounded-lg p-3 sm:p-5 mb-3 sm:mb-8 shadow-xs space-y-2.5 sm:space-y-3">
                 {/* Info Badge Row (above drag & drop and upload button row, right-aligned) */}

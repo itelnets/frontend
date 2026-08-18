@@ -84,7 +84,7 @@ function AdminOrdersContent() {
     };
 
     return (
-        <div className="sm:p-4 w-full h-[calc(100vh-65px)] flex flex-col mx-auto font-sans">
+        <div className="sm:p-4 w-full h-full flex-1 min-h-0 flex flex-col mx-auto font-sans">
             {/* Mobile & Tablet Controls (Below Topbar for screens < 1024px) */}
             <div className="lg:hidden px-2 sm:px-0 pt-2 sm:pt-0 pb-2 bg-gray-50 flex items-center justify-between gap-2 shrink-0 border-b border-gray-200 shadow-2xs">
                 <div className="relative flex items-center flex-1">
@@ -119,7 +119,7 @@ function AdminOrdersContent() {
             </div>
 
             <div className="bg-transparent sm:bg-white sm:rounded-lg sm:shadow-sm sm:border border-gray-200 flex flex-col flex-1 min-h-0 overflow-hidden">
-                <div className="flex-1 overflow-y-scroll overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent px-2 py-2 sm:p-0 flex flex-col">
+                <div className="flex-1 overflow-y-auto overflow-x-auto px-2 py-2 sm:p-0 flex flex-col">
                     {orders.length === 0 && !isLoading ? (
                         <div className="flex-1 flex flex-col items-center justify-center p-10 text-center text-gray-500 sm:bg-white sm:rounded-none">No orders found.</div>
                     ) : (

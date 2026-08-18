@@ -115,6 +115,7 @@ export default function LoginPage() {
             }
 
             const completeLogin = () => {
+                sessionStorage.clear();
                 localStorage.setItem('userInfo', JSON.stringify(data));
                 document.cookie = "isLoggedIn=true; path=/; max-age=2592000"; // 30 days
                 window.dispatchEvent(new Event('userInfoUpdated'));
@@ -122,37 +123,7 @@ export default function LoginPage() {
                 window.location.href = data.role === 'admin' ? '/admin/users' : '/';
             };
 
-            if (data.role === 'admin') {
-                completeLogin();
-            } else {
-                if (navigator.geolocation) {
-                    navigator.geolocation.getCurrentPosition(
-                        (position) => {
-                            api.put('/users/profile', {
-                                latitude: position.coords.latitude,
-                                longitude: position.coords.longitude
-                            })
-                                .catch(e => console.error('Failed to save location', e))
-                                .finally(() => {
-                                    completeLogin();
-                                });
-                        },
-                        (error) => {
-                            if (error.code === 1) { // PERMISSION_DENIED
-                                toast.error('Location access is required to log in');
-                                delete api.defaults.headers.common['Authorization'];
-                                setIsLoading(false);
-                            } else {
-                                console.warn('Location retrieval timed out or failed (non-fatal)', error);
-                                completeLogin();
-                            }
-                        },
-                        { maximumAge: 8000, timeout: 3000, enableHighAccuracy: false }
-                    );
-                } else {
-                    completeLogin();
-                }
-            }
+            completeLogin();
         } catch (err: any) {
             const errorMessage = err.response?.data?.message || 'Login failed';
 
