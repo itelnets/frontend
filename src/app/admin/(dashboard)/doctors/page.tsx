@@ -241,15 +241,20 @@ export default function AdminDoctorRequestsPage() {
                                                     {/* Desktop Verification Toggle Switch (h-5 w-9) */}
                                                     <button
                                                         type="button"
+                                                        disabled={req.status === 'rejected'}
                                                         onClick={() => {
+                                                            if (req.status === 'rejected') return;
                                                             if (req.status === 'approved') {
                                                                 setRejectModalItem(req);
                                                             } else {
                                                                 handleOpenApproveModal(req);
                                                             }
                                                         }}
-                                                        className={`cursor-pointer relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none ${req.status === 'approved' ? 'bg-green-600' : 'bg-gray-300'}`}
-                                                        title={req.status === 'approved' ? 'Verified (Click to unverify)' : 'Unverified (Click to verify)'}
+                                                        className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none ${req.status === 'rejected'
+                                                                ? 'cursor-not-allowed opacity-50 bg-gray-300'
+                                                                : 'cursor-pointer ' + (req.status === 'approved' ? 'bg-green-600' : 'bg-gray-300')
+                                                            }`}
+                                                        title={req.status === 'rejected' ? 'Rejected (Cannot be enabled)' : req.status === 'approved' ? 'Verified (Click to unverify)' : 'Unverified (Click to verify)'}
                                                     >
                                                         <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform ${req.status === 'approved' ? 'translate-x-4.5' : 'translate-x-0.5'}`} />
                                                     </button>
@@ -296,15 +301,20 @@ export default function AdminDoctorRequestsPage() {
                                                     {/* Mobile Verification Toggle Switch (h-4 w-7) */}
                                                     <button
                                                         type="button"
+                                                        disabled={req.status === 'rejected'}
                                                         onClick={() => {
+                                                            if (req.status === 'rejected') return;
                                                             if (req.status === 'approved') {
                                                                 setRejectModalItem(req);
                                                             } else {
                                                                 handleOpenApproveModal(req);
                                                             }
                                                         }}
-                                                        className={`cursor-pointer relative inline-flex h-4 w-7 items-center rounded-full transition-colors focus:outline-none ${req.status === 'approved' ? 'bg-green-600' : 'bg-gray-300'}`}
-                                                        title={req.status === 'approved' ? 'Verified (Click to unverify)' : 'Unverified (Click to verify)'}
+                                                        className={`relative inline-flex h-4 w-7 items-center rounded-full transition-colors focus:outline-none ${req.status === 'rejected'
+                                                                ? 'cursor-not-allowed opacity-50 bg-gray-300'
+                                                                : 'cursor-pointer ' + (req.status === 'approved' ? 'bg-green-600' : 'bg-gray-300')
+                                                            }`}
+                                                        title={req.status === 'rejected' ? 'Rejected (Cannot be enabled)' : req.status === 'approved' ? 'Verified (Click to unverify)' : 'Unverified (Click to verify)'}
                                                     >
                                                         <span className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${req.status === 'approved' ? 'translate-x-3.5' : 'translate-x-0.5'}`} />
                                                     </button>

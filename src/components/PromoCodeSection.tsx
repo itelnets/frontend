@@ -31,8 +31,6 @@ export default function PromoCodeSection({
                 Promo Code
             </label>
 
-
-
             {appliedPromo ? (
                 <div className="bg-green-50 border border-green-300 rounded-md p-2.5 flex items-center justify-between shadow-xs">
                     <div className="flex items-center gap-2">
@@ -63,7 +61,7 @@ export default function PromoCodeSection({
                             type="button"
                             disabled={promoCodeInput.trim().length !== 8}
                             onClick={() => onApplyPromo()}
-                            className="bg-[#458500] hover:bg-[#366800] text-white font-bold text-xs sm:text-sm px-4 sm:px-5 h-[34px] sm:h-[40px] rounded-md transition-colors cursor-pointer shrink-0 flex items-center justify-center shadow-xs disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#458500]"
+                            className="bg-[#458500] hover:bg-[#366800] text-[#FFFFFF] font-bold text-xs sm:text-sm px-4 sm:px-5 h-[34px] sm:h-[40px] rounded-md transition-colors cursor-pointer shrink-0 flex items-center justify-center shadow-xs disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#458500]"
                         >
                             Apply
                         </button>
