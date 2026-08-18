@@ -6,8 +6,9 @@ import Link from 'next/link';
 import { useCart } from '@/context/CartContext';
 import ImageZoom from '@/components/ImageZoom';
 import CustomerReviews from '@/components/CustomerReviews';
-import { getProductById, getProducts } from '@/services/product';
+import { getProductById } from '@/services/product';
 import AddToListsModal from '@/components/AddToListsModal';
+import { formatExpiryDate } from '@/utils/formatDate';
 
 export default function ProductDetailsPage() {
     const params = useParams();
@@ -71,6 +72,7 @@ export default function ProductDetailsPage() {
         otherIngredients: product?.otherIngredients || null,
         warnings: product?.warnings || null,
         disclaimer: product?.disclaimer || null,
+        expiredOn: formatExpiryDate(product?.expiredOn),
         _id: product?._id,
         weight: product?.weight,
         weightUnit: product?.weightUnit,
@@ -78,8 +80,6 @@ export default function ProductDetailsPage() {
 
     const originalPrice = displayProduct.price;
     const currentPrice = displayProduct.discount > 0 ? Math.round(originalPrice * (1 - displayProduct.discount / 100)) : originalPrice;
-
-
 
     const renderReviewsPopover = () => {
         const reviews = product?.reviews || [];
@@ -379,10 +379,18 @@ export default function ProductDetailsPage() {
                                     <span className="text-[#458500] mr-3">:</span>
                                     <span className="text-gray-900">
                                         {spec.value}
-                                        {spec.key === 'Weight (gm)' && ' gm'}
                                     </span>
                                 </div>
                             ))}
+                            {displayProduct.expiredOn && !displayProduct.specifications.some((s: any) => s.key?.toLowerCase().includes('expiry')) && (
+                                <div className="flex text-[13px] lg:text-sm">
+                                    <span className="text-[#458500] w-[140px] lg:w-[160px] shrink-0 font-bold">Product Expiry</span>
+                                    <span className="text-[#458500] mr-3">:</span>
+                                    <span className="text-gray-900">
+                                        {displayProduct.expiredOn}
+                                    </span>
+                                </div>
+                            )}
                         </div>
                     </div>
                 )}
@@ -456,6 +464,9 @@ export default function ProductDetailsPage() {
                                 {displayProduct.specifications.map((spec: any, idx: number) => (
                                     <li key={idx}>{spec.key}: {spec.value}</li>
                                 ))}
+                                {displayProduct.expiredOn && !displayProduct.specifications.some((s: any) => s.key?.toLowerCase().includes('expiry')) && (
+                                    <li>Product Expiry: {displayProduct.expiredOn}</li>
+                                )}
                             </ul>
                         </>
                     )}

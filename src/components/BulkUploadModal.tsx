@@ -100,7 +100,11 @@ export default function BulkUploadModal() {
                     'HSN Code': 'hsn',
                     'Batch No.': 'batchNo',
                     'Expired On': 'expiredOn',
-                    'Shipping Weight (gm)': 'Weight (gm)'
+                    'Shipping Weight (gm)': 'Pack of',
+                    'Weight (gm)': 'Pack of',
+                    'Product Quantity (No)': 'QTY',
+                    'Product Code (SKU)': 'SKU',
+                    'Varient': 'Variant'
                 };
 
                 for (let i = 0; i < data.length; i++) {

@@ -23,7 +23,7 @@ export default async function Home() {
     return (
         <div className="flex flex-col min-h-screen bg-white">
             {isMaintenance && <TriggerMaintenance />}
-            <main className="w-full flex-1 mb-20">
+            <main className="w-full flex-1 mb-2 sm:mb-6">
                 {/* Hero Banner Section */}
                 <div className="max-w-[1400px] mx-auto p-1 sm:p-4 mt-0 sm:mt-2">
                     <HeroCarousel />
@@ -37,7 +37,7 @@ export default async function Home() {
 
                     <div className="relative">
                         {products.length > 0 ? (
-                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 sm:gap-4 pb-4">
+                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 sm:gap-4">
                                 {products.map((product: any) => (
                                     <ProductCard key={product._id} product={product} />
                                 ))}

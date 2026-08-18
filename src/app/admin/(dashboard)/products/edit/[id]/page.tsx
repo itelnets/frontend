@@ -140,23 +140,34 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
             }));
             setImages(existingMapped);
             const defaultSpecs = [
-                { key: 'Weight (gm)', value: '' },
-                { key: 'Product Quantity (No)', value: '' },
-                { key: 'Product Code (SKU)', value: '' },
+                { key: 'Pack of', value: '' },
+                { key: 'QTY', value: '' },
+                { key: 'SKU', value: '' },
                 { key: 'Dimensions (l x b h)', value: '' },
-                { key: 'Form', value: '' }
+                { key: 'Form', value: '' },
+                { key: 'Treatment', value: '' },
+                { key: 'Benefits', value: '' },
+                { key: 'Variant', value: '' }
             ];
 
             const fetchedSpecs = data.specifications || [];
 
+            const normalizeKey = (key: string) => {
+                if (key === 'Weight (gm)') return 'Pack of';
+                if (key === 'Product Quantity (No)') return 'QTY';
+                if (key === 'Product Code (SKU)') return 'SKU';
+                return key;
+            };
+
             const mergedSpecs = defaultSpecs.map(defaultSpec => {
-                const found = fetchedSpecs.find((s: any) => s.key === defaultSpec.key);
-                return found ? found : defaultSpec;
+                const found = fetchedSpecs.find((s: any) => normalizeKey(s.key) === defaultSpec.key);
+                return found ? { key: defaultSpec.key, value: found.value } : defaultSpec;
             });
 
             fetchedSpecs.forEach((spec: any) => {
-                if (!defaultSpecs.find(ds => ds.key === spec.key)) {
-                    mergedSpecs.push(spec);
+                const normKey = normalizeKey(spec.key);
+                if (!defaultSpecs.find(ds => ds.key === normKey)) {
+                    mergedSpecs.push({ key: normKey, value: spec.value });
                 }
             });
 
@@ -592,8 +603,8 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                         <div className="bg-green-50/30 rounded-md border border-green-50/50 p-2 sm:p-3">
                             <label className="block text-sm font-semibold text-gray-800 mb-2">Specifications <span className="text-red-500">*</span></label>
                             {specifications.map((spec, index) => (
-                                <div key={index} className={`relative flex flex-col sm:flex-row gap-1 sm:gap-3 p-2 rounded-md border ${index < 5 ? 'bg-gray-50 border-gray-200' : 'bg-white/60 border-gray-100 pr-11 sm:pr-2'}`}>
-                                    {index < 5 ? (
+                                <div key={index} className={`relative flex flex-col sm:flex-row gap-1 sm:gap-3 p-2 rounded-md border ${index < 8 ? 'bg-gray-50 border-gray-200' : 'bg-white/60 border-gray-100 pr-11 sm:pr-2'}`}>
+                                    {index < 8 ? (
                                         <div className="w-full sm:w-1/2 px-3 py-2 text-sm bg-white border border-gray-200 rounded-md text-gray-700 flex items-center font-medium">{spec.key}</div>
                                     ) : (
                                         <input
@@ -616,11 +627,14 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                                         <input
                                             type="text"
                                             placeholder={
-                                                index === 0 ? "e.g. 200" :
-                                                    index === 1 ? "e.g. 100" :
-                                                        index === 2 ? "e.g. MLI-00952" :
-                                                            index === 4 ? "e.g. Tablet,Capsule,Syrup,Oil etc." :
-                                                                "1 capsule daily after meals"
+                                                spec.key === 'Pack of' ? "e.g. 1 Pack" :
+                                                    spec.key === 'QTY' ? "e.g. 1" :
+                                                        spec.key === 'SKU' ? "e.g. MLI-00952" :
+                                                            spec.key === 'Form' ? "e.g. Tablet, Capsule, Syrup, Oil etc." :
+                                                                spec.key === 'Treatment' ? "e.g. Immunity, Hair Care" :
+                                                                    spec.key === 'Benefits' ? "e.g. Energy Boost, Wellness" :
+                                                                        spec.key === 'Variant' || spec.key === 'Varient' ? "e.g. 500gm, Red, Small" :
+                                                                            "1 capsule daily after meals"
                                             }
                                             value={spec.value}
                                             onChange={(e) => handleSpecificationChange(index, 'value', e.target.value)}
@@ -628,7 +642,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                                         />
                                     )}
                                     {/* Delete button: top-right corner on mobile, inline on sm+ */}
-                                    {index >= 5 && (
+                                    {index >= 8 && (
                                         <button
                                             type="button"
                                             onClick={() => handleRemoveSpecification(index)}

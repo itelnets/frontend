@@ -273,7 +273,7 @@ const Navbar = () => {
                                 <Link href="/products" className="hover:text-[#458500] text-gray-400">Health Topics</Link>
                             </div>
                             <div className="flex items-center gap-6 ml-8 pr-4">
-                                <Link href="/products" className="text-red-600 hover:text-red-700">Deals</Link>
+                                <Link href="/products" className="text-red-600 hover:text-red-700">Dr. Corner</Link>
                                 <Link href="/products" className="hover:text-[#458500]">Best Sellers</Link>
                                 <Link href="/products" className="hover:text-[#458500]">BOGO</Link>
                                 <Link href="/products" className="hover:text-[#458500]">New</Link>
@@ -371,7 +371,7 @@ const Navbar = () => {
                                             <span className="text-base font-medium text-gray-900">Brands A-Z</span>
                                             <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
                                         </Link>
-                                        <Link href="/products" onClick={() => setIsMobileMenuOpen(false)} className="block px-4 py-3 hover:bg-gray-50 text-base font-medium text-red-600">Deals</Link>
+                                        <Link href="/products" onClick={() => setIsMobileMenuOpen(false)} className="block px-4 py-3 hover:bg-gray-50 text-base font-medium text-red-600">Dr. Corner</Link>
                                         <Link href="/products" onClick={() => setIsMobileMenuOpen(false)} className="block px-3 sm:px-4 py-2.5 sm:py-3 hover:bg-gray-50 text-base font-medium text-gray-900">Best Sellers</Link>
                                         <Link href="/products" onClick={() => setIsMobileMenuOpen(false)} className="block px-3 sm:px-4 py-2.5 sm:py-3 hover:bg-gray-50 text-base font-medium text-gray-900">New</Link>
                                         <Link href="/products" onClick={() => setIsMobileMenuOpen(false)} className="block px-3 sm:px-4 py-2.5 sm:py-3 hover:bg-gray-50 text-base font-medium text-gray-900">Try</Link>

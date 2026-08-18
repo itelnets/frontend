@@ -168,12 +168,12 @@ export default function AdminDashboard() {
             await deleteProduct(productToDelete);
             toast.success('Product deleted successfully');
             setProducts(products.filter(p => p._id !== productToDelete));
-            setProductToDelete(null);
-        } catch (error) {
-            console.error('Failed to delete product', error);
-            toast.error('Failed to delete product');
+        } catch (error: any) {
+            const errorMessage = error?.response?.data?.message || 'Failed to delete product';
+            toast.error(errorMessage);
         } finally {
             setIsDeleting(false);
+            setProductToDelete(null);
         }
     };
     const scrollByOneImage = (direction: 'left' | 'right') => {
