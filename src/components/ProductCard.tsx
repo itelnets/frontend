@@ -89,7 +89,7 @@ export default function ProductCard({ product, showHeart = false }: ProductCardP
                 confirmText="Remove"
             />
 
-            <div className="w-full h-[170px] sm:h-[200px] lg:h-[220px] shrink-0 flex items-center justify-center relative bg-white border-b border-gray-100 p-2 sm:p-4">
+            <div className="w-full h-[170px] sm:h-[200px] lg:h-[220px] shrink-0 flex items-center justify-center relative bg-white border-b border-gray-100 p-1">
                 {product.images && product.images.length > 0 ? (
                     <Image
                         src={product.images[0].startsWith('http') ? product.images[0] : `${process.env.NEXT_PUBLIC_API_URL}/upload/file/${product.images[0]}`}

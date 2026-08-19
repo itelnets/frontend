@@ -540,8 +540,8 @@ export default function ProductDetailsPage() {
 
                 {/* --- DESKTOP LAYOUT (hidden on mobile) --- */}
                 <div className="hidden lg:flex flex-row gap-10">
-                    <div className="w-[35%] relative z-50">
-                        <div className="sticky top-32 z-50">
+                    <div className="w-[35%] relative z-[40]">
+                        <div className="lg:sticky lg:top-[145px] z-[40]">
                             {renderImageGallery()}
                         </div>
                     </div>
@@ -550,7 +550,7 @@ export default function ProductDetailsPage() {
                         {renderProductDetailsBottom()}
                     </div>
                     <div className="w-[25%] relative z-10">
-                        <div className="sticky top-28 z-10">
+                        <div className="lg:sticky lg:top-[145px] space-y-4 z-10">
                             {renderCartBox()}
                         </div>
                     </div>

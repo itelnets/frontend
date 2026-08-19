@@ -8,7 +8,6 @@ import Spinner from './Spinner';
 import SearchBar from './SearchBar';
 import toast from 'react-hot-toast';
 import api from '@/services/api';
-import { getBannerSlug } from './HeroCarousel';
 
 const Navbar = () => {
     const router = useRouter();
