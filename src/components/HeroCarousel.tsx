@@ -138,7 +138,7 @@ export default function HeroCarousel() {
 
     return (
         <div
-            className="w-full relative select-none mb-2 sm:mb-10 md:mb-16"
+            className="w-full relative select-none mb-2 sm:mb-8 md:mb-10"
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
         >
@@ -220,7 +220,7 @@ export default function HeroCarousel() {
             </div>
 
             {/* Bottom Overlay Tabs - Centered, half on banner and half off banner */}
-            <div className="hidden md:flex absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 bg-[#f5f5f5] rounded-2xl shadow-lg border border-gray-200/80 p-1 z-30 items-stretch gap-1 max-w-[95%] overflow-x-auto scrollbar-none">
+            <div className="hidden md:flex absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 bg-[#f5f5f5] rounded-2xl shadow-lg border border-gray-200/80 p-1 z-30 items-stretch gap-1 w-[98%] lg:w-auto max-w-[1360px] lg:max-w-[95%] overflow-x-auto scrollbar-none">
                 {activeSlides.map((item, idx) => {
                     const isActive = idx === currentSlide;
                     return (
@@ -229,17 +229,17 @@ export default function HeroCarousel() {
                             href={`/${getBannerSlug(item.tabTitle)}`}
                             onMouseEnter={() => handleTabHover(idx)}
                             onClick={() => handleTabClick(idx)}
-                            className={`flex flex-col justify-center py-2.5 px-5 text-center cursor-pointer transition-all duration-300 rounded-xl whitespace-nowrap ${isActive
+                            className={`flex-1 lg:flex-none min-w-0 flex flex-col justify-center py-1.5 lg:py-2.5 px-1.5 lg:px-5 text-center cursor-pointer transition-all duration-300 rounded-xl ${isActive
                                 ? 'bg-white border border-gray-300 shadow-xs'
                                 : 'bg-transparent border border-transparent hover:bg-white/40'
                                 }`}
                         >
-                            <div className={`text-[11px] lg:text-[12px] font-semibold leading-snug whitespace-nowrap ${isActive ? 'text-gray-900 font-bold' : 'text-gray-600'
+                            <div className={`text-[10px] lg:text-[12px] font-semibold leading-tight lg:leading-snug truncate lg:truncate-none lg:whitespace-nowrap ${isActive ? 'text-gray-900 font-bold' : 'text-gray-600'
                                 }`}>
                                 {item.tabTitle}
                             </div>
                             {item.tabSubtitle ? (
-                                <div className={`text-[9px] lg:text-[10px] mt-0.5 font-bold ${isActive ? 'text-[#458500]' : 'text-gray-500'
+                                <div className={`text-[8.5px] lg:text-[10px] mt-0.5 font-bold truncate lg:truncate-none ${isActive ? 'text-[#458500]' : 'text-gray-500'
                                     }`}>
                                     {item.tabSubtitle}
                                 </div>

@@ -18,10 +18,15 @@ interface Product {
     discount: number;
     images: string[];
     type?: string;
+    inStock?: string | boolean;
     isActive?: boolean;
     createdAt?: string;
     updatedAt?: string;
 }
+
+const isProductInStock = (inStockVal?: string | boolean) => {
+    return inStockVal !== 'No';
+};
 
 export default function AdminDashboard() {
     const router = useRouter();
@@ -32,6 +37,7 @@ export default function AdminDashboard() {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [typeFilter, setTypeFilter] = useState('All Types');
+    const [stockFilter, setStockFilter] = useState('All Stock');
     const itemsPerPage = 20;
 
     const dynamicTypeOptions = Array.from(new Set([
@@ -99,7 +105,7 @@ export default function AdminDashboard() {
 
     useEffect(() => {
         setCurrentPage(1);
-    }, [searchQuery, typeFilter]);
+    }, [searchQuery, typeFilter, stockFilter]);
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -115,18 +121,23 @@ export default function AdminDashboard() {
     const fetchProducts = async (
         page: number = currentPage,
         query: string = searchQuery,
-        typeVal: string = typeFilter
+        typeVal: string = typeFilter,
+        stockVal: string = stockFilter
     ) => {
         setIsLoading(true);
         try {
             const typeParam = typeVal === 'All Types' ? '' : typeVal;
+            let inStockParam: string | undefined = undefined;
+            if (stockVal === 'In Stock') inStockParam = 'true';
+            if (stockVal === 'Out of Stock') inStockParam = 'false';
 
             const { data } = await getProducts({
                 search: query,
                 page: page,
                 limit: itemsPerPage,
                 isActive: 'all',
-                type: typeParam
+                type: typeParam,
+                inStock: inStockParam
             });
 
             if (data && Array.isArray(data.products)) {
@@ -152,11 +163,11 @@ export default function AdminDashboard() {
                 return;
             }
 
-            fetchProducts(currentPage, searchQuery, typeFilter);
+            fetchProducts(currentPage, searchQuery, typeFilter, stockFilter);
         };
 
         checkAdmin();
-    }, [router, currentPage, searchQuery, typeFilter]);
+    }, [router, currentPage, searchQuery, typeFilter, stockFilter]);
 
     const toggleProductStatus = async (productId: string, currentStatus: boolean) => {
         try {
@@ -208,8 +219,33 @@ export default function AdminDashboard() {
     return (
         <div className="sm:p-4 w-full h-full flex-1 min-h-0 flex flex-col mx-auto font-sans">
             {/* Mobile & Tablet Controls (Below Topbar for screens < 1024px) */}
-            <div className="lg:hidden px-2 sm:px-0 pt-2 sm:pt-0 pb-2 bg-gray-50 flex items-center justify-between gap-2 shrink-0 border-b border-gray-200 shadow-2xs">
-                <div className="relative flex items-center flex-1">
+            <div className="lg:hidden px-2 sm:px-0 pt-2 sm:pt-0 pb-2.5 bg-gray-50 flex flex-col gap-2 shrink-0 border-b border-gray-200 shadow-2xs">
+                {/* Row 1: Dropdown filters */}
+                <div className="flex items-center justify-end gap-2 w-full">
+                    <SortDropdown
+                        isAdmin={true}
+                        options={['All Stock', 'In Stock', 'Out of Stock']}
+                        value={stockFilter}
+                        onChange={(val) => setStockFilter(val)}
+                        className="z-30 w-[110px] sm:w-[130px]"
+                        buttonClassName="h-[32px] sm:h-[36px] text-xs bg-white border border-gray-300 rounded-md px-2.5"
+                        menuClassName="w-full"
+                        listClassName="max-h-[200px]"
+                    />
+                    <SortDropdown
+                        isAdmin={true}
+                        options={dynamicTypeOptions}
+                        value={typeFilter}
+                        onChange={(val) => setTypeFilter(val)}
+                        className="z-30 w-[110px] sm:w-[135px]"
+                        buttonClassName="h-[32px] sm:h-[36px] text-xs bg-white border border-gray-300 rounded-md px-2.5"
+                        menuClassName="w-full"
+                        listClassName="max-h-[200px]"
+                    />
+                </div>
+
+                {/* Row 2: Search input full width */}
+                <div className="relative flex items-center w-full">
                     <div className="absolute left-2.5 text-gray-800">
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                     </div>
@@ -218,25 +254,13 @@ export default function AdminDashboard() {
                         placeholder="Search by product id and title"
                         value={searchInput}
                         onChange={(e) => setSearchInput(e.target.value)}
-                        className="border border-gray-300 rounded-md pl-8 pr-8 h-[34px] text-[13px] outline-none focus:border-green-500 w-full transition-all bg-white shadow-2xs"
+                        className="border border-gray-300 rounded-md pl-8 pr-8 h-[36px] text-xs sm:text-[13px] outline-none focus:border-green-500 w-full transition-all bg-white shadow-2xs"
                     />
                     {searchInput && (
-                        <button onClick={() => setSearchInput('')} className="absolute right-2 cursor-pointer w-5 h-5 bg-green-500 hover:bg-green-600 text-white rounded-full flex items-center justify-center transition-colors">
+                        <button onClick={() => setSearchInput('')} className="absolute right-2.5 cursor-pointer w-5 h-5 bg-green-500 hover:bg-green-600 text-white rounded-full flex items-center justify-center transition-colors">
                             <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12"></path></svg>
                         </button>
                     )}
-                </div>
-                <div className="flex items-center gap-1 shrink-0">
-                    <SortDropdown
-                        isAdmin={true}
-                        options={dynamicTypeOptions}
-                        value={typeFilter}
-                        onChange={(val) => setTypeFilter(val)}
-                        className="z-30 w-[110px] sm:w-[130px]"
-                        buttonClassName="h-[34px] text-[11px] sm:text-xs bg-white border border-gray-300 rounded-md px-2"
-                        menuClassName="w-full"
-                        listClassName="max-h-[200px]"
-                    />
                 </div>
             </div>
 
@@ -248,15 +272,16 @@ export default function AdminDashboard() {
                         <table className="min-w-full divide-y divide-gray-200 block sm:table">
                             <thead className="bg-green-600 hidden sm:table-header-group sticky top-0 z-10 shadow-[0_2px_4px_rgba(0,0,0,0.1)]">
                                 <tr>
-                                    <th scope="col" className="px-3 py-3.5 w-8 border-b border-green-700"></th>
-                                    <th scope="col" className="px-6 py-3.5 text-left text-[12px] sm:text-[13px] font-bold text-white uppercase tracking-wide whitespace-nowrap border-b border-green-700">Product</th>
-                                    <th scope="col" className="px-6 py-3.5 text-center w-24 text-[12px] sm:text-[13px] font-bold text-white uppercase tracking-wide whitespace-nowrap border-b border-green-700">Type</th>
-                                    <th scope="col" className="px-6 py-3.5 text-center w-10 text-[12px] sm:text-[13px] font-bold text-white uppercase tracking-wide whitespace-nowrap border-b border-green-700">Price</th>
-                                    <th scope="col" className="px-6 py-3.5 text-center w-10 text-[12px] sm:text-[13px] font-bold text-white uppercase tracking-wide whitespace-nowrap border-b border-green-700">Discount</th>
-                                    <th scope="col" className="px-6 py-3.5 text-center w-10 text-[12px] sm:text-[13px] font-bold text-white uppercase tracking-wide whitespace-nowrap border-b border-green-700">D.Price</th>
-                                    <th scope="col" className="px-6 py-3.5 text-center w-24 text-[12px] sm:text-[13px] font-bold text-white uppercase tracking-wide whitespace-nowrap border-b border-green-700">Created</th>
-                                    <th scope="col" className="px-6 py-3.5 text-center w-24 text-[12px] sm:text-[13px] font-bold text-white uppercase tracking-wide whitespace-nowrap border-b border-green-700">Updated</th>
-                                    <th scope="col" className="px-6 py-3.5 text-center w-20 text-[12px] sm:text-[13px] font-bold text-white uppercase tracking-wide whitespace-nowrap border-b border-green-700">Actions</th>
+                                    <th scope="col" className="px-2 py-3.5 w-7 border-b border-green-700"></th>
+                                    <th scope="col" className="px-4 py-3.5 text-left text-[12px] sm:text-[13px] font-bold text-white uppercase tracking-wide whitespace-nowrap border-b border-green-700">Product</th>
+                                    <th scope="col" className="px-2 py-3.5 text-center w-20 text-[12px] sm:text-[13px] font-bold text-white uppercase tracking-wide whitespace-nowrap border-b border-green-700">Stock</th>
+                                    <th scope="col" className="px-2 py-3.5 text-center w-20 text-[12px] sm:text-[13px] font-bold text-white uppercase tracking-wide whitespace-nowrap border-b border-green-700">Type</th>
+                                    <th scope="col" className="px-2 py-3.5 text-center w-16 text-[12px] sm:text-[13px] font-bold text-white uppercase tracking-wide whitespace-nowrap border-b border-green-700">Price</th>
+                                    <th scope="col" className="px-2 py-3.5 text-center w-16 text-[12px] sm:text-[13px] font-bold text-white uppercase tracking-wide whitespace-nowrap border-b border-green-700">Discount</th>
+                                    <th scope="col" className="px-2 py-3.5 text-center w-16 text-[12px] sm:text-[13px] font-bold text-white uppercase tracking-wide whitespace-nowrap border-b border-green-700">D.Price</th>
+                                    <th scope="col" className="px-2 py-3.5 text-center w-20 text-[12px] sm:text-[13px] font-bold text-white uppercase tracking-wide whitespace-nowrap border-b border-green-700">Created</th>
+                                    <th scope="col" className="px-2 py-3.5 text-center w-20 text-[12px] sm:text-[13px] font-bold text-white uppercase tracking-wide whitespace-nowrap border-b border-green-700">Updated</th>
+                                    <th scope="col" className="pl-5 pr-3 py-3.5 text-center w-24 text-[12px] sm:text-[13px] font-bold text-white uppercase tracking-wide whitespace-nowrap border-b border-green-700">Actions</th>
                                 </tr>
                             </thead>
                             <tbody className="bg-transparent sm:bg-white divide-y-0 sm:divide-y divide-gray-200 block sm:table-row-group">
@@ -264,7 +289,7 @@ export default function AdminDashboard() {
                                     <tr key={product._id} draggable={draggableRowId === product._id} onDragStart={(e) => onDragStart(e, idx)} onDragOver={(e) => onDragOver(e, idx)} onDrop={onDrop} className="hover:bg-gray-50 transition-colors grid grid-cols-3 sm:table-row mb-2 sm:mb-0 bg-white border border-gray-200 sm:border-0 sm:border-b sm:border-gray-200 rounded-lg sm:rounded-none shadow-sm sm:shadow-none">
                                         {/* Drag Handle - Desktop only */}
                                         <td
-                                            className="hidden sm:table-cell pl-3 px-2 py-2 border-b border-gray-200 w-8 text-gray-300 hover:text-gray-500 cursor-move"
+                                            className="hidden sm:table-cell pl-2 px-1 py-2 border-b border-gray-200 w-7 text-gray-300 hover:text-gray-500 cursor-move"
                                             onMouseEnter={() => setDraggableRowId(product._id)}
                                             onMouseLeave={() => setDraggableRowId(null)}
                                         >
@@ -272,7 +297,7 @@ export default function AdminDashboard() {
                                                 <path d="M8 6a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm0 6a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm0 6a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm8-12a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm0 6a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm0 6a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z" />
                                             </svg>
                                         </td>
-                                        <td className="col-span-3 w-full px-2 py-2 sm:py-2 block sm:table-cell border-b sm:border-b sm:border-gray-200 border-gray-100 sm:max-w-[250px] lg:max-w-[300px]">
+                                        <td className="col-span-3 w-full px-2 py-2 sm:py-2 block sm:table-cell border-b sm:border-b sm:border-gray-200 border-gray-100 sm:max-w-[340px] lg:max-w-[460px] xl:max-w-[560px]">
                                             <div className="flex items-start sm:items-center gap-3 sm:gap-4 w-full">
                                                 <div
                                                     className="h-14 w-14 sm:h-12 sm:w-12 flex-shrink-0 bg-gray-100 rounded-md overflow-hidden border border-gray-200 flex items-center justify-center cursor-pointer hover:opacity-80 transition-opacity"
@@ -302,39 +327,50 @@ export default function AdminDashboard() {
                                                 </div>
                                             </div>
                                         </td>
+                                        {/* Stock */}
+                                        <td className="p-0 sm:px-2 sm:py-2 hidden sm:table-cell sm:border-b sm:border-gray-200 sm:whitespace-nowrap sm:text-center">
+                                            {(() => {
+                                                const inStock = isProductInStock(product.inStock);
+                                                return (
+                                                    <span className={`inline-flex items-center px-2 py-0.5 rounded text-[13px] font-semibold ${inStock ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                                                        {inStock ? 'In Stock' : 'Out of Stock'}
+                                                    </span>
+                                                );
+                                            })()}
+                                        </td>
                                         {/* Type */}
-                                        <td className="p-0 sm:px-4 sm:py-2 hidden sm:table-cell sm:border-b sm:border-gray-200 sm:whitespace-nowrap sm:text-center">
+                                        <td className="p-0 sm:px-2 sm:py-2 hidden sm:table-cell sm:border-b sm:border-gray-200 sm:whitespace-nowrap sm:text-center">
                                             <span className="inline-flex items-center px-2 py-1 rounded text-[14px] font-medium text-gray-800">
                                                 {product.type || 'N/A'}
                                             </span>
                                         </td>
                                         {/* Price */}
-                                        <td className="p-0 sm:px-4 sm:py-2 hidden sm:table-cell sm:border-b sm:border-gray-200 sm:whitespace-nowrap sm:text-center">
+                                        <td className="p-0 sm:px-2 sm:py-2 hidden sm:table-cell sm:border-b sm:border-gray-200 sm:whitespace-nowrap sm:text-center">
                                             <div className="text-sm font-medium text-gray-900">₹{product.price}</div>
                                         </td>
                                         {/* Discount */}
-                                        <td className="p-0 sm:px-4 sm:py-2 hidden sm:table-cell sm:border-b sm:border-gray-200 sm:whitespace-nowrap sm:text-center">
+                                        <td className="p-0 sm:px-2 sm:py-2 hidden sm:table-cell sm:border-b sm:border-gray-200 sm:whitespace-nowrap sm:text-center">
                                             <span className={`inline-flex items-center px-3 py-1.5 rounded-md text-xs font-medium ${product.discount > 0 ? 'bg-green-200 text-green-900' : 'bg-gray-100 text-gray-800'}`}>
                                                 {product.discount > 0 ? `${product.discount}% OFF` : 'No Discount'}
                                             </span>
                                         </td>
                                         {/* D.Price */}
-                                        <td className="p-0 sm:px-4 sm:py-2 hidden sm:table-cell sm:border-b sm:border-gray-200 sm:whitespace-nowrap sm:text-center">
+                                        <td className="p-0 sm:px-2 sm:py-2 hidden sm:table-cell sm:border-b sm:border-gray-200 sm:whitespace-nowrap sm:text-center">
                                             <div className="text-sm font-medium text-gray-900">
                                                 ₹{product.discount > 0 ? (product.price - (product.price * product.discount / 100)).toFixed(2) : product.price}
                                             </div>
                                         </td>
                                         {/* Created At */}
-                                        <td className="p-0 sm:px-4 sm:py-2 hidden sm:table-cell sm:border-b sm:border-gray-200 sm:whitespace-nowrap sm:text-center">
+                                        <td className="p-0 sm:px-2 sm:py-2 hidden sm:table-cell sm:border-b sm:border-gray-200 sm:whitespace-nowrap sm:text-center">
                                             <div className="text-sm font-medium text-gray-900">{formatDate(product.createdAt)}</div>
                                         </td>
                                         {/* Updated At */}
-                                        <td className="p-0 sm:px-4 sm:py-2 hidden sm:table-cell sm:border-b sm:border-gray-200 sm:whitespace-nowrap sm:text-center">
+                                        <td className="p-0 sm:px-2 sm:py-2 hidden sm:table-cell sm:border-b sm:border-gray-200 sm:whitespace-nowrap sm:text-center">
                                             <div className="text-sm font-medium text-gray-900">{formatDate(product.updatedAt)}</div>
                                         </td>
                                         {/* Actions */}
-                                        <td className="p-0 sm:px-4 sm:py-2 sm:table-cell sm:border-b sm:border-gray-200 sm:whitespace-nowrap sm:text-right hidden">
-                                            <div className="flex items-center justify-end gap-4">
+                                        <td className="p-0 sm:pl-5 sm:pr-3 sm:py-2 sm:table-cell sm:border-b sm:border-gray-200 sm:whitespace-nowrap sm:text-right hidden">
+                                            <div className="flex items-center justify-end gap-2">
                                                 <button
                                                     onClick={() => toggleProductStatus(product._id, product.isActive !== false)}
                                                     className={`cursor-pointer relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none ${product.isActive !== false ? 'bg-green-600' : 'bg-gray-300'}`}
@@ -358,8 +394,8 @@ export default function AdminDashboard() {
                                         {/* Mobile-only compact info row (col-span-3) */}
                                         <td className="col-span-3 sm:hidden px-3 pb-2 pt-0 block">
                                             {/* Row 1: Price + Discount + D.Price + Actions */}
-                                            <div className="flex items-end justify-between gap-2 pt-1">
-                                                <div className="flex items-end gap-3 flex-1 min-w-0">
+                                            <div className="flex items-center justify-between gap-2 pt-1">
+                                                <div className="flex items-center gap-3 flex-1 min-w-0">
                                                     <div>
                                                         <div className="text-[9px] font-semibold text-gray-400 uppercase">Price</div>
                                                         <div className="text-[11px] font-semibold text-gray-800">₹{product.price}</div>
@@ -374,7 +410,7 @@ export default function AdminDashboard() {
                                                     </div>
                                                 </div>
                                                 {/* Actions */}
-                                                <div className="flex items-center gap-2 sm:gap-1.5 flex-shrink-0">
+                                                <div className="flex items-center gap-1.5 flex-shrink-0">
                                                     <button
                                                         onClick={() => toggleProductStatus(product._id, product.isActive !== false)}
                                                         className={`cursor-pointer relative inline-flex h-4 w-7 items-center rounded-full transition-colors focus:outline-none ${product.isActive !== false ? 'bg-green-600' : 'bg-gray-300'}`}
@@ -392,15 +428,20 @@ export default function AdminDashboard() {
                                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                                         </svg>
                                                     </button>
+                                                    {/* Stock Dot Indicator */}
+                                                    <span
+                                                        title={isProductInStock(product.inStock) ? 'In Stock' : 'Out of Stock'}
+                                                        className={`w-2.5 h-2.5 rounded-full ml-0.5 inline-block shrink-0 ${isProductInStock(product.inStock) ? 'bg-green-500 ring-2 ring-green-100' : 'bg-red-500 ring-2 ring-red-100'}`}
+                                                    />
                                                 </div>
                                             </div>
                                             {/* Row 2: Created At + Updated At */}
-                                            <div className="flex items-center gap-3 h-5">
+                                            <div className="flex items-center justify-between w-full h-5 mt-1">
                                                 <div>
                                                     <span className="text-[9px] font-semibold text-gray-400 uppercase">Created: </span>
                                                     <span className="text-[11px] font-medium text-gray-700">{formatDate(product.createdAt)}</span>
                                                 </div>
-                                                <div>
+                                                <div className="text-right">
                                                     <span className="text-[9px] font-semibold text-gray-400 uppercase">Updated: </span>
                                                     <span className="text-[11px] font-medium text-gray-700">{formatDate(product.updatedAt)}</span>
                                                 </div>
@@ -507,6 +548,16 @@ export default function AdminDashboard() {
                         )}
                     </div>
                     <div className="hidden lg:flex items-center gap-2 sm:gap-3 shrink-0">
+                        <SortDropdown
+                            isAdmin={true}
+                            options={['All Stock', 'In Stock', 'Out of Stock']}
+                            value={stockFilter}
+                            onChange={(val) => setStockFilter(val)}
+                            className="z-30 w-[110px] sm:w-[130px]"
+                            buttonClassName="h-[32px] sm:h-[36px] text-[11px] sm:text-sm bg-white border border-gray-300 rounded-md"
+                            menuClassName="w-full"
+                            listClassName="max-h-[200px]"
+                        />
                         <SortDropdown
                             isAdmin={true}
                             options={dynamicTypeOptions}

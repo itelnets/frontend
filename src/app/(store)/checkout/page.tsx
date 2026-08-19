@@ -367,7 +367,7 @@ function CheckoutContent() {
 
 
     return (
-        <div className="min-h-screen bg-[#f5f5f5]">
+        <div className="flex-1 bg-[#f5f5f5] pb-4 sm:pb-6">
             {isPreparingGPay && (
                 <div className="fixed inset-0 bg-white/60 backdrop-blur-sm z-50 flex items-center justify-center">
                     <div className="flex flex-col items-center">
@@ -433,7 +433,7 @@ function CheckoutContent() {
 
                 {/* RIGHT COLUMN */}
                 <div className="w-full lg:w-[380px] shrink-0">
-                    <div className="lg:sticky lg:top-6 bg-white rounded shadow-sm p-4 sm:p-5">
+                    <div className="lg:sticky lg:top-[135px] bg-white rounded shadow-sm p-4 sm:p-5 border border-gray-200">
                         <h2 className="font-bold text-gray-900 text-lg mb-3 sm:mb-4">Order summary</h2>
 
                         <div className="space-y-3 border-b border-gray-200 pb-2 sm:pb-4 mb-2 sm:mb-4">

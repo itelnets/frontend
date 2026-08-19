@@ -53,8 +53,8 @@ export function DealsHeroBanner({
 
 export function DealsTypeCategories({ selectedType, onSelectType }: { selectedType: string; onSelectType: (type: string) => void }) {
     return (
-        <div className="w-full max-w-full overflow-x-auto scrollbar-none px-2.5 sm:px-4 pt-1.5 sm:pt-3 pb-1.5 lg:pb-3">
-            <div className="flex items-center justify-start md:justify-center gap-3 md:gap-4 lg:gap-5 w-max md:w-auto mx-auto">
+        <div className="w-full max-w-full overflow-x-auto scrollbar-none pt-1.5 sm:pt-3 pb-1.5 lg:pb-3">
+            <div className="flex items-center justify-start lg:justify-center gap-2.5 sm:gap-3.5 md:gap-4 lg:gap-5 w-max lg:w-auto mx-auto min-w-full px-1">
                 {PRODUCT_TYPES.map((pt) => {
                     const isSelected = selectedType.toLowerCase() === pt.type.toLowerCase();
                     return (

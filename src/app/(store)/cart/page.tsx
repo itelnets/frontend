@@ -228,7 +228,7 @@ export default function CartPage() {
     };
 
     return (
-        <div className="font-sans min-h-screen bg-white pb-12">
+        <div className="font-sans min-h-screen bg-white pb-4">
             <div className="max-w-[1400px] mx-auto px-2.5 sm:px-4 pt-6">
 
                 {cartItems.length === 0 ? (
@@ -396,7 +396,7 @@ export default function CartPage() {
 
                             {/* RIGHT COLUMN: Order Summary */}
                             <div className="w-full lg:w-[380px] shrink-0">
-                                <div className="lg:sticky lg:top-[180px] space-y-4">
+                                <div className="lg:sticky lg:top-[145px] space-y-4">
 
 
 
@@ -488,7 +488,7 @@ export default function CartPage() {
                 )}
 
                 {/* Save for later / My Lists Section */}
-                <div className="my-4 sm:my-6 lg:py-8 border-t border-gray-200">
+                <div className="py-1 lg:py-4 border-t border-gray-200">
                     <div className="flex border-b border-gray-200 gap-8">
                         <button
                             onClick={() => setActiveTab('saved')}
@@ -504,7 +504,7 @@ export default function CartPage() {
                         </button>
                     </div>
 
-                    <div className="mt-6 flex flex-wrap gap-6">
+                    <div className="mt-3 sm:mt-6 flex flex-wrap gap-6">
                         {(activeTab === 'saved' ? savedForLater : myLists).length === 0 ? (
                             <p className="text-gray-500 text-sm py-4">No items {activeTab === 'saved' ? 'saved for later' : 'in your lists'}.</p>
                         ) : (
