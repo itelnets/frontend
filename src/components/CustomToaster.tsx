@@ -6,7 +6,8 @@ export default function CustomToaster() {
   return (
     <Toaster
       position="top-right"
-      containerClassName="!top-[50px] sm:!top-[75px] max-sm:![&>div]:justify-center max-sm:![&>div]:items-center overflow-hidden"
+      containerStyle={{ zIndex: 100000 }}
+      containerClassName="!top-[20px] sm:!top-[30px] max-sm:![&>div]:justify-center max-sm:![&>div]:items-center"
       toastOptions={{
         style: {
           background: '#facc15',

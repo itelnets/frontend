@@ -91,8 +91,8 @@ export default function BulkUploadModal() {
 
                 try {
                     const res = await getProducts({ limit: 10000, isActive: 'all' });
-                    const existingList: any[] = Array.isArray(res.data) 
-                        ? res.data 
+                    const existingList: any[] = Array.isArray(res.data)
+                        ? res.data
                         : (res.data?.products || res.data?.data?.products || res.data?.data || []);
 
                     existingList.forEach((p: any) => {
@@ -237,7 +237,7 @@ export default function BulkUploadModal() {
 
                 // 4. Auto-download PDF audit report if any existing products were updated
                 if (auditRecords.length > 0) {
-                    toast.success(`Generating PDF audit report for ${auditRecords.length} updated product(s)...`);
+                    toast.success(`PDF audit report for ${auditRecords.length} product(s)`);
                     await generateBulkUploadPdfReport(auditRecords);
                 }
 
