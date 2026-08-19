@@ -373,15 +373,22 @@ export default function ProductDetailsPage() {
                     <div className='mt-2 sm:mt-4 mb-2 sm:mb-0'>
                         <h3 className="font-bold text-gray-900 mb-3 lg:mb-4 text-base lg:text-lg">Specifications</h3>
                         <div className="flex flex-col gap-1.5 sm:gap-2.5">
-                            {displayProduct.specifications.map((spec: any, idx: number) => (
-                                <div key={idx} className="flex text-[13px] lg:text-sm">
-                                    <span className="text-[#458500] w-[140px] lg:w-[160px] shrink-0 font-bold">{spec.key}</span>
-                                    <span className="text-[#458500] mr-3">:</span>
-                                    <span className="text-gray-900">
-                                        {spec.value}
-                                    </span>
-                                </div>
-                            ))}
+                            {displayProduct.specifications.map((spec: any, idx: number) => {
+                                const isPackSize = spec.key === 'Pack of' || spec.key === 'Pack size' || spec.key === 'Pack Size';
+                                const isQty = spec.key === 'QTY' || spec.key === 'Units in Pack';
+                                const label = isPackSize ? 'Pack Size' : isQty ? 'Units in Pack' : spec.key;
+                                let formattedVal = spec.value;
+                                if (isPackSize && formattedVal && !/\b(gm|g|kg|ml|l|pack|capsules|tablets)\b/i.test(String(formattedVal))) {
+                                    formattedVal = `${formattedVal} gm`;
+                                }
+                                return (
+                                    <div key={idx} className="flex text-[13px] lg:text-sm">
+                                        <span className="text-[#458500] w-[140px] lg:w-[160px] shrink-0 font-bold">{label}</span>
+                                        <span className="text-[#458500] mr-3">:</span>
+                                        <span className="text-gray-900">{formattedVal}</span>
+                                    </div>
+                                );
+                            })}
                             {displayProduct.expiredOn && !displayProduct.specifications.some((s: any) => s.key?.toLowerCase().includes('expiry')) && (
                                 <div className="flex text-[13px] lg:text-sm">
                                     <span className="text-[#458500] w-[140px] lg:w-[160px] shrink-0 font-bold">Product Expiry</span>
@@ -457,19 +464,6 @@ export default function ProductDetailsPage() {
                         </>
                     )}
 
-                    {displayProduct.specifications?.length > 0 && (
-                        <>
-                            <h3 className="font-bold text-gray-900 mb-3 lg:mb-4 text-sm lg:text-base">Specifications</h3>
-                            <ul className="list-disc pl-4 lg:pl-5 space-y-1.5 text-xs lg:text-sm text-gray-800 mb-4 lg:mb-6">
-                                {displayProduct.specifications.map((spec: any, idx: number) => (
-                                    <li key={idx}>{spec.key}: {spec.value}</li>
-                                ))}
-                                {displayProduct.expiredOn && !displayProduct.specifications.some((s: any) => s.key?.toLowerCase().includes('expiry')) && (
-                                    <li>Product Expiry: {displayProduct.expiredOn}</li>
-                                )}
-                            </ul>
-                        </>
-                    )}
 
                     {displayProduct.suggestedUse && (
                         <>
@@ -482,7 +476,7 @@ export default function ProductDetailsPage() {
 
                     {displayProduct.otherIngredients && (
                         <>
-                            <h3 className="font-bold text-gray-900 mb-3 lg:mb-4 text-sm lg:text-base">Other ingredients</h3>
+                            <h3 className="font-bold text-gray-900 mb-3 lg:mb-4 text-sm lg:text-base">Key ingredients</h3>
                             <div className="text-xs lg:text-sm text-gray-800 space-y-4 mb-4 lg:mb-6 whitespace-pre-wrap">
                                 {displayProduct.otherIngredients}
                             </div>
@@ -491,7 +485,7 @@ export default function ProductDetailsPage() {
 
                     {displayProduct.warnings && (
                         <>
-                            <h3 className="font-bold text-gray-900 mb-3 lg:mb-4 text-sm lg:text-base">Warnings</h3>
+                            <h3 className="font-bold text-gray-900 mb-3 lg:mb-4 text-sm lg:text-base">Direction of use/dosage</h3>
                             <div className="text-xs lg:text-sm text-gray-800 space-y-4 mb-4 lg:mb-6 leading-relaxed whitespace-pre-wrap">
                                 {displayProduct.warnings}
                             </div>
@@ -500,7 +494,7 @@ export default function ProductDetailsPage() {
 
                     {displayProduct.disclaimer && (
                         <>
-                            <h3 className="font-bold text-gray-900 mb-3 lg:mb-4 text-sm lg:text-base">Disclaimer</h3>
+                            <h3 className="font-bold text-gray-900 mb-3 lg:mb-4 text-sm lg:text-base">Safety Information</h3>
                             <div className="text-xs lg:text-sm text-gray-800 space-y-4 mb-4 lg:mb-6 leading-relaxed whitespace-pre-wrap">
                                 {displayProduct.disclaimer}
                             </div>

@@ -98,8 +98,8 @@ export default function AddProductPage() {
 
     // State for Specifications
     const defaultSpecs = [
-        { key: 'Pack of', value: '' },
-        { key: 'QTY', value: '' },
+        { key: 'Pack Size', value: '' },
+        { key: 'Units in Pack', value: '' },
         { key: 'SKU', value: '' },
         { key: 'Dimensions (l x b h)', value: '' },
         { key: 'Form', value: '' },
@@ -537,8 +537,8 @@ export default function AddProductPage() {
                                         <input
                                             type="text"
                                             placeholder={
-                                                spec.key === 'Pack of' ? "e.g. 1 Pack" :
-                                                    spec.key === 'QTY' ? "e.g. 1" :
+                                                spec.key === 'Pack Size' || spec.key === 'Pack size' || spec.key === 'Pack of' ? "e.g. 500 gm" :
+                                                    spec.key === 'Units in Pack' || spec.key === 'QTY' ? "e.g. 1" :
                                                         spec.key === 'SKU' ? "e.g. MLI-00952" :
                                                             spec.key === 'Form' ? "e.g. Tablet, Capsule, Syrup, Oil etc." :
                                                                 spec.key === 'Treatment' ? "e.g. Immunity, Hair Care" :
@@ -583,17 +583,17 @@ export default function AddProductPage() {
                         </div>
 
                         <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-2">Other Ingredients <span className="text-red-500">*</span></label>
+                            <label className="block text-sm font-semibold text-gray-700 mb-2">Key Ingredients <span className="text-red-500">*</span></label>
                             <textarea name="otherIngredients" value={formData.otherIngredients} rows={3} onChange={handleChange} className={`w-full px-3 py-2 text-sm bg-white/50 border ${showFormErrors && !formData.otherIngredients.trim() ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-green-600'} rounded-md focus:outline-none transition-all outline-none`} />
                         </div>
 
                         <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-2">Warnings <span className="text-red-500">*</span></label>
+                            <label className="block text-sm font-semibold text-gray-700 mb-2">Direction of use/dosage <span className="text-red-500">*</span></label>
                             <textarea name="warnings" value={formData.warnings} rows={3} onChange={handleChange} className={`w-full px-3 py-2 text-sm bg-white/50 border ${showFormErrors && !formData.warnings.trim() ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-green-600'} rounded-md focus:outline-none transition-all outline-none`} />
                         </div>
 
                         <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-2">Disclaimer <span className="text-red-500">*</span></label>
+                            <label className="block text-sm font-semibold text-gray-700 mb-2">Safety Information <span className="text-red-500">*</span></label>
                             <textarea name="disclaimer" value={formData.disclaimer} rows={3} onChange={handleChange} className={`w-full px-3 py-2 text-sm bg-white/50 border ${showFormErrors && !formData.disclaimer.trim() ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-green-600'} rounded-md focus:outline-none transition-all outline-none`} />
                         </div>
                         <div className="flex items-center justify-between px-3 py-2.5 bg-white/50 border border-gray-200 rounded-md transition-all hover:border-green-600/30">

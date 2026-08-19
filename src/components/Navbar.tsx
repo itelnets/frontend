@@ -21,6 +21,7 @@ const Navbar = () => {
     const [successOrderAmount, setSuccessOrderAmount] = useState<number>(0);
     const { cartCount } = useCart();
     const headerRef = useRef<HTMLElement | null>(null);
+    const fetchedOrdersUserIdRef = useRef<string | null>(null);
 
     const [productTypes, setProductTypes] = useState<string[]>(['Supplements', 'Sports', 'Bath', 'Beauty', 'Grocery', 'Home', 'Baby', 'Pets']);
 
@@ -32,7 +33,7 @@ const Navbar = () => {
                 }
             })
             .catch(() => { });
-    }, [pathname]);
+    }, []);
 
     useEffect(() => {
         setIsMobileMenuOpen(false);
@@ -45,21 +46,35 @@ const Navbar = () => {
             const userInfo = localStorage.getItem('userInfo');
 
             if (userInfo) {
-                setUser(JSON.parse(userInfo));
+                const parsedUser = JSON.parse(userInfo);
+                setUser(parsedUser);
                 // Self-healing: ensure cookie exists if they have a valid session
                 if (!document.cookie.includes('isLoggedIn=true')) {
                     document.cookie = "isLoggedIn=true; path=/; max-age=2592000";
                 }
 
-                // Only fetch orders on initial load or cross-tab login, NOT on simple profile updates
-                if (!isUserInfoUpdate) {
+                const currentUserId = parsedUser._id || parsedUser.id || parsedUser.email;
+                const cachedOrders = sessionStorage.getItem(`orders_summary_${currentUserId}`);
+
+                if (cachedOrders) {
+                    try {
+                        const parsedSummary = JSON.parse(cachedOrders);
+                        setSuccessOrderCount(parsedSummary.totalOrders || 0);
+                        setSuccessOrderAmount(parsedSummary.totalAmount || 0);
+                    } catch (err) { }
+                } else if (!isUserInfoUpdate && fetchedOrdersUserIdRef.current !== currentUserId) {
+                    fetchedOrdersUserIdRef.current = currentUserId;
                     api.get('/orders/myorders?status=Success&limit=1').then(res => {
-                        setSuccessOrderCount(res.data.totalOrders || 0);
-                        setSuccessOrderAmount(res.data.totalAmount || 0);
+                        const totalOrders = res.data.totalOrders || 0;
+                        const totalAmount = res.data.totalAmount || 0;
+                        setSuccessOrderCount(totalOrders);
+                        setSuccessOrderAmount(totalAmount);
+                        sessionStorage.setItem(`orders_summary_${currentUserId}`, JSON.stringify({ totalOrders, totalAmount }));
                     }).catch(err => console.error('Failed to fetch success orders data:', err));
                 }
             } else {
                 setUser(null);
+                fetchedOrdersUserIdRef.current = null;
             }
             setIsAuthReady(true);
         };

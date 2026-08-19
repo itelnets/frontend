@@ -141,8 +141,8 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
             }));
             setImages(existingMapped);
             const defaultSpecs = [
-                { key: 'Pack of', value: '' },
-                { key: 'QTY', value: '' },
+                { key: 'Pack Size', value: '' },
+                { key: 'Units in Pack', value: '' },
                 { key: 'SKU', value: '' },
                 { key: 'Dimensions (l x b h)', value: '' },
                 { key: 'Form', value: '' },
@@ -154,8 +154,8 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
             const fetchedSpecs = data.specifications || [];
 
             const normalizeKey = (key: string) => {
-                if (key === 'Weight (gm)') return 'Pack of';
-                if (key === 'Product Quantity (No)') return 'QTY';
+                if (key === 'Weight (gm)' || key === 'Pack of' || key === 'Shipping Weight (gm)' || key === 'Pack size' || key === 'Pack Size') return 'Pack Size';
+                if (key === 'Product Quantity (No)' || key === 'QTY' || key === 'Units in Pack') return 'Units in Pack';
                 if (key === 'Product Code (SKU)') return 'SKU';
                 return key;
             };
@@ -615,8 +615,8 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                                         <input
                                             type="text"
                                             placeholder={
-                                                spec.key === 'Pack of' ? "e.g. 1 Pack" :
-                                                    spec.key === 'QTY' ? "e.g. 1" :
+                                                spec.key === 'Pack Size' || spec.key === 'Pack size' || spec.key === 'Pack of' ? "e.g. 500 gm" :
+                                                    spec.key === 'Units in Pack' || spec.key === 'QTY' ? "e.g. 1" :
                                                         spec.key === 'SKU' ? "e.g. MLI-00952" :
                                                             spec.key === 'Form' ? "e.g. Tablet, Capsule, Syrup, Oil etc." :
                                                                 spec.key === 'Treatment' ? "e.g. Immunity, Hair Care" :
@@ -661,17 +661,17 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                         </div>
 
                         <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-2">Other Ingredients <span className="text-red-500">*</span></label>
+                            <label className="block text-sm font-semibold text-gray-700 mb-2">Key Ingredients <span className="text-red-500">*</span></label>
                             <textarea name="otherIngredients" value={formData.otherIngredients} rows={3} onChange={handleChange} className={`w-full px-3 py-2 text-sm bg-white/50 border ${showFormErrors && !formData.otherIngredients.trim() ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-green-600'} rounded-md focus:outline-none transition-all outline-none`} />
                         </div>
 
                         <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-2">Warnings <span className="text-red-500">*</span></label>
+                            <label className="block text-sm font-semibold text-gray-700 mb-2">Direction of use/dosage <span className="text-red-500">*</span></label>
                             <textarea name="warnings" value={formData.warnings} rows={3} onChange={handleChange} className={`w-full px-3 py-2 text-sm bg-white/50 border ${showFormErrors && !formData.warnings.trim() ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-green-600'} rounded-md focus:outline-none transition-all outline-none`} />
                         </div>
 
                         <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-2">Disclaimer <span className="text-red-500">*</span></label>
+                            <label className="block text-sm font-semibold text-gray-700 mb-2">Safety Information <span className="text-red-500">*</span></label>
                             <textarea name="disclaimer" value={formData.disclaimer} rows={3} onChange={handleChange} className={`w-full px-3 py-2 text-sm bg-white/50 border ${showFormErrors && !formData.disclaimer.trim() ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-green-600'} rounded-md focus:outline-none transition-all outline-none`} />
                         </div>
                         <div className="flex items-center justify-between px-3 py-2.5 bg-white/50 border border-gray-200 rounded-md transition-all hover:border-green-600/30">

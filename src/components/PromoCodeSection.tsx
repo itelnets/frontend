@@ -55,7 +55,11 @@ export default function PromoCodeSection({
                                     }
                                 }
                             }}
-                            className="flex-1 border border-gray-300 rounded-md px-3 py-1.5 sm:py-2 text-xs sm:text-sm font-mono font-semibold uppercase focus:outline-none focus:border-green-600 h-[34px] sm:h-[40px]"
+                            className={`flex-1 border rounded-md px-3 py-1.5 sm:py-2 text-xs sm:text-sm font-mono font-semibold uppercase focus:outline-none h-[34px] sm:h-[40px] transition-colors ${
+                                promoError
+                                    ? 'border-red-500 focus:border-red-500 bg-red-50/20 text-red-900'
+                                    : 'border-gray-300 focus:border-green-600 bg-white'
+                            }`}
                         />
                         <button
                             type="button"
@@ -66,9 +70,6 @@ export default function PromoCodeSection({
                             Apply
                         </button>
                     </div>
-                    {promoError && (
-                        <p className="text-xs text-red-600 mt-1 font-medium">{promoError}</p>
-                    )}
                 </div>
             )}
         </div>

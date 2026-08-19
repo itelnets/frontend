@@ -82,6 +82,14 @@ export default function DoctorCornerPage() {
         const file = e.target.files?.[0];
         if (!file) return;
 
+        // UI-side 5 MB file size limit (applies strictly to Doctor Document field)
+        const maxSizeBytes = 5 * 1024 * 1024; // 5 MB
+        if (file.size > maxSizeBytes) {
+            toast.error('File size must be under 5 MB');
+            e.target.value = '';
+            return;
+        }
+
         setUploadingDoc(true);
         try {
             const uploadFormData = new FormData();
@@ -115,6 +123,7 @@ export default function DoctorCornerPage() {
             toast.error(err.message || 'Failed to upload certificate file');
         } finally {
             setUploadingDoc(false);
+            e.target.value = '';
         }
     };
 
@@ -352,6 +361,7 @@ export default function DoctorCornerPage() {
                             <div>
                                 <label className="block text-xs font-bold text-gray-700 mb-1.5">
                                     Upload Medical / License Document <span className="text-red-500">*</span>
+                                    <span className="text-[11px] font-normal text-gray-500 ml-2">(Formats: PDF, JPG, PNG, WEBP · Max 5 MB)</span>
                                 </label>
                                 <div className="flex flex-row items-center gap-1 sm:gap-2">
                                     {/* Left Side: Upload Button (Fixed dimensions: standard height, fixed width during/before upload) */}

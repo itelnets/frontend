@@ -238,26 +238,30 @@ export default function AdminDoctorRequestsPage() {
                                                         </button>
                                                     ) : null}
 
-                                                    {/* Desktop Verification Toggle Switch (h-5 w-9) */}
-                                                    <button
-                                                        type="button"
-                                                        disabled={req.status === 'rejected'}
-                                                        onClick={() => {
-                                                            if (req.status === 'rejected') return;
-                                                            if (req.status === 'approved') {
-                                                                setRejectModalItem(req);
-                                                            } else {
-                                                                handleOpenApproveModal(req);
-                                                            }
-                                                        }}
-                                                        className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none ${req.status === 'rejected'
-                                                                ? 'cursor-not-allowed opacity-50 bg-gray-300'
-                                                                : 'cursor-pointer ' + (req.status === 'approved' ? 'bg-green-600' : 'bg-gray-300')
-                                                            }`}
-                                                        title={req.status === 'rejected' ? 'Rejected (Cannot be enabled)' : req.status === 'approved' ? 'Verified (Click to unverify)' : 'Unverified (Click to verify)'}
-                                                    >
-                                                        <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform ${req.status === 'approved' ? 'translate-x-4.5' : 'translate-x-0.5'}`} />
-                                                    </button>
+                                                    {/* Desktop Verification Action: Toggle Switch for Pending/Approved, Prohibition Icon for Rejected */}
+                                                    {req.status === 'rejected' ? (
+                                                        <div title="Rejected (Request has been rejected)" className="w-5 h-5 flex items-center justify-center text-red-500 shrink-0">
+                                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <circle cx="12" cy="12" r="9" strokeWidth="2" />
+                                                                <path strokeLinecap="round" strokeWidth="2" d="M5.636 5.636l12.728 12.728" />
+                                                            </svg>
+                                                        </div>
+                                                    ) : (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => {
+                                                                if (req.status === 'approved') {
+                                                                    setRejectModalItem(req);
+                                                                } else {
+                                                                    handleOpenApproveModal(req);
+                                                                }
+                                                            }}
+                                                            className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none cursor-pointer ${req.status === 'approved' ? 'bg-green-600' : 'bg-gray-300'}`}
+                                                            title={req.status === 'approved' ? 'Verified (Click to unverify)' : 'Unverified (Click to verify)'}
+                                                        >
+                                                            <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform ${req.status === 'approved' ? 'translate-x-4.5' : 'translate-x-0.5'}`} />
+                                                        </button>
+                                                    )}
                                                 </div>
                                             </td>
 
@@ -283,7 +287,7 @@ export default function AdminDoctorRequestsPage() {
                                                 </div>
 
                                                 <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-gray-100">
-                                                    {/* Eye View Document Button + Mobile Toggle Switch besides each other */}
+                                                    {/* Eye View Document Button */}
                                                     {fullDocUrl ? (
                                                         <button
                                                             type="button"
@@ -298,26 +302,30 @@ export default function AdminDoctorRequestsPage() {
                                                         </button>
                                                     ) : null}
 
-                                                    {/* Mobile Verification Toggle Switch (h-4 w-7) */}
-                                                    <button
-                                                        type="button"
-                                                        disabled={req.status === 'rejected'}
-                                                        onClick={() => {
-                                                            if (req.status === 'rejected') return;
-                                                            if (req.status === 'approved') {
-                                                                setRejectModalItem(req);
-                                                            } else {
-                                                                handleOpenApproveModal(req);
-                                                            }
-                                                        }}
-                                                        className={`relative inline-flex h-4 w-7 items-center rounded-full transition-colors focus:outline-none ${req.status === 'rejected'
-                                                                ? 'cursor-not-allowed opacity-50 bg-gray-300'
-                                                                : 'cursor-pointer ' + (req.status === 'approved' ? 'bg-green-600' : 'bg-gray-300')
-                                                            }`}
-                                                        title={req.status === 'rejected' ? 'Rejected (Cannot be enabled)' : req.status === 'approved' ? 'Verified (Click to unverify)' : 'Unverified (Click to verify)'}
-                                                    >
-                                                        <span className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${req.status === 'approved' ? 'translate-x-3.5' : 'translate-x-0.5'}`} />
-                                                    </button>
+                                                    {/* Mobile Verification Action */}
+                                                    {req.status === 'rejected' ? (
+                                                        <div title="Rejected" className="w-4.5 h-4.5 flex items-center justify-center text-red-500 shrink-0">
+                                                            <svg className="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <circle cx="12" cy="12" r="9" strokeWidth="2" />
+                                                                <path strokeLinecap="round" strokeWidth="2" d="M5.636 5.636l12.728 12.728" />
+                                                            </svg>
+                                                        </div>
+                                                    ) : (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => {
+                                                                if (req.status === 'approved') {
+                                                                    setRejectModalItem(req);
+                                                                } else {
+                                                                    handleOpenApproveModal(req);
+                                                                }
+                                                            }}
+                                                            className={`relative inline-flex h-4 w-7 items-center rounded-full transition-colors focus:outline-none cursor-pointer ${req.status === 'approved' ? 'bg-green-600' : 'bg-gray-300'}`}
+                                                            title={req.status === 'approved' ? 'Verified (Click to unverify)' : 'Unverified (Click to verify)'}
+                                                        >
+                                                            <span className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${req.status === 'approved' ? 'translate-x-3.5' : 'translate-x-0.5'}`} />
+                                                        </button>
+                                                    )}
                                                 </div>
                                             </td>
                                         </tr>

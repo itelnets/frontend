@@ -120,7 +120,7 @@ export default function LoginPage() {
                 document.cookie = "isLoggedIn=true; path=/; max-age=2592000"; // 30 days
                 window.dispatchEvent(new Event('userInfoUpdated'));
                 toast.success(data.message);
-                window.location.href = data.role === 'admin' ? '/admin/users' : '/';
+                router.push(data.role === 'admin' ? '/admin/users' : '/');
             };
 
             completeLogin();
