@@ -15,10 +15,7 @@ export default function EditBannerPage({ params }: { params: Promise<{ id: strin
     const [isSaving, setIsSaving] = useState(false);
     const [banner, setBanner] = useState<BannerItem | null>(null);
 
-    // Text states
-    const [tabTitle, setTabTitle] = useState('');
-    const [tabSubtitle, setTabSubtitle] = useState('');
-    const [showInputErrors, setShowInputErrors] = useState(false);
+
 
     // Upload state
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -44,8 +41,6 @@ export default function EditBannerPage({ params }: { params: Promise<{ id: strin
             if (found) {
                 setBanner(found);
                 setPreviewUrl(found.imageUrl);
-                setTabTitle(found.tabTitle || '');
-                setTabSubtitle(found.tabSubtitle || '');
             } else {
                 toast.error('Banner not found');
                 router.push('/admin/banners');
@@ -73,10 +68,6 @@ export default function EditBannerPage({ params }: { params: Promise<{ id: strin
 
         const img = new Image();
         img.onload = () => {
-            if (img.width !== 1368 || img.height !== 260) {
-                toast.error(`Image size must be 1368x260 pixels. Uploaded image is ${img.width}x${img.height} pixels.`);
-                return;
-            }
             setSelectedFile(file);
             setPreviewUrl(URL.createObjectURL(file));
             setImageDimensions({ width: img.width, height: img.height });
@@ -117,13 +108,6 @@ export default function EditBannerPage({ params }: { params: Promise<{ id: strin
             return;
         }
 
-        if (!tabTitle.trim() || !tabSubtitle.trim()) {
-            setShowInputErrors(true);
-            toast.error('Please fill out all fields');
-            return;
-        }
-        setShowInputErrors(false);
-
         try {
             setIsSaving(true);
 
@@ -163,9 +147,7 @@ export default function EditBannerPage({ params }: { params: Promise<{ id: strin
                 imageKey: newImageKey,
                 fileSize: newFileSize,
                 width: newWidth,
-                height: newHeight,
-                tabTitle,
-                tabSubtitle
+                height: newHeight
             });
 
             toast.success('Banner updated successfully');
@@ -234,43 +216,6 @@ export default function EditBannerPage({ params }: { params: Promise<{ id: strin
                         </div>
                     </div>
 
-                    {/* Dynamic Text Information */}
-                    <div className="border-t border-gray-100 pt-4">
-                        <h3 className="text-sm font-bold text-gray-900 mb-3">Banner Details & Text</h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-                            <div>
-                                <label className="block text-[11px] sm:text-xs font-bold text-gray-700 uppercase tracking-normal mb-1.5">
-                                    Tab Title <span className="text-red-500">*</span> <span className="text-gray-400 font-normal lowercase">(e.g. Up to 70% Off Deals)</span>
-                                </label>
-                                <input
-                                    type="text"
-                                    placeholder="Enter tab title"
-                                    value={tabTitle}
-                                    onChange={(e) => {
-                                        setTabTitle(e.target.value);
-                                        if (showInputErrors && e.target.value.trim()) setShowInputErrors(false);
-                                    }}
-                                    className={`w-full px-3 py-2 text-[13px] sm:text-sm bg-white/50 border ${showInputErrors && !tabTitle.trim() ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-green-600'} rounded-md focus:outline-none transition-all outline-none placeholder-gray-400`}
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-[11px] sm:text-xs font-bold text-gray-700 uppercase tracking-normal mb-1.5">
-                                    Tab Subtitle <span className="text-red-500">*</span> <span className="text-gray-400 font-normal lowercase">(e.g. Shop Now)</span>
-                                </label>
-                                <input
-                                    type="text"
-                                    placeholder="Enter tab subtitle"
-                                    value={tabSubtitle}
-                                    onChange={(e) => {
-                                        setTabSubtitle(e.target.value);
-                                        if (showInputErrors && e.target.value.trim()) setShowInputErrors(false);
-                                    }}
-                                    className={`w-full px-3 py-2 text-[13px] sm:text-sm bg-white/50 border ${showInputErrors && !tabSubtitle.trim() ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-green-600'} rounded-md focus:outline-none transition-all outline-none placeholder-gray-400`}
-                                />
-                            </div>
-                        </div>
-                    </div>
                 </div>
 
                 <div className="px-4 py-3 sm:px-6 sm:py-3.5 bg-gray-50 border-t border-gray-100 flex flex-col-reverse sm:flex-row justify-end gap-3">

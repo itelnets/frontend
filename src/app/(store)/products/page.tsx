@@ -7,7 +7,7 @@ import ProductCard from '@/components/ProductCard';
 import SortDropdown from '@/components/SortDropdown';
 import MobileFilterDrawer from '@/components/MobileFilterDrawer';
 import MobileSortDrawer from '@/components/MobileSortDrawer';
-import { DealsTypeCategories } from '../[slug]/components/DealsPageComponents';
+import { DealsTypeCategories } from '@/components/DealsTypeCategories';
 
 interface Product {
     _id: string;

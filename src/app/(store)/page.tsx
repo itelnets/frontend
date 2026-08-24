@@ -1,4 +1,5 @@
 import HeroCarousel from '@/components/HeroCarousel';
+import FeatureBar from '@/components/FeatureBar';
 import ProductCard from '@/components/ProductCard';
 import TriggerMaintenance from '@/components/TriggerMaintenance';
 
@@ -24,10 +25,13 @@ export default async function Home() {
         <div className="flex flex-col min-h-screen bg-white">
             {isMaintenance && <TriggerMaintenance />}
             <main className="w-full flex-1 mb-2 sm:mb-6">
-                {/* Hero Banner Section */}
-                <div className="max-w-[1400px] mx-auto p-1 sm:p-4 mt-0 lg:mt-2">
+                {/* Hero Banner Section (Full Width Edge to Edge) */}
+                <div className="w-full mb-2 sm:mb-4">
                     <HeroCarousel />
                 </div>
+
+                {/* Feature Highlights Bar */}
+                <FeatureBar />
 
                 {/* Deals Section */}
                 <div className="max-w-[1400px] mx-auto px-2.5 sm:px-4 mt-1 sm:mt-[-20px] md:mt-[-10px] lg:mt-6">

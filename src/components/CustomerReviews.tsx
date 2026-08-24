@@ -220,7 +220,7 @@ const CustomerReviews = ({ productId, onReviewSubmitted }: Props) => {
                                 }
                                 setShowForm(true);
                             }}
-                            className="w-full bg-[#3d8c1c] hover:bg-green-700 text-white font-bold py-2.5 cursor-pointer rounded-md transition-colors mt-2 text-sm"
+                            className="w-full bg-[#3d8c1c] hover:bg-[#234300] text-white font-bold py-2.5 cursor-pointer rounded-md transition-colors mt-2 text-sm"
                         >
                             {hasReviewed ? 'Edit Your Review' : 'Write a Review'}
                         </button>

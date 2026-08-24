@@ -1,35 +1,6 @@
+'use client';
+
 import React from 'react';
-
-export interface Product {
-    _id: string;
-    name: string;
-    description?: string;
-    price: number;
-    discount: number;
-    images: string[];
-    brand?: string;
-    type?: string;
-    inStock?: string;
-    rating?: number;
-    numReviews?: number;
-}
-
-export interface FilterState {
-    inStock: boolean;
-    brands: string[];
-    price: string[];
-    rating: string[];
-}
-
-export const SORT_OPTIONS = [
-    'Featured',
-    'Best sellers',
-    'Top Rated',
-    'Price: Low to High',
-    'Price: High to Low',
-    'Newest',
-    'Highest Discount'
-];
 
 export const PRODUCT_TYPES = [
     {
@@ -147,3 +118,37 @@ export const PRODUCT_TYPES = [
         )
     }
 ];
+
+export function DealsTypeCategories({ selectedType, onSelectType }: { selectedType: string; onSelectType: (type: string) => void }) {
+    return (
+        <div className="w-full max-w-full overflow-x-auto scrollbar-none pb-1.5 lg:pb-3">
+            <div className="flex items-center justify-start lg:justify-center gap-2.5 sm:gap-3.5 md:gap-4 lg:gap-5 w-max lg:w-auto mx-auto min-w-full px-1">
+                {PRODUCT_TYPES.map((pt) => {
+                    const isSelected = selectedType.toLowerCase() === pt.type.toLowerCase();
+                    return (
+                        <button
+                            key={pt.id}
+                            onClick={() => onSelectType(isSelected ? '' : pt.type)}
+                            className="flex flex-col items-center gap-1 sm:gap-2 group cursor-pointer shrink-0 transition-transform active:scale-95"
+                        >
+                            <div
+                                className={`w-14 h-14 sm:w-20 sm:h-20 xl:w-24 xl:h-24 rounded-full flex items-center justify-center transition-all ${isSelected
+                                    ? 'bg-[#f0f5f0] border-2 border-[#12592d] text-[#12592d] shadow-xs'
+                                    : 'bg-[#f4f7f4] border border-transparent text-[#12592d] group-hover:bg-[#e6efe6] group-hover:border-[#12592d]/20'
+                                    }`}
+                            >
+                                {pt.icon}
+                            </div>
+                            <span
+                                className={`text-[11px] md:text-[13px] lg:text-[14px] tracking-tight text-center max-w-[85px] sm:max-w-[105px] truncate ${isSelected ? 'text-[#12592d] font-bold' : 'text-gray-700 font-medium group-hover:text-[#12592d]'
+                                    }`}
+                            >
+                                {pt.name}
+                            </span>
+                        </button>
+                    );
+                })}
+            </div>
+        </div>
+    );
+}

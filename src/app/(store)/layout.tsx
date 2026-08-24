@@ -23,15 +23,13 @@ export default function StoreLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <CartProvider>
-      <div className="flex flex-col min-h-screen">
-        <Navbar />
-        <main className="flex-1 flex flex-col">
-          {children}
-        </main>
-        <Footer />
-        <WhatsAppButton />
-      </div>
-    </CartProvider>
+    <div className="flex flex-col min-h-screen">
+      <Navbar />
+      <main className="flex-1 flex flex-col">
+        {children}
+      </main>
+      <Footer />
+      <WhatsAppButton />
+    </div>
   );
 }

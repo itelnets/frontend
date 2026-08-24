@@ -54,7 +54,7 @@ export default function ImageZoom({ src, alt, onHeartClick, isHeartFilled }: Ima
     }, [showShare]);
 
     return (
-        <div className="relative aspect-square w-full sm:aspect-auto sm:w-[400px] sm:h-[400px] bg-white rounded-xl p-2 group mx-auto">
+        <div className="relative aspect-square w-full sm:aspect-auto w-[340px] h-[340px] lg:w-[380px] lg:h-[380px] xl:w-[400px] xl:h-[400px] bg-white rounded-xl p-2 group mx-auto">
             {/* Main Image */}
             <div
                 className="w-full h-full cursor-pointer relative"
@@ -73,7 +73,7 @@ export default function ImageZoom({ src, alt, onHeartClick, isHeartFilled }: Ima
             {/* Zoomed Portal Box (Appears on the right) */}
             {isZoomed && (
                 <div
-                    className="hidden lg:block absolute top-0 left-[calc(100%+40px)] w-[910px] h-[650px] bg-white border border-gray-200 shadow-2xl z-50 rounded-lg overflow-hidden bg-no-repeat"
+                    className="hidden lg:block absolute top-0 left-[calc(100%+5px)] xl:left-[calc(100%+40px)] w-[620px] h-[530px] xl:w-[910px] xl:h-[650px] bg-white border border-gray-200 shadow-2xl z-50 rounded-lg overflow-hidden bg-no-repeat"
                     style={{
                         backgroundImage: `url(${src})`,
                         backgroundPosition: `${position.x * 100}% ${position.y * 100}%`,
