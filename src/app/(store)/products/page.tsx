@@ -7,6 +7,7 @@ import ProductCard from '@/components/ProductCard';
 import SortDropdown from '@/components/SortDropdown';
 import MobileFilterDrawer from '@/components/MobileFilterDrawer';
 import MobileSortDrawer from '@/components/MobileSortDrawer';
+import { DealsTypeCategories } from '../[slug]/components/DealsPageComponents';
 
 interface Product {
     _id: string;
@@ -24,6 +25,7 @@ export default function ProductsPage() {
     const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
     const [mobileFilterView, setMobileFilterView] = useState<'main' | 'brands' | 'ratings' | 'price'>('main');
     const [isMobileSortOpen, setIsMobileSortOpen] = useState(false);
+    const [selectedType, setSelectedType] = useState('');
 
     const [availableBrands, setAvailableBrands] = useState<string[]>([]);
     const [filters, setFilters] = useState({
@@ -95,6 +97,7 @@ export default function ProductsPage() {
 
                 const params: any = {
                     sort: sortOption !== 'Featured' ? sortOption : undefined,
+                    type: selectedType || undefined,
                     inStock: filters.inStock ? 'true' : undefined,
                     brand: filters.brands.length > 0 ? filters.brands.join(',') : undefined,
                     ratings: cleanRatings || undefined,
@@ -120,15 +123,23 @@ export default function ProductsPage() {
         };
 
         fetchProducts();
-    }, [filters, sortOption]);
+    }, [filters, sortOption, selectedType]);
 
 
     return (
-        <div className="flex-1 bg-gray-50 py-2.5 sm:py-5 px-2.5 sm:px-4 lg:px-5 flex flex-col">
-            <div className="flex-1 w-full max-w-[1400px] mx-auto flex flex-col lg:flex-row gap-4 relative">
+        <div className="flex-1 bg-gray-50 py-2.5 sm:py-5 px-2.5 sm:px-4 lg:px-5 flex flex-col min-h-[calc(100vh-145px)]">
+            {/* Top Categories Row of Circles with Icons */}
+            <div className="w-full max-w-[1400px] mx-auto mb-2 sm:mb-4">
+                <DealsTypeCategories
+                    selectedType={selectedType}
+                    onSelectType={(type) => setSelectedType(type)}
+                />
+            </div>
+
+            <div className="flex-1 w-full max-w-[1400px] mx-auto flex flex-col lg:flex-row gap-4 relative min-h-[600px]">
                 {/* Left Sidebar (Filters - Desktop) */}
-                <div className="hidden lg:block w-56 shrink-0 bg-white p-5 rounded-xl border border-gray-200 h-fit self-start sticky top-[175px] shadow-sm max-h-[calc(100vh-180px)] overflow-y-auto scrollbar-thin">
-                    <h2 className="font-bold text-lg text-gray-900 mb-4 border-b border-gray-100 pb-2">Filters</h2>
+                <div className="hidden lg:block w-56 shrink-0 bg-white p-4 sm:p-5 rounded-xl border border-gray-200 h-fit self-start sticky top-[141px] shadow-sm max-h-[calc(100vh-160px)] min-h-[480px] overflow-y-auto scrollbar-thin">
+                    <h2 className="font-bold text-lg text-gray-900 mb-3 border-b border-gray-100 pb-2.5">Filters</h2>
 
                     <div className="mb-6">
                         <label className="flex items-center justify-between cursor-pointer group">
@@ -140,27 +151,37 @@ export default function ProductsPage() {
                         </label>
                     </div>
 
-                    <div className="mb-4 border-t border-gray-100 pt-2">
+                    <div className="mb-3 border-t border-gray-100 pt-2">
                         <h3 className="font-semibold text-sm text-gray-800 mb-3">Brands</h3>
-                        <div className="space-y-2.5 text-sm text-gray-600 max-h-48 overflow-y-auto scrollbar-thin">
-                            {availableBrands.map(brand => (
-                                <label key={brand} className="flex items-start gap-2.5 cursor-pointer group">
-                                    <input
-                                        type="checkbox"
-                                        className="rounded text-[#458500] focus:ring-[#458500] accent-[#458500] w-4 h-4 cursor-pointer mt-0.5"
-                                        checked={filters.brands.includes(brand)}
-                                        onChange={(e) => {
-                                            const newBrands = e.target.checked
-                                                ? [...filters.brands, brand]
-                                                : filters.brands.filter(b => b !== brand);
-                                            setFilters({ ...filters, brands: newBrands });
-                                        }}
-                                    />
-                                    <div className="flex-1 flex justify-between items-start leading-snug">
-                                        <span className="pr-2">{brand}</span>
-                                    </div>
-                                </label>
-                            ))}
+                        <div className="space-y-2.5 text-sm text-gray-600 max-h-48 overflow-y-auto scrollbar-thin min-h-[60px]">
+                            {availableBrands.length > 0 ? (
+                                availableBrands.map(brand => (
+                                    <label key={brand} className="flex items-start gap-2.5 cursor-pointer group">
+                                        <input
+                                            type="checkbox"
+                                            className="rounded text-[#458500] focus:ring-[#458500] accent-[#458500] w-4 h-4 cursor-pointer mt-0.5"
+                                            checked={filters.brands.includes(brand)}
+                                            onChange={(e) => {
+                                                const newBrands = e.target.checked
+                                                    ? [...filters.brands, brand]
+                                                    : filters.brands.filter(b => b !== brand);
+                                                setFilters({ ...filters, brands: newBrands });
+                                            }}
+                                        />
+                                        <div className="flex-1 flex justify-between items-start leading-snug">
+                                            <span className="pr-2">{brand}</span>
+                                        </div>
+                                    </label>
+                                ))
+                            ) : isLoading ? (
+                                <div className="space-y-2 pt-1">
+                                    <div className="h-3.5 bg-gray-100 rounded w-3/4 animate-pulse"></div>
+                                    <div className="h-3.5 bg-gray-100 rounded w-1/2 animate-pulse"></div>
+                                    <div className="h-3.5 bg-gray-100 rounded w-2/3 animate-pulse"></div>
+                                </div>
+                            ) : (
+                                <div className="text-xs text-gray-400 py-1 italic">No brands available</div>
+                            )}
                         </div>
                     </div>
 
@@ -220,7 +241,7 @@ export default function ProductsPage() {
                 </div>
 
                 {/* Main Content Area */}
-                <div className="flex-1 w-full min-w-0">
+                <div className="flex-1 w-full min-w-0 min-h-[600px]">
 
                     {/* Mobile Quick Filters Bar */}
                     <div className="lg:hidden flex items-center gap-2 overflow-x-auto hide-scrollbar pb-1 sm:pb-4 sm:mb-2">
@@ -268,11 +289,11 @@ export default function ProductsPage() {
                     </div>
 
                     {/* Header Bar */}
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-gray-200 pb-3 mb-4 sm:mb-6 sm:bg-white sm:p-4 sm:rounded-xl sm:shadow-sm mt-1 sm:mt-0">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between sm:border border-gray-200 pb-0 sm:pb-3 mb-2 sm:mb-3 sm:bg-white sm:p-3 sm:rounded-xl sm:shadow-xs px-0 sm:px-4">
                         {/* Desktop Header */}
                         <div className="hidden sm:block">
-                            <h1 className="text-[18px] sm:text-[20px] text-gray-900 font-bold">
-                                All Products <span className="text-gray-500 font-normal text-[18px] sm:text-[20px]">({products.length})</span>
+                            <h1 className="text-[18px] sm:text-[20px] text-gray-900 font-bold capitalize">
+                                {selectedType ? selectedType : filters.brands.length === 1 ? filters.brands[0] : 'All Products'} <span className="text-gray-500 font-normal text-[18px] sm:text-[20px]">({products.length})</span>
                             </h1>
                         </div>
                         <div className="hidden sm:flex items-center gap-3 text-sm mt-4 sm:mt-0">

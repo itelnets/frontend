@@ -53,7 +53,7 @@ export function DealsHeroBanner({
 
 export function DealsTypeCategories({ selectedType, onSelectType }: { selectedType: string; onSelectType: (type: string) => void }) {
     return (
-        <div className="w-full max-w-full overflow-x-auto scrollbar-none pt-1.5 sm:pt-3 pb-1.5 lg:pb-3">
+        <div className="w-full max-w-full overflow-x-auto scrollbar-none pb-1.5 lg:pb-3">
             <div className="flex items-center justify-start lg:justify-center gap-2.5 sm:gap-3.5 md:gap-4 lg:gap-5 w-max lg:w-auto mx-auto min-w-full px-1">
                 {PRODUCT_TYPES.map((pt) => {
                     const isSelected = selectedType.toLowerCase() === pt.type.toLowerCase();
@@ -95,8 +95,8 @@ export function DealsSidebarFilters({
     availableBrands: string[];
 }) {
     return (
-        <div className="hidden lg:block w-56 shrink-0 bg-white p-5 rounded-xl border border-gray-200 h-fit self-start sticky top-[175px] shadow-sm max-h-[calc(100vh-180px)] overflow-y-auto scrollbar-thin">
-            <h2 className="font-bold text-lg text-gray-900 mb-4 border-b border-gray-100 pb-2">Filters</h2>
+        <div className="hidden lg:block w-56 shrink-0 bg-white p-4 sm:p-5 rounded-xl border border-gray-200 h-fit self-start sticky top-[141px] shadow-sm max-h-[calc(100vh-160px)] min-h-[480px] overflow-y-auto scrollbar-thin">
+            <h2 className="font-bold text-lg text-gray-900 mb-3 border-b border-gray-100 pb-2.5">Filters</h2>
 
             <div className="mb-6">
                 <label className="flex items-center justify-between cursor-pointer group">

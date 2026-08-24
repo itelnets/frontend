@@ -194,9 +194,11 @@ export default function ProductDetailsPage() {
                 {displayProduct.name}
             </h1>
 
-            <div className="text-[12px] sm:text-sm text-gray-600 mb-1">
-                By <Link href="#" className="text-[#0052A5]">{displayProduct.manufacturer}</Link>
-            </div>
+            {(displayProduct.manufacturer || displayProduct.brand) && (
+                <div className="text-[12px] sm:text-sm text-gray-600 mb-1">
+                    By <Link href={`/products?brand=${encodeURIComponent(displayProduct.manufacturer || displayProduct.brand || '')}`} className="text-[#0052A5] hover:underline">{displayProduct.manufacturer || displayProduct.brand}</Link>
+                </div>
+            )}
 
             <div className="flex flex-wrap items-center gap-2 lg:gap-4 text-xs lg:text-sm lg:border-b lg:border-gray-100 lg:pb-4">
 
