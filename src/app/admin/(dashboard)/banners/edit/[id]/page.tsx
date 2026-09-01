@@ -60,22 +60,56 @@ export default function EditBannerPage({ params }: { params: Promise<{ id: strin
         }
     };
 
-    const processFile = (file: File) => {
-        if (!file.type.match(/image\/(jpeg|jpg|png)/)) {
-            toast.error('Please upload a JPG or PNG image.');
+    const processFile = async (file: File) => {
+        if (!file.type.match(/image\/(jpeg|jpg|png|webp)/)) {
+            toast.error('Please upload a JPG, PNG, or WEBP image.');
             return;
         }
 
         const img = new Image();
+        const objectUrl = URL.createObjectURL(file);
         img.onload = () => {
+            const width = img.width;
+            const height = img.height;
+            setImageDimensions({ width, height });
+
+            // If file size > 1MB, compress to JPEG using canvas to stay well within server/Nginx payload limits
+            if (file.size > 1 * 1024 * 1024) {
+                const canvas = document.createElement('canvas');
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                if (ctx) {
+                    ctx.drawImage(img, 0, 0, width, height);
+                    canvas.toBlob(
+                        (blob) => {
+                            if (blob) {
+                                const compressedFile = new File([blob], file.name.replace(/\.[^/.]+$/, "") + ".jpg", {
+                                    type: 'image/jpeg',
+                                    lastModified: Date.now(),
+                                });
+                                setSelectedFile(compressedFile);
+                                setPreviewUrl(URL.createObjectURL(compressedFile));
+                                toast.success(`Image compressed automatically (${(file.size / (1024 * 1024)).toFixed(1)}MB → ${(compressedFile.size / (1024 * 1024)).toFixed(2)}MB)`);
+                            } else {
+                                setSelectedFile(file);
+                                setPreviewUrl(objectUrl);
+                            }
+                        },
+                        'image/jpeg',
+                        0.85
+                    );
+                    return;
+                }
+            }
+
             setSelectedFile(file);
-            setPreviewUrl(URL.createObjectURL(file));
-            setImageDimensions({ width: img.width, height: img.height });
+            setPreviewUrl(objectUrl);
         };
         img.onerror = () => {
             toast.error('Invalid image file.');
         };
-        img.src = URL.createObjectURL(file);
+        img.src = objectUrl;
     };
 
     const handleDragOver = (e: React.DragEvent) => {
