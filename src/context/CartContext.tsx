@@ -93,8 +93,18 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
                 setCartItems(data.items || []);
                 setSavedForLater(normalizeProductList(data.savedItems || []));
             }
-        } catch (error) {
-            console.error('Failed to fetch backend cart', error);
+        } catch (error: any) {
+            if (error.response?.status === 401) {
+                localStorage.removeItem('userInfo');
+                const storedCart = localStorage.getItem('cart');
+                if (storedCart) {
+                    try {
+                        setCartItems(JSON.parse(storedCart));
+                    } catch (e) { }
+                }
+            } else {
+                console.error('Failed to fetch backend cart', error);
+            }
         } finally {
             setIsCartLoading(false);
         }
@@ -109,8 +119,18 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
                 try {
                     const { data } = await apiGetWishlist();
                     setMyLists(normalizeProductList(data.wishlist || []));
-                } catch (error) {
-                    console.error('Failed to fetch wishlist API', error);
+                } catch (error: any) {
+                    if (error.response?.status === 401) {
+                        localStorage.removeItem('userInfo');
+                        const storedLists = localStorage.getItem('myLists');
+                        if (storedLists) {
+                            try {
+                                setMyLists(JSON.parse(storedLists));
+                            } catch (e) { }
+                        }
+                    } else {
+                        console.error('Failed to fetch wishlist API', error);
+                    }
                 }
             } else {
                 // guests: load from localStorage
