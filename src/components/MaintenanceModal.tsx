@@ -8,16 +8,17 @@ export default function MaintenanceModal() {
     const pingServer = async (showLoader = false) => {
         if (showLoader) setIsChecking(true);
         try {
-            const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-            if (!apiUrl) return;
-            const pingUrl = apiUrl.replace(/\/api\/?$/, '').replace(/\/+$/, '') || '/';
+            const rawUrl = process.env.NEXT_PUBLIC_API_URL || '';
+            if (!rawUrl) return;
+            // Clean double slashes while preserving scheme (http:// or https://)
+            const cleanApiUrl = rawUrl.replace(/([^:]\/)\/+/g, '$1').replace(/\/+$/, '');
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), 15000);
 
-            const res = await fetch(pingUrl, { signal: controller.signal });
+            const res = await fetch(cleanApiUrl, { signal: controller.signal });
             clearTimeout(timeoutId);
 
-            if (res && (res.ok || res.status === 200)) {
+            if (res && res.status < 500) {
                 window.location.reload();
             }
         } catch (e) {
