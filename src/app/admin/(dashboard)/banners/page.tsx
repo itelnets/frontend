@@ -57,58 +57,25 @@ export default function BannersPage() {
         e.target.value = ''; // Reset
     };
 
-    const processFile = async (file: File) => {
-        const allowedExtensions = ['jpg', 'jpeg', 'png', 'webp'];
+    const processFile = (file: File) => {
+        const allowedExtensions = ['jpg', 'jpeg', 'png'];
         const fileExtension = file.name.split('.').pop()?.toLowerCase() || '';
         if (!allowedExtensions.includes(fileExtension)) {
-            toast.error('Invalid file format. Only JPG, JPEG, PNG, and WEBP formats are supported.');
+            toast.error('Invalid file format. Only JPG, JPEG, and PNG formats are supported.');
             return;
         }
 
-        const img = new Image();
-        const objectUrl = URL.createObjectURL(file);
-        img.onload = () => {
-            const width = img.width;
-            const height = img.height;
-            setImageDimensions({ width, height });
-
-            // If file size > 1MB, compress to JPEG using canvas to stay well within server/Nginx payload limits
-            if (file.size > 1 * 1024 * 1024) {
-                const canvas = document.createElement('canvas');
-                canvas.width = width;
-                canvas.height = height;
-                const ctx = canvas.getContext('2d');
-                if (ctx) {
-                    ctx.drawImage(img, 0, 0, width, height);
-                    canvas.toBlob(
-                        (blob) => {
-                            if (blob) {
-                                const compressedFile = new File([blob], file.name.replace(/\.[^/.]+$/, "") + ".jpg", {
-                                    type: 'image/jpeg',
-                                    lastModified: Date.now(),
-                                });
-                                setSelectedFile(compressedFile);
-                                setPreviewUrl(URL.createObjectURL(compressedFile));
-                                toast.success(`Image compressed automatically (${(file.size / (1024 * 1024)).toFixed(1)}MB → ${(compressedFile.size / (1024 * 1024)).toFixed(2)}MB)`);
-                            } else {
-                                setSelectedFile(file);
-                                setPreviewUrl(objectUrl);
-                            }
-                        },
-                        'image/jpeg',
-                        0.85
-                    );
-                    return;
-                }
-            }
-
-            setSelectedFile(file);
-            setPreviewUrl(objectUrl);
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            const img = new Image();
+            img.onload = () => {
+                setImageDimensions({ width: img.width, height: img.height });
+                setSelectedFile(file);
+                setPreviewUrl(URL.createObjectURL(file));
+            };
+            img.src = event.target?.result as string;
         };
-        img.onerror = () => {
-            toast.error('Invalid image file.');
-        };
-        img.src = objectUrl;
+        reader.readAsDataURL(file);
     };
 
     const handleDragOver = (e: React.DragEvent) => {
