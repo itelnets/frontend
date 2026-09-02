@@ -42,7 +42,7 @@ export const useRazorpayPayment = () => {
                     product: item.product._id,
                     name: item.product.name,
                     qty: item.quantity,
-                    image: item.product.images?.[0] || '',
+                    image: item.product.images?.[0] || item.product.image || '/placeholder.png',
                     price: item.product.discount > 0 ? Math.round(item.product.price * (1 - item.product.discount / 100)) : item.product.price
                 })),
                 shippingAddress: {
