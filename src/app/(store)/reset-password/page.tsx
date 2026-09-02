@@ -12,6 +12,7 @@ function ResetPasswordForm() {
     const [showPassword, setShowPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [showPasswordErrors, setShowPasswordErrors] = useState(false);
+    const [isSuccess, setIsSuccess] = useState(false);
     const router = useRouter();
     const searchParams = useSearchParams();
     const token = searchParams.get('token');
@@ -49,9 +50,8 @@ function ResetPasswordForm() {
         setIsLoading(true);
         try {
             const { data } = await api.post('/auth/reset-password', { token, newPassword });
+            setIsSuccess(true);
             toast.success(data.message);
-            setNewPassword('');
-            setConfirmPassword('');
             await new Promise(resolve => setTimeout(resolve, 1500));
             router.push('/login');
         } catch (err: any) {
@@ -96,6 +96,7 @@ function ResetPasswordForm() {
                                         required
                                         value={newPassword}
                                         onChange={(e) => setNewPassword(e.target.value)}
+                                        autoComplete="new-password"
                                         className="block w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-[#458500] focus:ring-[#458500] transition duration-200 outline-none text-sm pr-10"
                                         placeholder="••••••••"
                                     />
@@ -112,10 +113,10 @@ function ResetPasswordForm() {
                                     </button>
                                 </div>
                                 <div className="mt-2 flex flex-wrap gap-2 text-xs">
-                                    <span className={`transition-all duration-300 px-2 py-1 rounded-md border ${/[A-Z]/.test(newPassword) ? 'opacity-100 border-[#458500] text-[#458500] bg-[#458500]/10' : (showPasswordErrors && !/[A-Z]/.test(newPassword) ? 'opacity-100 border-red-500 text-red-700 bg-red-50' : 'opacity-40 border-gray-300 text-gray-500 bg-gray-50')}`}>Capital</span>
-                                    <span className={`transition-all duration-300 px-2 py-1 rounded-md border ${/[a-z]/.test(newPassword) ? 'opacity-100 border-[#458500] text-[#458500] bg-[#458500]/10' : (showPasswordErrors && !/[a-z]/.test(newPassword) ? 'opacity-100 border-red-500 text-red-700 bg-red-50' : 'opacity-40 border-gray-300 text-gray-500 bg-gray-50')}`}>Lowercase</span>
-                                    <span className={`transition-all duration-300 px-2 py-1 rounded-md border ${/[0-9]/.test(newPassword) ? 'opacity-100 border-[#458500] text-[#458500] bg-[#458500]/10' : (showPasswordErrors && !/[0-9]/.test(newPassword) ? 'opacity-100 border-red-500 text-red-700 bg-red-50' : 'opacity-40 border-gray-300 text-gray-500 bg-gray-50')}`}>Numeric</span>
-                                    <span className={`transition-all duration-300 px-2 py-1 rounded-md border ${/[^A-Za-z0-9]/.test(newPassword) && newPassword.length > 0 ? 'opacity-100 border-[#458500] text-[#458500] bg-[#458500]/10' : (showPasswordErrors && (!/[^A-Za-z0-9]/.test(newPassword) || newPassword.length === 0) ? 'opacity-100 border-red-500 text-red-700 bg-red-50' : 'opacity-40 border-gray-300 text-gray-500 bg-gray-50')}`}>Special</span>
+                                    <span className={`transition-all duration-300 px-2 py-1 rounded-md border ${isSuccess || /[A-Z]/.test(newPassword) ? 'opacity-100 border-[#458500] text-[#458500] bg-[#458500]/10' : (showPasswordErrors && !/[A-Z]/.test(newPassword) ? 'opacity-100 border-red-500 text-red-700 bg-red-50' : 'opacity-40 border-gray-300 text-gray-500 bg-gray-50')}`}>Capital</span>
+                                    <span className={`transition-all duration-300 px-2 py-1 rounded-md border ${isSuccess || /[a-z]/.test(newPassword) ? 'opacity-100 border-[#458500] text-[#458500] bg-[#458500]/10' : (showPasswordErrors && !/[a-z]/.test(newPassword) ? 'opacity-100 border-red-500 text-red-700 bg-red-50' : 'opacity-40 border-gray-300 text-gray-500 bg-gray-50')}`}>Lowercase</span>
+                                    <span className={`transition-all duration-300 px-2 py-1 rounded-md border ${isSuccess || /[0-9]/.test(newPassword) ? 'opacity-100 border-[#458500] text-[#458500] bg-[#458500]/10' : (showPasswordErrors && !/[0-9]/.test(newPassword) ? 'opacity-100 border-red-500 text-red-700 bg-red-50' : 'opacity-40 border-gray-300 text-gray-500 bg-gray-50')}`}>Numeric</span>
+                                    <span className={`transition-all duration-300 px-2 py-1 rounded-md border ${isSuccess || (/[^A-Za-z0-9]/.test(newPassword) && newPassword.length > 0) ? 'opacity-100 border-[#458500] text-[#458500] bg-[#458500]/10' : (showPasswordErrors && (!/[^A-Za-z0-9]/.test(newPassword) || newPassword.length === 0) ? 'opacity-100 border-red-500 text-red-700 bg-red-50' : 'opacity-40 border-gray-300 text-gray-500 bg-gray-50')}`}>Special</span>
                                 </div>
                             </div>
 
@@ -130,6 +131,7 @@ function ResetPasswordForm() {
                                         required
                                         value={confirmPassword}
                                         onChange={(e) => setConfirmPassword(e.target.value)}
+                                        autoComplete="new-password"
                                         className="block w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-[#458500] focus:ring-[#458500] transition duration-200 outline-none text-sm pr-10"
                                         placeholder="••••••••"
                                     />
