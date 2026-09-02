@@ -51,14 +51,14 @@ function ResetPasswordForm() {
         try {
             const { data } = await api.post('/auth/reset-password', { token, newPassword });
             setIsSuccess(true);
+            await new Promise(resolve => setTimeout(resolve, 800));
+            setIsLoading(false);
             toast.success(data.message);
-            await new Promise(resolve => setTimeout(resolve, 1500));
             router.push('/login');
         } catch (err: any) {
+            setIsLoading(false);
             const errorMessage = err.response?.data?.message || 'Password reset failed';
             toast.error(errorMessage);
-        } finally {
-            setIsLoading(false);
         }
     };
 
@@ -151,6 +151,16 @@ function ResetPasswordForm() {
                     </form>
                 </div>
             </div>
+
+            {isLoading && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/40 backdrop-blur-sm">
+                    <div className="flex flex-col items-center justify-center p-8 bg-white/90 rounded-2xl shadow-2xl border border-gray-100">
+                        <Spinner className="w-12 h-12 text-[#458500] mb-4 animate-spin" />
+                        <p className="text-base font-bold text-gray-800 tracking-wide">Authenticating...</p>
+                        <p className="text-xs text-gray-500 mt-2">Please wait while we verify your credentials</p>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

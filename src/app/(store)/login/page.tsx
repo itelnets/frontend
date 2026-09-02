@@ -83,8 +83,9 @@ export default function LoginPage() {
                 localStorage.removeItem(failedAttemptsKey);
                 localStorage.removeItem(lastFailedKey);
 
+                await new Promise(resolve => setTimeout(resolve, 800));
+                setIsLoading(false);
                 toast.success(data.message);
-                await new Promise(resolve => setTimeout(resolve, 1500));
                 setIsForgotPassword(false);
             } catch (err: any) {
                 if (err.response?.status === 401 || err.response?.status === 400 || err.response?.status === 404) {
@@ -95,6 +96,7 @@ export default function LoginPage() {
                     localStorage.setItem(failedAttemptsKey, '5');
                     localStorage.setItem(lastFailedKey, Date.now().toString());
                 }
+                setIsLoading(false);
                 toast.error(err.response?.data?.message || 'Failed to send reset link');
             } finally {
                 setIsLoading(false);
@@ -114,16 +116,15 @@ export default function LoginPage() {
                 api.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
             }
 
-            const completeLogin = () => {
-                sessionStorage.clear();
-                localStorage.setItem('userInfo', JSON.stringify(data));
-                document.cookie = "isLoggedIn=true; path=/; max-age=2592000"; // 30 days
-                window.dispatchEvent(new Event('userInfoUpdated'));
-                toast.success(data.message);
-                router.push(data.role === 'admin' ? '/admin/users' : '/');
-            };
+            await new Promise(resolve => setTimeout(resolve, 800));
+            setIsLoading(false);
 
-            completeLogin();
+            sessionStorage.clear();
+            localStorage.setItem('userInfo', JSON.stringify(data));
+            document.cookie = "isLoggedIn=true; path=/; max-age=2592000"; // 30 days
+            window.dispatchEvent(new Event('userInfoUpdated'));
+            toast.success(data.message);
+            router.push(data.role === 'admin' ? '/admin/users' : '/');
         } catch (err: any) {
             const errorMessage = err.response?.data?.message || 'Login failed';
 
@@ -137,8 +138,8 @@ export default function LoginPage() {
                 localStorage.setItem(lastFailedKey, Date.now().toString());
             }
 
-            toast.error(errorMessage);
             setIsLoading(false);
+            toast.error(errorMessage);
         }
     };
 
