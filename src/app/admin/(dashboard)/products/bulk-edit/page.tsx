@@ -11,8 +11,8 @@ import BulkProductTable, { ProductItem } from '@/components/BulkProductTable';
 const BULK_FIELDS = [
     { id: 'name', label: 'Product Name', type: 'text', placeholder: 'e.g. Premium Widget' },
     { id: 'type', label: 'Product Type', type: 'typeSelect', placeholder: 'Select Product Type' },
-    { id: 'brand', label: 'Brand', type: 'text', placeholder: 'e.g. Itelents Brands' },
-    { id: 'manufacturer', label: 'Manufacturer', type: 'text', placeholder: 'e.g. Itelents Healthcare' },
+    { id: 'brand', label: 'Brand', type: 'text', placeholder: 'e.g. Pratham Herbs Brands' },
+    { id: 'manufacturer', label: 'Manufacturer', type: 'text', placeholder: 'e.g. Pratham Herbs Healthcare' },
     { id: 'price', label: 'Price (₹)', type: 'number', placeholder: '0.00' },
     { id: 'discount', label: 'Discount (%)', type: 'number', placeholder: '10' },
     { id: 'inStock', label: 'In Stock', type: 'radio', options: ['Yes', 'No'] },

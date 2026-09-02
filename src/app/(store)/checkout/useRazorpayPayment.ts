@@ -68,7 +68,7 @@ export const useRazorpayPayment = () => {
                 key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID, // Enter the Key ID generated from the Dashboard
                 amount: createdOrderResponse.amount,
                 currency: createdOrderResponse.currency,
-                name: 'Itelents E-commerce',
+                name: 'Pratham Herbs',
                 description: 'Order Payment',
                 order_id: createdOrderResponse.razorpayOrderId,
                 handler: async function (response: any) {

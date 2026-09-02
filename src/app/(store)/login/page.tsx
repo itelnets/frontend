@@ -162,7 +162,7 @@ export default function LoginPage() {
 
                 <div className="text-center mb-4">
                     <p className="text-sm text-gray-600">
-                        {isForgotPassword ? 'Enter your email to receive a reset link' : 'Welcome back to Itelents'}
+                        {isForgotPassword ? 'Enter your email to receive a reset link' : 'Welcome back to Pratham Herbs'}
                     </p>
                 </div>
 

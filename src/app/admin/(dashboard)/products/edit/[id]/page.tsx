@@ -506,11 +506,11 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm font-semibold text-gray-700 mb-2">Brand <span className="text-red-500">*</span></label>
-                                    <input name="brand" value={formData.brand} onChange={handleChange} className={`w-full px-3 py-2 text-sm bg-white/50 border ${showFormErrors && !formData.brand.trim() ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-green-600'} rounded-md focus:outline-none transition-all outline-none placeholder-gray-400`} placeholder="e.g. Itelents Brands" />
+                                    <input name="brand" value={formData.brand} onChange={handleChange} className={`w-full px-3 py-2 text-sm bg-white/50 border ${showFormErrors && !formData.brand.trim() ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-green-600'} rounded-md focus:outline-none transition-all outline-none placeholder-gray-400`} placeholder="e.g. Pratham Herbs Brands" />
                                 </div>
                                 <div>
                                     <label className="block text-sm font-semibold text-gray-700 mb-2">Manufacturer <span className="text-red-500">*</span></label>
-                                    <input name="manufacturer" value={formData.manufacturer} onChange={handleChange} className={`w-full px-3 py-2 text-sm bg-white/50 border ${showFormErrors && !formData.manufacturer.trim() ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-green-600'} rounded-md focus:outline-none transition-all outline-none placeholder-gray-400`} placeholder="e.g. Itelents Brands" />
+                                    <input name="manufacturer" value={formData.manufacturer} onChange={handleChange} className={`w-full px-3 py-2 text-sm bg-white/50 border ${showFormErrors && !formData.manufacturer.trim() ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-green-600'} rounded-md focus:outline-none transition-all outline-none placeholder-gray-400`} placeholder="e.g. Pratham Herbs Brands" />
                                 </div>
                             </div>
 

@@ -70,7 +70,7 @@ function ResetPasswordForm() {
             <div className="hidden lg:flex lg:w-1/2 bg-[#458500] relative items-center justify-center">
                 <div className="absolute inset-0 opacity-20 bg-[url('https://www.toptal.com/designers/subtlepatterns/uploads/leaf.png')]"></div>
                 <div className="z-10 text-center px-10">
-                    <h1 className="text-5xl text-white mb-4 font-bold">Itelents</h1>
+                    <h1 className="text-5xl text-white mb-4 font-bold">Pratham Herbs</h1>
                     <p className="text-green-100 text-xl font-light">Revitalize your life with nature's wisdom.</p>
                 </div>
             </div>

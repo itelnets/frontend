@@ -65,7 +65,7 @@ export default function SearchBar({ isMobile = false }: { isMobile?: boolean }) 
             </div>
             <input
                 type="text"
-                placeholder="Search all of Itelents"
+                placeholder="Search all of Pratham Herbs"
                 value={query}
                 autoCapitalize="none"
                 onChange={(e) => setQuery(e.target.value)}

@@ -108,7 +108,7 @@ const Navbar = () => {
                                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
                             </button>
                             <Link href="/" className="font-bold text-[23px] sm:text-[30px] tracking-normal shrink-0">
-                                Itelents
+                                Pratham Herbs
                             </Link>
                         </div>
 
@@ -141,7 +141,7 @@ const Navbar = () => {
                                             {/* Left Side: Orders Info */}
                                             <div className="hidden sm:flex w-[170px] bg-gray-50 p-3 sm:p-4 border-r border-gray-100 flex-col items-center text-center">
                                                 <div className="text-sm font-bold text-[#458500] mb-1 flex items-center gap-1">
-                                                    Itelents <span className="text-gray-400 font-normal text-xs">| ORDERS</span>
+                                                    Pratham Herbs <span className="text-gray-400 font-normal text-xs">| ORDERS</span>
                                                 </div>
                                                 <div className="text-[10px] text-gray-500 mt-2">Total Paid Orders</div>
                                                 <div className="text-lg font-extrabold text-[#458500] my-1">
@@ -219,7 +219,7 @@ const Navbar = () => {
                                             {/* Left Side: Orders Info */}
                                             <div className="hidden sm:flex w-[170px] bg-gray-50 p-3 sm:p-4 border-r border-gray-100 flex-col items-center text-center">
                                                 <div className="text-sm font-bold text-[#458500] mb-1 flex items-center gap-1">
-                                                    Itelents <span className="text-gray-400 font-normal text-xs">| ORDERS</span>
+                                                    Pratham Herbs <span className="text-gray-400 font-normal text-xs">| ORDERS</span>
                                                 </div>
                                                 <div className="text-[10px] text-gray-500 mt-2">Total Paid Orders</div>
                                                 <div className="text-lg font-extrabold text-[#458500] my-1">

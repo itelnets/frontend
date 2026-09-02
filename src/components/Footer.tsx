@@ -64,7 +64,7 @@ export default function Footer() {
                     <div className="lg:col-span-2 flex flex-col items-center sm:items-start space-y-3">
                         <Link href="/" className="inline-block">
                             <span className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">
-                                Itelents
+                                Pratham Herbs
                             </span>
                         </Link>
                         <p className="text-xs sm:text-sm text-gray-600 leading-relaxed max-w-sm text-center sm:text-left">
@@ -149,8 +149,8 @@ export default function Footer() {
                                 <svg className="w-4 h-4 text-[#458500] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                                 </svg>
-                                <a href="mailto:itelnets3@gmail.com" className="hover:text-[#458500] transition-colors">
-                                    itelnets3@gmail.com
+                                <a href="mailto:care@prathamherbs.com" className="hover:text-[#458500] transition-colors">
+                                    care@prathamherbs.com
                                 </a>
                             </div>
 
@@ -188,7 +188,7 @@ export default function Footer() {
             {/* Bottom Copyright & Security */}
             <div className="border-t border-gray-200 bg-[#e2e8f0]/40 py-4 px-4 text-xs text-gray-500">
                 <div className="max-w-[1400px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
-                    <p>© {new Date().getFullYear()} Itelents. All rights reserved.</p>
+                    <p>© {new Date().getFullYear()} Pratham Herbs. All rights reserved.</p>
                     <div className="flex items-center gap-4 text-gray-500 text-[11px] sm:text-xs">
                         <span>100% Encrypted &amp; Secure Checkout</span>
                     </div>

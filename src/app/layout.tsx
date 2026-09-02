@@ -15,7 +15,7 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "Itelents",
+  title: "Pratham Herbs",
   description: "Premium Ayurvedic Products",
 };
 
