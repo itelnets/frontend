@@ -7,6 +7,8 @@ import ProductCard from '@/components/ProductCard';
 import SortDropdown from '@/components/SortDropdown';
 import MobileFilterDrawer from '@/components/MobileFilterDrawer';
 import MobileSortDrawer from '@/components/MobileSortDrawer';
+import { ThreeDotsLoader } from '@/components/ThreeDotsLoader';
+import { ProductPagination } from '@/components/ProductPagination';
 
 interface Product {
     _id: string;
@@ -22,8 +24,11 @@ import { useParams } from 'next/navigation';
 export default function TypeProductsPage() {
     const { type: paramsType } = useParams<{ type: string }>();
     const [products, setProducts] = useState<Product[]>([]);
+    const [totalProducts, setTotalProducts] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
     const [sortOption, setSortOption] = useState('Featured');
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 30;
     const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
     const [mobileFilterView, setMobileFilterView] = useState<'main' | 'brands' | 'ratings' | 'price'>('main');
     const [isMobileSortOpen, setIsMobileSortOpen] = useState(false);
@@ -58,6 +63,10 @@ export default function TypeProductsPage() {
         }
     }, [paramsType]);
 
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [paramsType, filters, sortOption]);
+
     const handleSortChange = (newSort: string) => {
         setSortOption(newSort);
         if (typeof window !== 'undefined') {
@@ -73,6 +82,7 @@ export default function TypeProductsPage() {
 
     useEffect(() => {
         const fetchProducts = async () => {
+            const startTime = Date.now();
             try {
                 setIsLoading(true);
                 const typeRaw = decodeURIComponent(paramsType);
@@ -111,7 +121,9 @@ export default function TypeProductsPage() {
                     inStock: filters.inStock ? 'true' : undefined,
                     brand: filters.brands.length > 0 ? filters.brands.join(',') : undefined,
                     ratings: cleanRatings || undefined,
-                    includeFilters: availableBrands.length === 0
+                    includeFilters: availableBrands.length === 0,
+                    page: currentPage,
+                    limit: itemsPerPage
                 };
 
                 if (minPrice !== undefined) params.minPrice = minPrice;
@@ -123,7 +135,17 @@ export default function TypeProductsPage() {
                     setAvailableBrands(data.filters.brands);
                 }
 
-                setProducts(data.products || data);
+                const rawProducts = Array.isArray(data) ? data : (data.products || []);
+                const totalCount = data.totalProducts ?? (Array.isArray(data) ? data.length : rawProducts.length);
+
+                const elapsedTime = Date.now() - startTime;
+                const minLoaderDelay = 2000;
+                if (elapsedTime < minLoaderDelay) {
+                    await new Promise(resolve => setTimeout(resolve, minLoaderDelay - elapsedTime));
+                }
+
+                setProducts(rawProducts);
+                setTotalProducts(totalCount);
             } catch (error) {
                 console.error('Failed to fetch products', error);
                 toast.error('Failed to load products');
@@ -133,7 +155,7 @@ export default function TypeProductsPage() {
         };
 
         fetchProducts();
-    }, [paramsType, filters, sortOption]);
+    }, [paramsType, filters, sortOption, currentPage]);
 
 
     return (
@@ -295,7 +317,7 @@ export default function TypeProductsPage() {
                         {/* Desktop Header */}
                         <div className="hidden sm:block">
                             <h1 className="text-[18px] sm:text-[20px] text-gray-900 font-bold capitalize">
-                                {decodeURIComponent(paramsType)} <span className="text-gray-500 font-normal text-[18px] sm:text-[20px]">({products.length})</span>
+                                {paramsType ? decodeURIComponent(paramsType) : 'Category Products'} <span className="text-gray-500 font-normal text-[18px] sm:text-[20px]">({totalProducts})</span>
                             </h1>
                         </div>
                         <div className="hidden sm:flex items-center gap-3 text-sm mt-4 sm:mt-0">
@@ -311,9 +333,9 @@ export default function TypeProductsPage() {
                         </div>
 
                         {/* Mobile Header */}
-                        <div className="sm:hidden flex items-center justify-between w-full px-1 mt-1 sm:mt-0">
+                        <div className="sm:hidden flex items-center justify-between w-full px-1">
                             <div className="text-sm font-medium text-gray-600">
-                                {products.length.toLocaleString()} results
+                                {totalProducts.toLocaleString()} results
                             </div>
                             <button
                                 onClick={() => setIsMobileSortOpen(true)}
@@ -325,43 +347,60 @@ export default function TypeProductsPage() {
                         </div>
                     </div>
 
-                    <div className={`transition-opacity duration-200 ${isLoading && products.length > 0 ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
-                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-5 gap-2 sm:gap-3">
-                            {products.map((product) => (
-                                <div key={product._id} className="h-full">
-                                    <ProductCard product={product} />
-                                </div>
-                            ))}
-                        </div>
-
-                        {!isLoading && products.length === 0 && (
-                            <div className="flex flex-col items-center justify-center w-full py-16 sm:py-30 text-center px-4 bg-white rounded-xl border border-gray-100 shadow-sm">
-                                <div className="w-12 h-12 sm:w-16 sm:h-16 lg:w-24 lg:h-24 bg-gray-50 rounded-full flex items-center justify-center mb-4 sm:mb-6">
-                                    <svg className="w-10 h-10 sm:w-12 sm:h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 13.5l1.5-1.5m0 0l1.5-1.5m-1.5 1.5l-1.5-1.5m1.5 1.5l1.5 1.5" />
-                                    </svg>
-                                </div>
-                                <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">No products found</h3>
-                                <p className="text-sm sm:text-base text-gray-500 max-w-sm">
-                                    We couldn't find any products matching your current filters. Try adjusting your search criteria to find what you're looking for.
-                                </p>
-                                <button
-                                    onClick={() => setFilters({ inStock: false, brands: [], price: [], rating: [] })}
-                                    className="mt-6 px-6 py-2.5 bg-[#458500] text-white font-medium rounded-lg hover:bg-[#366800] transition-colors shadow-sm text-sm"
-                                >
-                                    Clear all filters
-                                </button>
+                    {isLoading ? (
+                        <ThreeDotsLoader className="py-16" />
+                    ) : (
+                        <div>
+                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-5 gap-2 sm:gap-3">
+                                {products.map((product) => (
+                                    <div key={product._id} className="h-full">
+                                        <ProductCard product={product} />
+                                    </div>
+                                ))}
                             </div>
-                        )}
-                    </div>
+
+                            {totalProducts > 0 && (
+                                <ProductPagination
+                                    currentPage={currentPage}
+                                    totalPages={Math.ceil(totalProducts / itemsPerPage)}
+                                    onPageChange={(p) => {
+                                        setCurrentPage(p);
+                                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                                    }}
+                                    totalItems={totalProducts}
+                                    itemsPerPage={itemsPerPage}
+                                />
+                            )}
+
+                            {products.length === 0 && (
+                                <div className="flex flex-col items-center justify-center w-full py-16 sm:py-30 text-center px-4 bg-white rounded-xl border border-gray-100 shadow-sm">
+                                    <div className="w-12 h-12 sm:w-16 sm:h-16 lg:w-24 lg:h-24 bg-gray-50 rounded-full flex items-center justify-center mb-4 sm:mb-6">
+                                        <svg className="w-10 h-10 sm:w-12 sm:h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 13.5l1.5-1.5m0 0l1.5-1.5m-1.5 1.5l-1.5-1.5m1.5 1.5l1.5 1.5" />
+                                        </svg>
+                                    </div>
+                                    <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">No products found</h3>
+                                    <p className="text-sm sm:text-base text-gray-500 max-w-sm">
+                                        We couldn't find any products matching your current filters. Try adjusting your search criteria to find what you're looking for.
+                                    </p>
+                                    <button
+                                        onClick={() => setFilters({ inStock: false, brands: [], price: [], rating: [] })}
+                                        className="mt-6 px-6 py-2.5 bg-[#458500] text-white font-medium rounded-lg hover:bg-[#366800] transition-colors shadow-sm text-sm"
+                                    >
+                                        Clear all filters
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    )}
                 </div>
             </div>
 
             <MobileFilterDrawer
                 isOpen={isMobileFilterOpen}
                 onClose={() => setIsMobileFilterOpen(false)}
-                totalResults={products.length}
+                totalResults={totalProducts}
                 initialView={mobileFilterView}
                 availableBrands={availableBrands}
                 filters={filters}
@@ -374,7 +413,7 @@ export default function TypeProductsPage() {
                 options={['Featured', 'Best sellers', 'Top Rated', 'Price: Low to High', 'Price: High to Low', 'Newest', 'Heaviest', 'Lightest', 'Highest Discount']}
                 value={sortOption}
                 onChange={handleSortChange}
-                totalResults={products.length}
+                totalResults={totalProducts}
             />
         </div>
     );
