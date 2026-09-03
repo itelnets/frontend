@@ -107,7 +107,7 @@ const Navbar = () => {
                             <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="md:hidden">
                                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
                             </button>
-                            <Link href="/" className="font-bold text-[23px] sm:text-[30px] tracking-normal shrink-0">
+                            <Link href="/" className="font-semibold text-[23px] sm:text-[30px] tracking-normal shrink-0">
                                 Pratham Herbs
                             </Link>
                         </div>

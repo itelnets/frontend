@@ -107,7 +107,7 @@ export default function ProductCard({ product, showHeart = false }: ProductCardP
             </div>
 
             <div className="p-2 sm:p-3 flex-1 flex flex-col relative">
-                <div className="text-[12px] sm:text-[13px] text-gray-800 line-clamp-2 h-[2.5em] leading-tight sm:leading-snug mb-1 sm:mb-2 font-medium group transition-colors overflow-hidden">
+                <div className="text-[12px] sm:text-[13px] text-gray-800 line-clamp-2 min-h-[2.7em] h-[2.7em] leading-snug pb-0.5 mb-1 sm:mb-2 font-medium group transition-colors overflow-hidden">
                     {product.name}
                 </div>
 
