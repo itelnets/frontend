@@ -101,14 +101,19 @@ const Navbar = () => {
             <header ref={headerRef} className="sticky w-full left-0 top-0 z-[100]">
                 {/* Main Green Header */}
                 <div className={`bg-[#458500] text-white transition-all duration-200`}>
-                    <div className={`max-w-[1400px] mx-auto px-3 sm:px-4 py-2 sm:py-3 flex items-center justify-between gap-4`}>
+                    <div className={`max-w-[1400px] mx-auto px-3 sm:px-4 h-[50px] sm:h-auto py-2 sm:py-3 flex items-center justify-between gap-2 sm:gap-3`}>
                         {/* Logo & Mobile Menu */}
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
                             <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="md:hidden">
                                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
                             </button>
-                            <Link href="/" className="font-semibold text-[23px] sm:text-[30px] tracking-normal shrink-0">
-                                Pratham Herbs
+                            <Link href="/" className="shrink-0 flex items-center relative">
+                                <img
+                                    src="/brand_logo.png"
+                                    alt="Pratham Herbs"
+                                    className="h-9 sm:h-12 md:h-14 w-auto object-contain -my-2 sm:-my-3 max-h-[44px] sm:max-h-[56px] scale-105 sm:scale-110 origin-left invert mix-blend-screen"
+                                    style={{ filter: 'invert(1)', mixBlendMode: 'screen' }}
+                                />
                             </Link>
                         </div>
 
