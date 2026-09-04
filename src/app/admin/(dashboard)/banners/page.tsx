@@ -202,7 +202,7 @@ export default function BannersPage() {
         try {
             setBanners(prev => prev.map(b => b._id === bannerId ? { ...b, isActive: nextStatus } : b));
             await updateBanner(bannerId, { isActive: nextStatus });
-            toast.success(`Banner is now ${nextStatus ? 'Visible' : 'Hidden'} on user side`);
+            toast.success(`Banner is now ${nextStatus ? 'visible' : 'hidden'}`);
         } catch (error) {
             console.error('Error toggling banner status:', error);
             setBanners(prev => prev.map(b => b._id === bannerId ? { ...b, isActive: currentStatus } : b));
@@ -400,7 +400,7 @@ export default function BannersPage() {
                                                         >
                                                             <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform ${banner.isActive !== false ? 'translate-x-4.5' : 'translate-x-0.5'}`} />
                                                         </button>
-                                                        <Link href={`/admin/banners/edit/${banner._id}`} title="Edit" className="inline-flex items-center justify-center p-1.5 border border-transparent rounded-md text-green-700 bg-green-50 hover:bg-green-100 focus:outline-none transition-colors shadow-sm">
+                                                        <Link href={`/admin/banners/edit/${banner._id}`} onClick={(e) => { if (banner.isActive === false) { e.preventDefault(); toast.error('First turn on the banner'); } }} title="Edit" className="inline-flex items-center justify-center p-1.5 border border-transparent rounded-md text-green-700 bg-green-50 hover:bg-green-100 focus:outline-none transition-colors shadow-sm">
                                                             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                                             </svg>
@@ -459,7 +459,7 @@ export default function BannersPage() {
                                                     >
                                                         <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform ${banner.isActive !== false ? 'translate-x-4.5' : 'translate-x-0.5'}`} />
                                                     </button>
-                                                    <Link href={`/admin/banners/edit/${banner._id}`} title="Edit" className="inline-flex items-center justify-center p-1.5 border border-transparent rounded-md text-green-700 bg-green-50 hover:bg-green-100 focus:outline-none transition-colors shadow-sm">
+                                                    <Link href={`/admin/banners/edit/${banner._id}`} onClick={(e) => { if (banner.isActive === false) { e.preventDefault(); toast.error('First turn on the banner'); } }} title="Edit" className="inline-flex items-center justify-center p-1.5 border border-transparent rounded-md text-green-700 bg-green-50 hover:bg-green-100 focus:outline-none transition-colors shadow-sm">
                                                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                                         </svg>

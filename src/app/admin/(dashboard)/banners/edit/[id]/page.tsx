@@ -36,14 +36,17 @@ export default function EditBannerPage({ params }: { params: Promise<{ id: strin
         setIsLoading(true);
         try {
             const { getBanners } = await import('../../../../../../services/banner');
-            const data = await getBanners();
+            const data = await getBanners({ isActive: 'all' });
             const found = data.find(b => b._id === bannerId);
-            if (found) {
-                setBanner(found);
-                setPreviewUrl(found.imageUrl);
-            } else {
+            if (!found) {
                 toast.error('Banner not found');
                 router.push('/admin/banners');
+            } else if (found.isActive === false) {
+                toast.error('First turn on the banner');
+                router.push('/admin/banners');
+            } else {
+                setBanner(found);
+                setPreviewUrl(found.imageUrl);
             }
         } catch (error) {
             console.error('Error fetching banner:', error);
