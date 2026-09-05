@@ -41,7 +41,7 @@ export default function PrivacyPolicy() {
                                 <strong>Shipping &amp; Billing Data:</strong> Recipient name, street address, city, state, postal code, landmark, and delivery phone numbers required for order fulfillment.
                             </li>
                             <li>
-                                <strong>Transaction &amp; Payment Logs:</strong> Order details, purchase amounts, item lists, transaction references, and payment confirmation status. Payment processing is handled by certified payment gateways (e.g. Razorpay). We do not store sensitive credit card numbers, CVV codes, or UPI PINs on our servers.
+                                <strong>Transaction &amp; Payment Logs:</strong> Order details, purchase amounts, item lists, transaction references, and payment confirmation status. Payment processing is handled by certified payment gateways (e.g. Cashfree). We do not store sensitive credit card numbers, CVV codes, or UPI PINs on our servers.
                             </li>
                             <li>
                                 <strong>Device &amp; Technical Identifiers:</strong> IP address, browser type, operating system, device models, referring URLs, time stamps, and interaction data collected automatically during browsing.
@@ -63,14 +63,14 @@ export default function PrivacyPolicy() {
 
                         <h2 className="text-[16px] sm:text-lg lg:text-xl font-bold text-gray-900 mt-5 sm:mt-6 !mb-1 sm:!mb-2">4. Information Sharing &amp; Disclosure</h2>
                         <p>
-                            Your privacy is paramount. We do not sell, rent, trade, or monetize your personal information to third-party advertisers. We disclose collected information only under strict confidentiality and operational safeguards to the following recipients:
+                            We do not sell, rent, trade, or monetize your personal information to third-party advertisers. We disclose collected information only under strict confidentiality and operational safeguards to the following recipients:
                         </p>
                         <ul className="list-disc pl-5 space-y-1">
                             <li>
                                 <strong>Logistics &amp; Delivery Carriers:</strong> Courier services and fulfillment partners who require your shipping address and contact phone number to physically deliver packages to your doorstep.
                             </li>
                             <li>
-                                <strong>Financial Processors:</strong> Payment gateway providers (such as Razorpay) necessary to verify, authorize, and process payment transactions safely.
+                                <strong>Financial Processors:</strong> Payment gateway providers (such as Cashfree) necessary to verify, authorize, and process payment transactions safely.
                             </li>
                             <li>
                                 <strong>Legal &amp; Regulatory Authorities:</strong> Government agencies or law enforcement officials when required by law, subpoena, court order, or to defend the legal rights, safety, and property of Pratham Herbs and its users.

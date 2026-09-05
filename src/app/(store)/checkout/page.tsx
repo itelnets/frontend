@@ -8,7 +8,8 @@ import ConfirmModal from '@/components/ConfirmModal';
 import toast from 'react-hot-toast';
 import PaymentMethod from '@/components/PaymentMethod';
 import AddressSection from '@/components/AddressSection';
-import { useRazorpayPayment } from './useRazorpayPayment';
+// import { useRazorpayPayment } from './useRazorpayPayment';
+import { useCashfreePayment } from './useCashfreePayment';
 import { getDoctorStatus } from '@/services/doctor';
 import PromoCodeSection from '@/components/PromoCodeSection';
 
@@ -119,7 +120,7 @@ function CheckoutContent() {
     }, [router]);
 
     const handleGPayProcess = () => {
-        handleRazorpayPayment();
+        handleCashfreePayment();
     };
 
     // Total calculation
@@ -173,11 +174,12 @@ function CheckoutContent() {
         }
     };
 
-    const { handleRazorpayPayment: processRazorpayPayment } = useRazorpayPayment();
+    // const { handleRazorpayPayment: processRazorpayPayment } = useRazorpayPayment();
+    const { handleCashfreePayment: processCashfreePayment } = useCashfreePayment();
 
-    const handleRazorpayPayment = () => {
+    const handleCashfreePayment = () => {
         const activeAddress = savedAddresses.find((a: any) => a._id === selectedAddressMode) || (selectedAddressMode !== 'new' ? savedAddresses[0] : null);
-        processRazorpayPayment({
+        processCashfreePayment({
             activeAddress,
             cartItems,
             subtotal,
@@ -521,7 +523,7 @@ function CheckoutContent() {
                                         toast.error('Please select a payment method');
                                     } else if (selectedPaymentMethod === 'card') {
                                         // setShowCardError(true);
-                                        handleRazorpayPayment();
+                                        handleCashfreePayment();
                                     } else if (selectedPaymentMethod === 'gpay') {
                                         handleGPayProcess();
                                     }

@@ -257,7 +257,7 @@ function AdminOrdersContent() {
                 <ConfirmModal
                     isOpen={!!showRefundConfirm}
                     title="Approve For Return"
-                    description="Are you sure you want to approve and process the refund via Razorpay?"
+                    description="Are you sure you want to approve and process the refund via Cashfree?"
                     onCancel={() => !isRefunding && setShowRefundConfirm(null)}
                     onConfirm={() => handleApproveRefund(showRefundConfirm)}
                     confirmText="Approve"

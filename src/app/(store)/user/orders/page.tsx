@@ -38,7 +38,7 @@ export default function OrdersPage() {
             // Create a temporary link element to trigger the download
             const link = document.createElement('a');
             link.href = url;
-            link.download = `Invoice_${selectedOrder.razorpayOrderId || selectedOrder._id}.pdf`;
+            link.download = `Invoice_${selectedOrder.cashfreeOrderId || selectedOrder.razorpayOrderId || selectedOrder._id}.pdf`;
             document.body.appendChild(link);
             link.click();
 
@@ -182,10 +182,10 @@ export default function OrdersPage() {
                                             </div>
                                         </div>
 
-                                        <div className="sm:w-[240px] sm:border-l sm:border-gray-200 sm:pl-6 flex flex-col justify-between pt-2 sm:pt-0 border-t sm:border-t-0 border-gray-100">
+                                        <div className="sm:w-[270px] shrink-0 sm:border-l sm:border-gray-200 sm:pl-4 md:sm:pl-6 flex flex-col justify-between pt-2 sm:pt-0 border-t sm:border-t-0 border-gray-100">
                                             <div className="flex flex-col gap-0.5">
-                                                <div className="flex justify-between items-center gap-2">
-                                                    <span className={`inline-flex items-center text-[13px] font-bold ${order.status === 'Delivered' || order.status === 'Refunded' ? 'text-green-700' :
+                                                <div className="flex justify-between items-center gap-1 sm:gap-2 flex-wrap sm:flex-nowrap">
+                                                    <span className={`inline-flex items-center text-[12px] sm:text-[13px] font-bold whitespace-nowrap shrink-0 ${order.status === 'Delivered' || order.status === 'Refunded' ? 'text-green-700' :
                                                         order.status === 'Captured' ? 'text-green-700' :
                                                             (order.status === 'Cancelled' || order.status === 'Pending' || order.status === 'Refund Failed') ? 'text-red-800' :
                                                                 (order.status === 'Refund Requested' || order.refundStatus === 'requested') ? 'text-blue-700' :
@@ -194,15 +194,16 @@ export default function OrdersPage() {
                                                         {(order.status === 'Cancelled' || order.status === 'Pending') ? 'Failed' : order.status === 'Captured' ? 'Success' : order.status}
                                                     </span>
                                                     {order.paymentMethod && (
-                                                        <span className="text-[11px] sm:text-[13px] text-gray-500 flex items-center gap-1">
+                                                        <span className="text-[11px] sm:text-[12.5px] text-gray-500 flex items-center gap-1 whitespace-nowrap shrink-0">
                                                             {order.isPaid ? (
-                                                                <svg className="w-3.5 h-3.5 text-green-600" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" /></svg>
+                                                                <svg className="w-3.5 h-3.5 text-green-600 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" /></svg>
                                                             ) : (order.status === 'Cancelled' || order.status === 'Pending') ? (
-                                                                <svg className="w-3.5 h-3.5 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" /></svg>
+                                                                <svg className="w-3.5 h-3.5 text-red-500 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" /></svg>
                                                             ) : (
-                                                                <svg className="w-3.5 h-3.5 text-gray-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" /></svg>
+                                                                <svg className="w-3.5 h-3.5 text-gray-400 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" /></svg>
                                                             )}
-                                                            {order.isPaid ? 'Paid via' : (order.status === 'Cancelled' || order.status === 'Pending') ? 'Failed via' : 'Pending via'} <span className="capitalize">{order.paymentMethod === 'Razorpay' ? 'Online' : order.paymentMethod}</span>
+                                                            <span>{order.isPaid ? 'Paid via' : (order.status === 'Cancelled' || order.status === 'Pending') ? 'Failed via' : 'Pending via'}</span>
+                                                            <span className="capitalize font-medium text-gray-700">{order.paymentMethod === 'Cashfree' ? 'Cashfree' : order.paymentMethod === 'Razorpay' ? 'Online' : order.paymentMethod}</span>
                                                         </span>
                                                     )}
                                                 </div>

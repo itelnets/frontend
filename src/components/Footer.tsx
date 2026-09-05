@@ -50,7 +50,8 @@ export default function Footer() {
                         </div>
                         <div>
                             <h4 className="text-gray-900 text-xs sm:text-sm font-semibold">Secure Payment</h4>
-                            <p className="text-[11px] sm:text-xs text-gray-500">Protected by Razorpay</p>
+                            {/* <p className="text-[11px] sm:text-xs text-gray-500">Protected by Razorpay</p> */}
+                            <p className="text-[11px] sm:text-xs text-gray-500">Protected by Cashfree</p>
                         </div>
                     </div>
                 </div>

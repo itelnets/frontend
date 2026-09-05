@@ -71,14 +71,14 @@ export default function OrderDetailsModal({
                             <h3 className="text-[15px] font-bold text-gray-900">Paid from</h3>
                             <div className="flex items-center gap-2 sm:gap-3">
                                 <div className="w-8 h-8 sm:w-9 sm:h-9 shrink-0 bg-white border border-gray-200 rounded-full flex items-center justify-center p-0.5">
-                                    {selectedOrder.paymentMethod === 'Razorpay' || selectedOrder.paymentMethod === 'Online' ? (
-                                        <img src="/google-pay.png" className="w-full h-full object-contain opacity-70" alt="UPI" />
+                                    {selectedOrder.paymentMethod === 'Cashfree' || selectedOrder.paymentMethod === 'Razorpay' || selectedOrder.paymentMethod === 'Online' ? (
+                                        <img src="/google-pay.png" className="w-full h-full object-contain opacity-70" alt="Payment" />
                                     ) : (
                                         <svg className="w-full h-full text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>
                                     )}
                                 </div>
                                 <div className="text-[13px] sm:text-[14px] font-bold text-gray-900 capitalize">
-                                    {selectedOrder.paymentMethod === 'Razorpay' ? 'UPI / Online' : selectedOrder.paymentMethod || 'Unknown'}
+                                    {selectedOrder.paymentMethod === 'Cashfree' ? 'Cashfree' : selectedOrder.paymentMethod === 'Razorpay' ? 'UPI / Online' : selectedOrder.paymentMethod || 'Unknown'}
                                 </div>
                             </div>
                         </div>
@@ -87,20 +87,20 @@ export default function OrderDetailsModal({
                     {/* Transaction Details */}
                     <div className="bg-white p-2.5 sm:px-4 sm:py-3.5 sm:rounded-lg sm:border sm:border-gray-200">
                         <div className="space-y-2 sm:space-y-3">
-                            {selectedOrder.razorpayPaymentId && (
+                            {(selectedOrder.cashfreePaymentId || selectedOrder.razorpayPaymentId) && (
                                 <div className="flex justify-between items-center text-[13px]">
                                     <span className="text-gray-500">Transaction ID</span>
                                     <div className="flex items-center">
-                                        <CopyIcon text={selectedOrder.razorpayPaymentId} label="Transaction ID" />
-                                        <span className="font-medium text-gray-900">{selectedOrder.razorpayPaymentId}</span>
+                                        <CopyIcon text={selectedOrder.cashfreePaymentId || selectedOrder.razorpayPaymentId} label="Transaction ID" />
+                                        <span className="font-medium text-gray-900">{selectedOrder.cashfreePaymentId || selectedOrder.razorpayPaymentId}</span>
                                     </div>
                                 </div>
                             )}
                             <div className="flex justify-between items-center text-[13px]">
                                 <span className="text-gray-500">Order ID</span>
                                 <div className="flex items-center">
-                                    <CopyIcon text={selectedOrder.razorpayOrderId || selectedOrder._id} label="Order ID" />
-                                    <span className="font-medium text-gray-900">{selectedOrder.razorpayOrderId || selectedOrder._id}</span>
+                                    <CopyIcon text={selectedOrder.cashfreeOrderId || selectedOrder.razorpayOrderId || selectedOrder._id} label="Order ID" />
+                                    <span className="font-medium text-gray-900">{selectedOrder.cashfreeOrderId || selectedOrder.razorpayOrderId || selectedOrder._id}</span>
                                 </div>
                             </div>
                             <div className="flex justify-between items-center text-[13px]">

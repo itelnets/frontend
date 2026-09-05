@@ -33,7 +33,8 @@ export default function PaymentMethod({
                                 <div className={`w-4 h-4 sm:w-5 sm:h-5 shrink-0 rounded-full border-2 flex items-center justify-center ${selectedPaymentMethod === 'card' ? 'border-[#458500]' : 'border-gray-300'}`}>
                                     {selectedPaymentMethod === 'card' && <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-[#458500]" />}
                                 </div>
-                                <span className="font-bold text-[14px] sm:text-[15px] text-gray-900 flex-1">Pay Securely with Razorpay (Cards, UPI, Netbanking)</span>
+                                {/* <span className="font-bold text-[14px] sm:text-[15px] text-gray-900 flex-1">Pay Securely with Razorpay (Cards, UPI, Netbanking)</span> */}
+                                <span className="font-bold text-[14px] sm:text-[15px] text-gray-900 flex-1">Pay Securely with Cashfree (Cards, UPI, Netbanking)</span>
                             </div>
                             <div className="pl-8 flex gap-1.5 sm:gap-2 mt-2">
                                 <div className="h-6 w-10 sm:h-8 sm:w-14 bg-white border cursor-disable border-gray-200 rounded flex items-center justify-center">
