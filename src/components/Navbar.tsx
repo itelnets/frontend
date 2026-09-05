@@ -101,19 +101,16 @@ const Navbar = () => {
             <header ref={headerRef} className="sticky w-full left-0 top-0 z-[100]">
                 {/* Main Green Header */}
                 <div className={`bg-[#458500] text-white transition-all duration-200`}>
-                    <div className={`max-w-[1400px] mx-auto px-3 sm:px-4 h-[50px] sm:h-auto py-2 sm:py-3 flex items-center justify-between gap-2 sm:gap-3`}>
+                    <div className={`max-w-[1400px] mx-auto px-3 sm:px-4 h-[40px] sm:h-auto py-1 sm:py-3 flex items-center justify-between gap-2 sm:gap-3`}>
                         {/* Logo & Mobile Menu */}
                         <div className="flex items-center gap-2 sm:gap-3 shrink-0">
                             <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="md:hidden">
-                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
+                                <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
                             </button>
-                            <Link href="/" className="shrink-0 flex items-center relative">
-                                <img
-                                    src="/brand_logo.png"
-                                    alt="Pratham Herbs"
-                                    className="h-9 sm:h-12 md:h-14 w-auto object-contain -my-2 sm:-my-3 max-h-[44px] sm:max-h-[56px] scale-105 sm:scale-110 origin-left invert mix-blend-screen"
-                                    style={{ filter: 'invert(1)', mixBlendMode: 'screen' }}
-                                />
+                            <Link href="/" className="shrink-0 flex items-center group">
+                                <span className="text-white font-semibold text-[20px] sm:text-[26px] xl:text-[30px] tracking-tight leading-none group-hover:opacity-90 transition-opacity select-none">
+                                    Pratham Herbs
+                                </span>
                             </Link>
                         </div>
 
@@ -280,9 +277,9 @@ const Navbar = () => {
                                     </div>
                                 </div>
                             )}
-                            <Link href="/cart" className="flex items-center gap-1 hover:opacity-80 relative">
-                                <svg className="sm:w-7 sm:h-7 w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
-                                <span className="absolute -top-1 -right-2 bg-white text-[#458500] text-[9px] sm:text-[12px] font-bold px-[5px] rounded-full">{cartCount}</span>
+                            <Link href="/cart" className="flex items-center justify-center hover:opacity-80 relative h-full my-auto py-1 translate-y-1 sm:translate-y-0">
+                                <svg className="sm:w-7 sm:h-7 w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+                                <span className="absolute -top-0.5 -right-2 sm:-top-1 sm:-right-2 bg-white text-[#458500] text-[9px] sm:text-[12px] font-bold px-[5px] py-[1px] rounded-full min-w-[16px] h-[16px] sm:min-w-[18px] sm:h-[18px] flex items-center justify-center leading-none">{cartCount}</span>
                             </Link>
                         </div>
                     </div>

@@ -46,7 +46,7 @@ export default function HeroCarousel() {
         if (!isPlaying || totalSlides <= 1) return;
         autoPlayRef.current = setInterval(() => {
             setCurrentSlide((prev) => (prev + 1) % totalSlides);
-        }, 5000);
+        }, 3000);
     };
 
     // Stop auto scroll
@@ -113,7 +113,7 @@ export default function HeroCarousel() {
 
     return (
         <div
-            className="w-full relative select-none"
+            className="w-full relative select-none group"
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
         >
@@ -139,6 +139,32 @@ export default function HeroCarousel() {
                         />
                     </div>
                 ))}
+
+                {/* Left and Right Navigation Buttons */}
+                {totalSlides > 1 && (
+                    <>
+                        <button
+                            type="button"
+                            onClick={(e) => { e.stopPropagation(); prevSlide(); }}
+                            aria-label="Previous slide"
+                            className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-20 bg-white/75 hover:bg-white text-gray-800 p-1.5 sm:p-2.5 rounded-full shadow-md backdrop-blur-sm transition-all flex items-center justify-center hover:scale-110 active:scale-95 focus:outline-none"
+                        >
+                            <svg className="w-4 h-4 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
+                            </svg>
+                        </button>
+                        <button
+                            type="button"
+                            onClick={(e) => { e.stopPropagation(); nextSlide(); }}
+                            aria-label="Next slide"
+                            className="absolute right-2 sm:left-auto right-2 sm:right-4 top-1/2 -translate-y-1/2 z-20 bg-white/75 hover:bg-white text-gray-800 p-1.5 sm:p-2.5 rounded-full shadow-md backdrop-blur-sm transition-all flex items-center justify-center hover:scale-110 active:scale-95 focus:outline-none"
+                        >
+                            <svg className="w-4 h-4 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+                            </svg>
+                        </button>
+                    </>
+                )}
             </div>
         </div>
     );
