@@ -303,7 +303,7 @@ const Navbar = () => {
                                     <span>Dr. Corner</span>
                                     <img src="/doctor_logo.svg" alt="Dr. Corner" className="w-5 h-5 shrink-0 object-contain" />
                                 </Link>
-                                <Link href="/products" className="hover:text-[#458500]">Manufacturers</Link>
+                                <Link href="/products" className="hover:text-[#458500]">Brands</Link>
                                 <Link href="/products" className="hover:text-[#458500]">All</Link>
                                 <Link href="/products" className="hover:text-[#458500]">New</Link>
                                 <Link href="/products" className="text-[#458500] hover:text-[#3b7100]">Wellness Hub</Link>
@@ -404,7 +404,7 @@ const Navbar = () => {
                                             <span>Dr. Corner</span>
                                             <img src="/doctor_logo.svg" alt="Dr. Corner" className="w-5 h-5 shrink-0 object-contain" />
                                         </Link>
-                                        <Link href="/products" onClick={() => setIsMobileMenuOpen(false)} className="block px-3 sm:px-4 py-2.5 sm:py-3 hover:bg-gray-50 text-base font-medium text-gray-900">Manufacturers</Link>
+                                        <Link href="/products" onClick={() => setIsMobileMenuOpen(false)} className="block px-3 sm:px-4 py-2.5 sm:py-3 hover:bg-gray-50 text-base font-medium text-gray-900">Brands</Link>
                                         <Link href="/products" onClick={() => setIsMobileMenuOpen(false)} className="block px-3 sm:px-4 py-2.5 sm:py-3 hover:bg-gray-50 text-base font-medium text-gray-900">All</Link>
                                         <Link href="/products" onClick={() => setIsMobileMenuOpen(false)} className="block px-3 sm:px-4 py-2.5 sm:py-3 hover:bg-gray-50 text-base font-medium text-gray-900">New</Link>
                                         <Link href="/products" onClick={() => setIsMobileMenuOpen(false)} className="block px-3 sm:px-4 py-2.5 sm:py-3 hover:bg-gray-50 text-base font-medium text-gray-900">Try</Link>
