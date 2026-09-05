@@ -59,6 +59,7 @@ export default function ProductCard({ product, showHeart = false }: ProductCardP
     return (
         <Link
             href={`/products/${product._id}`}
+            prefetch={false}
             className="bg-white rounded-xl flex flex-col cursor-pointer hover:shadow-lg transition-shadow group border border-gray-300 overflow-hidden w-full h-full relative"
         >
             {showHeart && (
