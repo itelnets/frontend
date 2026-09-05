@@ -19,40 +19,6 @@ export default function OrdersPage() {
     const [selectedOrder, setSelectedOrder] = useState<any>(null);
     const [isRefunding, setIsRefunding] = useState(false);
     const [showRefundConfirm, setShowRefundConfirm] = useState<string | null>(null);
-    const [isGeneratingInvoice, setIsGeneratingInvoice] = useState(false);
-
-    const generateInvoice = async () => {
-        if (!selectedOrder || isGeneratingInvoice) return;
-        setIsGeneratingInvoice(true);
-
-        try {
-            const response = await api.get(`/orders/${selectedOrder._id}/invoice`, {
-                responseType: 'blob', // Important: tells axios to expect binary data
-                timeout: 15000, // Override the 3s default timeout for PDF generation
-            });
-
-            // Create a blob URL from the response data
-            const blob = new Blob([response.data], { type: 'application/pdf' });
-            const url = window.URL.createObjectURL(blob);
-
-            // Create a temporary link element to trigger the download
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = `Invoice_${selectedOrder.cashfreeOrderId || selectedOrder.razorpayOrderId || selectedOrder._id}.pdf`;
-            document.body.appendChild(link);
-            link.click();
-
-            // Clean up
-            document.body.removeChild(link);
-            window.URL.revokeObjectURL(url);
-
-        } catch (error) {
-            console.error('Failed to download invoice', error);
-            toast.error('Failed to download invoice');
-        } finally {
-            setIsGeneratingInvoice(false);
-        }
-    };
 
     useEffect(() => {
         const loadOrders = async () => {
@@ -76,7 +42,7 @@ export default function OrdersPage() {
 
     const canRequestReturn = (order: any) => {
         if (!order.isPaid || !order.paidAt) return false;
-        if (order.status === 'Cancelled' || order.status === 'Refunded' || order.status === 'Refund Initiated' || order.status === 'Refund Requested' || order.status === 'Refund Failed') return false;
+        if (order.status === 'Cancelled' || order.status === 'Refunded' || order.status === 'Refund Initiated' || order.status === 'Refund Requested' || order.status === 'Refund Failed' || order.status === 'Refund Denied') return false;
         if (order.refundStatus && order.refundStatus !== 'NONE') return false;
         const fortyEightHours = 2 * 24 * 60 * 60 * 1000;
         return Date.now() - new Date(order.paidAt).getTime() <= fortyEightHours;
@@ -187,7 +153,7 @@ export default function OrdersPage() {
                                                 <div className="flex justify-between items-center gap-1 sm:gap-2 flex-wrap sm:flex-nowrap">
                                                     <span className={`inline-flex items-center text-[12px] sm:text-[13px] font-bold whitespace-nowrap shrink-0 ${order.status === 'Delivered' || order.status === 'Refunded' ? 'text-green-700' :
                                                         order.status === 'Captured' ? 'text-green-700' :
-                                                            (order.status === 'Cancelled' || order.status === 'Pending' || order.status === 'Refund Failed') ? 'text-red-800' :
+                                                            (order.status === 'Cancelled' || order.status === 'Pending' || order.status === 'Refund Failed' || order.status === 'Refund Denied') ? 'text-red-800' :
                                                                 (order.status === 'Refund Requested' || order.refundStatus === 'requested') ? 'text-blue-700' :
                                                                     'text-yellow-800'
                                                         }`}>
@@ -230,8 +196,6 @@ export default function OrdersPage() {
             <OrderDetailsModal
                 selectedOrder={selectedOrder}
                 setSelectedOrder={setSelectedOrder}
-                generateInvoice={generateInvoice}
-                isGeneratingInvoice={isGeneratingInvoice}
                 setShowRefundConfirm={setShowRefundConfirm}
                 isRefunding={isRefunding}
                 canRequestReturn={canRequestReturn}

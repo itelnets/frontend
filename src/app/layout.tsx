@@ -14,7 +14,7 @@ const poppins = Poppins({
   weight: ["300", "400", "500", "600", "700", "800", "900"],
 });
 
-const siteUrl = process.env.NEXT_PUBLIC_FRONTEND_URL || 'https://prathamherbs.com';
+const siteUrl = process.env.NEXT_PUBLIC_FRONTEND_URL || '';
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),

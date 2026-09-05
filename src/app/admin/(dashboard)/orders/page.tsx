@@ -4,7 +4,7 @@ import React, { useEffect, useState, Suspense } from 'react';
 import { createPortal } from 'react-dom';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { fetchAllOrders } from '@/services/orderService';
-import { refundOrder } from '@/services/paymentService';
+import { refundOrder, rejectReturn } from '@/services/paymentService';
 import SortDropdown from '@/components/SortDropdown';
 import ConfirmModal from '@/components/ConfirmModal';
 import { formatDate } from '@/utils/formatDate';
@@ -26,6 +26,7 @@ function AdminOrdersContent() {
     const [selectedOrder, setSelectedOrder] = useState<any>(null);
     const [isRefunding, setIsRefunding] = useState(false);
     const [showRefundConfirm, setShowRefundConfirm] = useState<string | null>(null);
+    const [showRejectConfirm, setShowRejectConfirm] = useState<string | null>(null);
     const [portalNode, setPortalNode] = useState<HTMLElement | null>(null);
     const [paginationPortalNode, setPaginationPortalNode] = useState<HTMLElement | null>(null);
 
@@ -78,6 +79,26 @@ function AdminOrdersContent() {
         } catch (error: any) {
             console.error('Failed to process refund', error);
             toast.error(error?.response?.data?.message || 'Failed to process refund');
+        } finally {
+            setIsRefunding(false);
+        }
+    };
+
+    const handleRejectRefund = async (orderId: string) => {
+        setIsRefunding(true);
+        try {
+            const res = await rejectReturn(orderId);
+            const newStatus = res?.order?.status || 'Refund Denied';
+            const newRefundStatus = res?.order?.refundStatus || 'denied';
+            setOrders(orders.map(o => o._id === orderId ? { ...o, status: newStatus, refundStatus: newRefundStatus } : o));
+            if (selectedOrder && selectedOrder._id === orderId) {
+                setSelectedOrder({ ...selectedOrder, status: newStatus, refundStatus: newRefundStatus });
+            }
+            setShowRejectConfirm(null);
+            toast.success('Return request denied!');
+        } catch (error: any) {
+            console.error('Failed to deny refund', error);
+            toast.error(error?.response?.data?.message || 'Failed to deny refund');
         } finally {
             setIsRefunding(false);
         }
@@ -168,7 +189,7 @@ function AdminOrdersContent() {
                                             <span className={`inline-flex items-center justify-center text-[13px] sm:text-[14px] font-bold ${order.status === 'Refund Requested' ? 'text-blue-600' :
                                                 order.status === 'Captured' ? 'text-green-600' :
                                                     order.status === 'Refunded' ? 'text-orange-600' :
-                                                        (order.status === 'Cancelled' || order.status === 'Refund Failed') ? 'text-red-600' :
+                                                        (order.status === 'Cancelled' || order.status === 'Refund Failed' || order.status === 'Refund Denied') ? 'text-red-600' :
                                                             'text-yellow-600'
                                                 }`}>
                                                 {order.status === 'Captured' ? 'Paid' : order.status}
@@ -176,18 +197,32 @@ function AdminOrdersContent() {
                                         </td>
                                         <td className="hidden sm:table-cell px-3 sm:px-4 py-2.5 text-center font-medium whitespace-nowrap">
                                             {order.status === 'Refund Requested' && (
-                                                <button
-                                                    onClick={() => setShowRefundConfirm(order._id)}
-                                                    disabled={isRefunding && showRefundConfirm === order._id}
-                                                    className="text-white bg-green-600 hover:bg-green-700 px-2 sm:px-3 py-1 sm:py-1.5 rounded text-[11px] sm:text-xs font-bold shadow-sm disabled:opacity-50 cursor-pointer relative"
-                                                >
-                                                    <span className={isRefunding && showRefundConfirm === order._id ? 'opacity-0' : ''}>Approve For Return</span>
-                                                    {isRefunding && showRefundConfirm === order._id && (
-                                                        <div className="absolute inset-0 flex items-center justify-center">
-                                                            <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                                                        </div>
-                                                    )}
-                                                </button>
+                                                <div className="flex items-center justify-center gap-1.5">
+                                                    <button
+                                                        onClick={() => setShowRefundConfirm(order._id)}
+                                                        disabled={isRefunding && (showRefundConfirm === order._id || showRejectConfirm === order._id)}
+                                                        className="text-white bg-green-600 hover:bg-green-700 px-2 sm:px-3 py-1 sm:py-1.5 rounded text-[11px] sm:text-xs font-bold shadow-sm disabled:opacity-50 cursor-pointer relative"
+                                                    >
+                                                        <span className={isRefunding && showRefundConfirm === order._id ? 'opacity-0' : ''}>Approve For Return</span>
+                                                        {isRefunding && showRefundConfirm === order._id && (
+                                                            <div className="absolute inset-0 flex items-center justify-center">
+                                                                <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                                            </div>
+                                                        )}
+                                                    </button>
+                                                    <button
+                                                        onClick={() => setShowRejectConfirm(order._id)}
+                                                        disabled={isRefunding && (showRefundConfirm === order._id || showRejectConfirm === order._id)}
+                                                        className="text-white bg-red-600 hover:bg-red-700 px-2 sm:px-3 py-1 sm:py-1.5 rounded text-[11px] sm:text-xs font-bold shadow-sm disabled:opacity-50 cursor-pointer relative"
+                                                    >
+                                                        <span className={isRefunding && showRejectConfirm === order._id ? 'opacity-0' : ''}>Cancel</span>
+                                                        {isRefunding && showRejectConfirm === order._id && (
+                                                            <div className="absolute inset-0 flex items-center justify-center">
+                                                                <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                                            </div>
+                                                        )}
+                                                    </button>
+                                                </div>
                                             )}
                                         </td>
 
@@ -207,7 +242,7 @@ function AdminOrdersContent() {
                                                     <span className={`inline-flex items-center text-[12px] sm:text-[13px] font-bold ${order.status === 'Refund Requested' ? 'text-blue-600' :
                                                         order.status === 'Captured' ? 'text-green-600' :
                                                             order.status === 'Refunded' ? 'text-orange-600' :
-                                                                (order.status === 'Cancelled' || order.status === 'Refund Failed') ? 'text-red-600' :
+                                                                (order.status === 'Cancelled' || order.status === 'Refund Failed' || order.status === 'Refund Denied') ? 'text-red-600' :
                                                                     'text-yellow-600'
                                                         }`}>
                                                         {order.status === 'Captured' ? 'Paid' : order.status}
@@ -230,18 +265,32 @@ function AdminOrdersContent() {
                                                 </div>
                                                 <div>
                                                     {order.status === 'Refund Requested' && (
-                                                        <button
-                                                            onClick={() => setShowRefundConfirm(order._id)}
-                                                            disabled={isRefunding && showRefundConfirm === order._id}
-                                                            className="text-white bg-green-600 hover:bg-green-700 px-2 py-1.5 rounded text-[10px] font-bold shadow-sm disabled:opacity-50 cursor-pointer flex-shrink-0 relative"
-                                                        >
-                                                            <span className={isRefunding && showRefundConfirm === order._id ? 'opacity-0' : ''}>Approve For Return</span>
-                                                            {isRefunding && showRefundConfirm === order._id && (
-                                                                <div className="absolute inset-0 flex items-center justify-center">
-                                                                    <svg className="animate-spin h-3.5 w-3.5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                                                                </div>
-                                                            )}
-                                                        </button>
+                                                        <div className="flex items-center gap-1.5">
+                                                            <button
+                                                                onClick={() => setShowRefundConfirm(order._id)}
+                                                                disabled={isRefunding && (showRefundConfirm === order._id || showRejectConfirm === order._id)}
+                                                                className="text-white bg-green-600 hover:bg-green-700 px-2 py-1.5 rounded text-[10px] font-bold shadow-sm disabled:opacity-50 cursor-pointer flex-shrink-0 relative"
+                                                            >
+                                                                <span className={isRefunding && showRefundConfirm === order._id ? 'opacity-0' : ''}>Approve For Return</span>
+                                                                {isRefunding && showRefundConfirm === order._id && (
+                                                                    <div className="absolute inset-0 flex items-center justify-center">
+                                                                        <svg className="animate-spin h-3.5 w-3.5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                                                    </div>
+                                                                )}
+                                                            </button>
+                                                            <button
+                                                                onClick={() => setShowRejectConfirm(order._id)}
+                                                                disabled={isRefunding && (showRefundConfirm === order._id || showRejectConfirm === order._id)}
+                                                                className="text-white bg-red-600 hover:bg-red-700 px-2 py-1.5 rounded text-[10px] font-bold shadow-sm disabled:opacity-50 cursor-pointer flex-shrink-0 relative"
+                                                            >
+                                                                <span className={isRefunding && showRejectConfirm === order._id ? 'opacity-0' : ''}>Cancel</span>
+                                                                {isRefunding && showRejectConfirm === order._id && (
+                                                                    <div className="absolute inset-0 flex items-center justify-center">
+                                                                        <svg className="animate-spin h-3.5 w-3.5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                                                    </div>
+                                                                )}
+                                                            </button>
+                                                        </div>
                                                     )}
                                                 </div>
                                             </div>
@@ -262,6 +311,18 @@ function AdminOrdersContent() {
                     onConfirm={() => handleApproveRefund(showRefundConfirm)}
                     confirmText="Approve"
                     cancelText="Cancel"
+                    isLoading={isRefunding}
+                />
+            )}
+            {showRejectConfirm && (
+                <ConfirmModal
+                    isOpen={!!showRejectConfirm}
+                    title="Deny Return Request"
+                    description="Are you sure you want to deny this return request? The order status will be updated to Refund Denied."
+                    onCancel={() => !isRefunding && setShowRejectConfirm(null)}
+                    onConfirm={() => handleRejectRefund(showRejectConfirm)}
+                    confirmText="Deny Return"
+                    cancelText="Back"
                     isLoading={isRefunding}
                 />
             )}

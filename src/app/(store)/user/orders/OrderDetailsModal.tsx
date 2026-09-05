@@ -4,8 +4,6 @@ import toast from 'react-hot-toast';
 interface OrderDetailsModalProps {
     selectedOrder: any;
     setSelectedOrder: (val: any) => void;
-    generateInvoice: () => void;
-    isGeneratingInvoice: boolean;
     setShowRefundConfirm: (val: any) => void;
     isRefunding: boolean;
     canRequestReturn: (order: any) => boolean;
@@ -63,7 +61,6 @@ export default function OrderDetailsModal({
                 </div>
 
                 <div className="flex-1 overflow-y-auto p-0 sm:p-4 space-y-1.5 sm:space-y-3">
-
 
                     {/* Paid From Section */}
                     <div className="bg-white p-2 sm:p-4 sm:rounded-lg sm:border sm:border-gray-200">
@@ -131,8 +128,6 @@ export default function OrderDetailsModal({
                         </div>
                     </div>
 
-
-
                     {/* Payment details */}
                     <div className="bg-white p-2.5 sm:p-4 pb-4 sm:pb-4 sm:rounded-lg sm:border sm:border-gray-200">
                         <div className="flex justify-between items-center mb-3 sm:mb-4">
@@ -186,13 +181,15 @@ export default function OrderDetailsModal({
                                 <div
                                     title="Not allowed"
                                     className={`px-2 sm:px-4 py-1.5 sm:py-2 rounded-md text-[12.5px] sm:text-[13px] font-bold cursor-not-allowed ${(selectedOrder.status === 'Cancelled' || selectedOrder.status === 'Pending') ? 'bg-red-50 text-red-600' :
-                                        selectedOrder.refundStatus === 'requested' ? 'bg-blue-50 text-blue-700' :
-                                            'bg-gray-100 text-gray-500'
+                                        (selectedOrder.status === 'Refund Denied' || selectedOrder.refundStatus === 'denied') ? 'bg-red-50 text-red-600' :
+                                            selectedOrder.refundStatus === 'requested' ? 'bg-blue-50 text-blue-700' :
+                                                'bg-gray-100 text-gray-500'
                                         }`}>
                                     {(selectedOrder.status === 'Cancelled' || selectedOrder.status === 'Pending') ? 'Payment Failed' :
-                                        (selectedOrder.refundStatus === 'processed' || selectedOrder.refundStatus === 'pending') ? 'Already Refunded' :
-                                            selectedOrder.refundStatus === 'requested' ? 'Refund Requested' :
-                                                'Return Closed'
+                                        (selectedOrder.status === 'Refund Denied' || selectedOrder.refundStatus === 'denied') ? 'Refund Denied' :
+                                            (selectedOrder.refundStatus === 'processed' || selectedOrder.refundStatus === 'pending') ? 'Already Refunded' :
+                                                selectedOrder.refundStatus === 'requested' ? 'Refund Requested' :
+                                                    'Return Closed'
                                     }
                                 </div>
                             )}

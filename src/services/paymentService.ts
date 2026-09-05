@@ -39,3 +39,13 @@ export const requestReturn = async (orderId: string) => {
         throw error;
     }
 };
+
+export const rejectReturn = async (orderId: string) => {
+    try {
+        const response = await api.post(`/orders/admin/${orderId}/reject-return`, {}, { timeout: 15000 });
+        return response.data;
+    } catch (error) {
+        console.error('Error rejecting return:', error);
+        throw error;
+    }
+};
