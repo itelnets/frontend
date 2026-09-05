@@ -144,3 +144,36 @@ export const handleDownloadProductsCSV = async () => {
         toast.error('Failed to export products CSV', { id: toastId });
     }
 };
+
+export const handleDownloadSampleCSV = () => {
+    const sampleRows = [{
+        'Product Name': 'Sample Health Supplement',
+        'Product Type': 'Supplements',
+        'Price': 499,
+        'Discount': 10,
+        'Overview': 'Detailed product overview...\nSupports digestive health',
+        'Suggested Use': 'Take 1 daily',
+        'Key Ingredients': 'Vitamin C, Zinc, Herbal Extracts',
+        'Direction of use/dosage': '1 capsule daily after meals',
+        'Safety Information': 'Store in a cool dry place',
+        'Brand': 'Pratham Herbs Brands',
+        'Manufacturer': 'Pratham Herbs Healthcare',
+        'In Stock': 'Yes',
+        'Best Seller': 'No',
+        'Categories': 'Supplements, Wellness',
+        'HSN Code': '30049099',
+        'Batch No.': 'BATCH-001',
+        'Expired On': '12-2027',
+        'Pack Size': '500 gm',
+        'Units in Pack': '1',
+        'SKU': 'ITL-001',
+        'Treatment': 'Immunity',
+        'Benefits': 'Energy Boost, Wellness',
+        'Varient': '500gm',
+        'Dimensions (l x b h)': '15 x 8 x 8',
+        'Form': 'Syrup'
+    }];
+
+    downloadCleanCsv(sampleRows, 'sample_products_upload.csv');
+    toast.success('Sample CSV downloaded successfully!');
+};

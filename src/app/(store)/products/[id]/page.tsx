@@ -10,6 +10,37 @@ import { getProductById } from '@/services/product';
 import AddToListsModal from '@/components/AddToListsModal';
 import { formatExpiryDate } from '@/utils/formatDate';
 
+const renderBulletContent = (text: any) => {
+    if (!text || (typeof text !== 'string' && typeof text !== 'number')) return null;
+    const str = String(text).trim();
+    if (!str) return null;
+
+    // If HTML tags present (like formatted HTML overview)
+    if (str.includes('<') && str.includes('>')) {
+        return <div dangerouslySetInnerHTML={{ __html: str }} />;
+    }
+
+    // Split by newline or comma (avoiding numeric commas like 1,000)
+    const rawItems = str.split(/,(?!\d)|\n/);
+    const items = rawItems
+        .map(s => s.trim())
+        .filter(s => s.length > 0);
+
+    if (items.length <= 1) {
+        return <span>{str}</span>;
+    }
+
+    return (
+        <ul className="list-disc list-outside pl-4 space-y-1 my-0.5">
+            {items.map((item, i) => (
+                <li key={i} className="text-gray-900 leading-snug">
+                    {item}
+                </li>
+            ))}
+        </ul>
+    );
+};
+
 export default function ProductDetailsPage() {
     const params = useParams();
     const router = useRouter();
@@ -376,6 +407,9 @@ export default function ProductDetailsPage() {
                         <h3 className="font-bold text-gray-900 mb-3 lg:mb-4 text-base lg:text-lg">Specifications</h3>
                         <div className="flex flex-col gap-1.5 sm:gap-2.5">
                             {displayProduct.specifications.map((spec: any, idx: number) => {
+                                const isDimension = spec.key?.toLowerCase().includes('dimension');
+                                if (isDimension) return null;
+
                                 const isPackSize = spec.key === 'Pack of' || spec.key === 'Pack size' || spec.key === 'Pack Size';
                                 const isQty = spec.key === 'QTY' || spec.key === 'Units in Pack';
                                 const label = isPackSize ? 'Pack Size' : isQty ? 'Units in Pack' : spec.key;
@@ -383,11 +417,14 @@ export default function ProductDetailsPage() {
                                 if (isPackSize && formattedVal && !/\b(gm|g|kg|ml|l|pack|capsules|tablets)\b/i.test(String(formattedVal))) {
                                     formattedVal = `${formattedVal} gm`;
                                 }
+                                 const isBenefits = label.toLowerCase().includes('benefit') || label.toLowerCase().includes('treatment');
                                 return (
-                                    <div key={idx} className="flex text-[13px] lg:text-sm">
+                                    <div key={idx} className="flex text-[13px] lg:text-sm items-start">
                                         <span className="text-[#458500] w-[140px] lg:w-[160px] shrink-0 font-bold">{label}</span>
-                                        <span className="text-[#458500] mr-3">:</span>
-                                        <span className="text-gray-900">{formattedVal}</span>
+                                        <span className="text-[#458500] mr-3">{isBenefits ? '' : ':'}</span>
+                                        <div className="text-gray-900 flex-1">
+                                            {isBenefits ? renderBulletContent(formattedVal) : <span>{formattedVal}</span>}
+                                        </div>
                                     </div>
                                 );
                             })}
@@ -470,17 +507,17 @@ export default function ProductDetailsPage() {
                     {displayProduct.suggestedUse && (
                         <>
                             <h3 className="font-bold text-gray-900 mb-3 lg:mb-4 text-sm lg:text-base">Suggested use</h3>
-                            <p className="text-xs lg:text-sm text-gray-800 leading-relaxed mb-4 lg:mb-6 whitespace-pre-wrap">
-                                {displayProduct.suggestedUse}
-                            </p>
+                            <div className="text-xs lg:text-sm text-gray-800 leading-relaxed mb-4 lg:mb-6">
+                                {renderBulletContent(displayProduct.suggestedUse)}
+                            </div>
                         </>
                     )}
 
                     {displayProduct.otherIngredients && (
                         <>
                             <h3 className="font-bold text-gray-900 mb-3 lg:mb-4 text-sm lg:text-base">Key ingredients</h3>
-                            <div className="text-xs lg:text-sm text-gray-800 space-y-4 mb-4 lg:mb-6 whitespace-pre-wrap">
-                                {displayProduct.otherIngredients}
+                            <div className="text-xs lg:text-sm text-gray-800 mb-4 lg:mb-6">
+                                {renderBulletContent(displayProduct.otherIngredients)}
                             </div>
                         </>
                     )}
@@ -488,8 +525,8 @@ export default function ProductDetailsPage() {
                     {displayProduct.warnings && (
                         <>
                             <h3 className="font-bold text-gray-900 mb-3 lg:mb-4 text-sm lg:text-base">Direction of use/dosage</h3>
-                            <div className="text-xs lg:text-sm text-gray-800 space-y-4 mb-4 lg:mb-6 leading-relaxed whitespace-pre-wrap">
-                                {displayProduct.warnings}
+                            <div className="text-xs lg:text-sm text-gray-800 mb-4 lg:mb-6 leading-relaxed">
+                                {renderBulletContent(displayProduct.warnings)}
                             </div>
                         </>
                     )}
@@ -497,8 +534,8 @@ export default function ProductDetailsPage() {
                     {displayProduct.disclaimer && (
                         <>
                             <h3 className="font-bold text-gray-900 mb-3 lg:mb-4 text-sm lg:text-base">Safety Information</h3>
-                            <div className="text-xs lg:text-sm text-gray-800 space-y-4 mb-4 lg:mb-6 leading-relaxed whitespace-pre-wrap">
-                                {displayProduct.disclaimer}
+                            <div className="text-xs lg:text-sm text-gray-800 mb-4 lg:mb-6 leading-relaxed">
+                                {renderBulletContent(displayProduct.disclaimer)}
                             </div>
                         </>
                     )}

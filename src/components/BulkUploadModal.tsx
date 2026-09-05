@@ -166,31 +166,9 @@ export default function BulkUploadModal() {
 
                         const allMatchingProducts = Array.from(matchingProductsMap.values());
 
-                        // 2. If matching product(s) EXIST in DB -> UPDATE them in place (NO NEW ROW CREATED)
+                        // 2. If matching product(s) EXIST in DB by SKU/Name -> NO CHANGE to existing product (Skip)
                         if (allMatchingProducts.length > 0) {
-                            const primaryProduct = allMatchingProducts[0];
-                            const { isChanged, updatePayload, changes } = compareAndUpdateProduct(row, primaryProduct);
-
-                            if (isChanged) {
-                                // Update all database instances of this product to keep DB in sync
-                                for (const prodToUpdate of allMatchingProducts) {
-                                    console.log(`[BulkUpload] Updating DB product ID ${prodToUpdate._id} with payload:`, updatePayload);
-                                    const updateRes = await updateProduct(prodToUpdate._id, updatePayload);
-                                    console.log(`[BulkUpload] DB update result for ${prodToUpdate._id}:`, updateRes);
-                                    Object.assign(prodToUpdate, updatePayload);
-                                }
-
-                                updatedCount++;
-
-                                auditRecords.push({
-                                    sku: getProductSku(primaryProduct) || skuValue || 'N/A',
-                                    productName: primaryProduct.name || rowName || 'Product',
-                                    changes
-                                });
-                            } else {
-                                // Data are identical -> Skip
-                                skippedCount++;
-                            }
+                            skippedCount++;
                         } else {
                             // 3. New Product -> Create new product
                             const productData = {
