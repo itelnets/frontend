@@ -268,7 +268,8 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
         let cleanValue = val;
         const key = specifications[index]?.key || '';
 
-        if (field === 'value' && (key.toLowerCase().includes('weight') || key.toLowerCase().includes('quantity') || index === 0 || index === 1)) {
+        // Allow alphabets, text, and numbers in Pack Size and specification fields
+        if (field === 'value' && key.toLowerCase().includes('quantity')) {
             cleanValue = val.replace(/\D/g, '');
         }
 

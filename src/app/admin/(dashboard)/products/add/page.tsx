@@ -211,7 +211,8 @@ export default function AddProductPage() {
         let cleanValue = value;
         const key = specifications[index]?.key || '';
 
-        if (field === 'value' && (key.toLowerCase().includes('weight') || key.toLowerCase().includes('quantity') || index === 0 || index === 1)) {
+        // Allow alphabets, text, and numbers in Pack Size and specification fields
+        if (field === 'value' && key.toLowerCase().includes('quantity')) {
             cleanValue = value.replace(/\D/g, '');
         }
 
