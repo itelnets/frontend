@@ -20,7 +20,7 @@ function downloadCleanCsv(dataRows: Array<Record<string, any>>, filename: string
             const val = row[h];
             if (val === undefined || val === null) return '""';
             if (typeof val === 'number') return String(val);
-            
+
             // Normalize CRLF to LF so Excel renders multiline text inside a single cell across multiple lines
             const strVal = String(val).replace(/\r\n/g, '\n').trim();
 
@@ -59,7 +59,7 @@ export const handleDownloadProductsCSV = async () => {
                 'Product Type': 'Supplements',
                 'Price': 499,
                 'Discount': 10,
-                'Overview': 'Detailed product overview...\nSupports digestive health\nMaintains normal bowel function',
+                'Description': 'Detailed product description...\nSupports digestive health\nMaintains normal bowel function',
                 'Suggested Use': 'Take 1 daily',
                 'Key Ingredients': 'Vitamin C, Zinc, Herbal Extracts',
                 'Direction of use/dosage': '1 capsule daily after meals',
@@ -111,7 +111,7 @@ export const handleDownloadProductsCSV = async () => {
                 'Product Type': p.type || '',
                 'Price': Number(p.price) || 0,
                 'Discount': Number(p.discount) || 0,
-                'Overview': p.overview || '',
+                'Description': p.description || p.overview || '',
                 'Suggested Use': p.suggestedUse || '',
                 'Key Ingredients': p.otherIngredients || '',
                 'Direction of use/dosage': p.warnings || '',
@@ -151,7 +151,7 @@ export const handleDownloadSampleCSV = () => {
         'Product Type': 'Supplements',
         'Price': 499,
         'Discount': 10,
-        'Overview': 'Detailed product overview...\nSupports digestive health',
+        'Description': 'Detailed product description...\nSupports digestive health',
         'Suggested Use': 'Take 1 daily',
         'Key Ingredients': 'Vitamin C, Zinc, Herbal Extracts',
         'Direction of use/dosage': '1 capsule daily after meals',

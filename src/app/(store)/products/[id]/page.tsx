@@ -97,7 +97,7 @@ export default function ProductDetailsPage() {
         images: product?.images?.length ? product.images.map((img: string) => getImageUrl(img)) : [
             "https://via.placeholder.com/600x600?text=No+Image+Available"
         ],
-        overview: product?.overview || null,
+        overview: product?.description || product?.overview || null,
         specifications: product?.specifications || [],
         suggestedUse: product?.suggestedUse || null,
         otherIngredients: product?.otherIngredients || null,
@@ -417,14 +417,11 @@ export default function ProductDetailsPage() {
                                 if (isPackSize && formattedVal && !/\b(gm|g|kg|ml|l|pack|capsules|tablets)\b/i.test(String(formattedVal))) {
                                     formattedVal = `${formattedVal} gm`;
                                 }
-                                 const isBenefits = label.toLowerCase().includes('benefit') || label.toLowerCase().includes('treatment');
                                 return (
                                     <div key={idx} className="flex text-[13px] lg:text-sm items-start">
                                         <span className="text-[#458500] w-[140px] lg:w-[160px] shrink-0 font-bold">{label}</span>
-                                        <span className="text-[#458500] mr-3">{isBenefits ? '' : ':'}</span>
-                                        <div className="text-gray-900 flex-1">
-                                            {isBenefits ? renderBulletContent(formattedVal) : <span>{formattedVal}</span>}
-                                        </div>
+                                        <span className="text-[#458500] mr-3">:</span>
+                                        <div className="text-gray-900 flex-1">{renderBulletContent(formattedVal)}</div>
                                     </div>
                                 );
                             })}
@@ -445,11 +442,12 @@ export default function ProductDetailsPage() {
     );
 
     const renderFrequentlyPurchased = () => {
+        if (!recommendedProducts || recommendedProducts.length === 0) return null;
         return (
             <div className="w-full pt-6 lg:pt-8">
                 <h2 className="text-lg lg:text-xl font-bold text-gray-900 mb-1 px-2 lg:px-0">Frequently purchased together</h2>
                 <div className="flex gap-4 overflow-x-auto pb-4 px-2 lg:px-0 hide-scrollbar" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-                    {recommendedProducts.length > 0 ? recommendedProducts.map((prod, i) => (
+                    {recommendedProducts.map((prod, i) => (
                         <div key={i} onClick={() => router.push(`/products/${prod._id}`)} className="min-w-[140px] max-w-[140px] lg:min-w-[160px] lg:max-w-[160px] flex flex-col cursor-pointer group">
                             <div className="aspect-square bg-white p-2 mb-2 lg:mb-3 flex items-center justify-center relative overflow-hidden transition-colors border border-gray-100 rounded">
                                 <img src={getImageUrl(prod.images?.[0], 'https://via.placeholder.com/150x150?text=No+Image')} className="h-[80%] object-contain     rm duration-300 group-hover:scale-105" />
@@ -471,7 +469,7 @@ export default function ProductDetailsPage() {
                                 </div>
                                 {prod.discount > 0 && (
                                     <>
-                                        <div className="text-[10px] text-gray-500 line-through">
+                                        <div className="text-[10px] text-[#0052A5] line-through">
                                             ₹{prod.price}
                                         </div>
                                         <div className="bg-[#ff3344] text-white text-[9px] font-bold px-1 py-0.5 rounded shadow-sm">
@@ -481,9 +479,7 @@ export default function ProductDetailsPage() {
                                 )}
                             </div>
                         </div>
-                    )) : (
-                        <div className="text-gray-500 text-sm">No recommendations available at this time.</div>
-                    )}
+                    ))}
                 </div>
             </div>
         );
@@ -498,7 +494,7 @@ export default function ProductDetailsPage() {
                 <div className="w-full">
                     {displayProduct.overview && (
                         <>
-                            <h3 className="font-bold text-gray-900 mb-3 lg:mb-4 text-sm lg:text-base">Overview</h3>
+                            <h3 className="font-bold text-gray-900 mb-3 lg:mb-4 text-sm lg:text-base">Description</h3>
                             <div className="text-xs lg:text-sm text-gray-700 leading-relaxed mb-4 lg:mb-6 whitespace-pre-wrap" dangerouslySetInnerHTML={{ __html: displayProduct.overview }} />
                         </>
                     )}

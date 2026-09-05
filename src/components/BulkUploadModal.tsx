@@ -152,14 +152,13 @@ export default function BulkUploadModal() {
                         const rowName = String(row.name || '').trim();
                         const normalizedName = rowName.toLowerCase();
 
-                        // Match all duplicate product instances in DB (Priority 1 = SKU, Priority 2 = Product Name)
+                        // Match existing product in DB (If SKU present -> check strictly by SKU; else fallback to Product Name)
                         const matchingProductsMap = new Map<string, any>();
 
                         if (normalizedSku && normalizedSku !== 'n/a') {
                             const list = existingBySkuMap.get(normalizedSku) || [];
                             list.forEach(p => matchingProductsMap.set(p._id, p));
-                        }
-                        if (matchingProductsMap.size === 0 && normalizedName) {
+                        } else if (normalizedName) {
                             const list = existingByNameMap.get(normalizedName) || [];
                             list.forEach(p => matchingProductsMap.set(p._id, p));
                         }

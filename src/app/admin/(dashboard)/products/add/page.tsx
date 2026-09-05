@@ -294,6 +294,8 @@ export default function AddProductPage() {
 
             const productData = {
                 ...formData,
+                description: formData.overview || formData.description || '',
+                overview: formData.overview || formData.description || '',
                 price: Number(formData.price),
                 discount: Number(formData.discount),
                 categories: formData.categories ? formData.categories.split(',').map((c: string) => c.trim()).filter(Boolean) : [],
@@ -530,8 +532,8 @@ export default function AddProductPage() {
 
 
                         <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-2">Overview <span className="text-red-500">*</span></label>
-                            <textarea name="overview" value={formData.overview} rows={6} onChange={handleChange} className={`w-full px-3 py-2 text-sm bg-white/50 border ${showFormErrors && !formData.overview.trim() ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-green-600'} rounded-md focus:outline-none transition-all outline-none placeholder-gray-400`} placeholder="Extensive product overview..." />
+                            <label className="block text-sm font-semibold text-gray-700 mb-2">Description <span className="text-red-500">*</span></label>
+                            <textarea name="overview" value={formData.overview || formData.description} rows={6} onChange={(e) => setFormData({ ...formData, overview: e.target.value, description: e.target.value })} className={`w-full px-3 py-2 text-sm bg-white/50 border ${showFormErrors && !(formData.overview || formData.description).trim() ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-green-600'} rounded-md focus:outline-none transition-all outline-none placeholder-gray-400`} placeholder="Extensive product description..." />
                         </div>
 
                         <div className="bg-green-50/30 rounded-md border border-green-50/50 p-2 sm:p-3">
