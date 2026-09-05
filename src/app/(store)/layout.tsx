@@ -13,8 +13,11 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Pratham Herbs",
-  description: "Premium Ayurvedic Products",
+  title: {
+    default: "Pratham Herbs | The Wellness store",
+    template: "%s | Pratham Herbs",
+  },
+  description: "Your trusted destination for authentic Ayurvedic formulations, premium health supplements, organic wellness, and natural personal care products.",
 };
 
 export default function StoreLayout({

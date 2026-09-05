@@ -45,7 +45,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
             : `Buy ${product.name} online at Pratham Herbs. 100% authentic Ayurvedic product.`;
 
         return {
-            title: `${product.name} | Pratham Herbs`,
+            title: product.name,
             description: plainTextDescription,
             keywords: [
                 product.name,

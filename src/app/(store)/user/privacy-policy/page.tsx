@@ -2,7 +2,7 @@ import React from 'react';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-    title: 'Privacy Policy | Pratham Herbs',
+    title: 'Privacy Policy',
     description: 'Comprehensive Privacy Policy detailing how Pratham Herbs collects, protects, uses, and shares your personal data.',
 };
 

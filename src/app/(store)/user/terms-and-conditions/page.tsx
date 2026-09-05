@@ -2,7 +2,7 @@ import React from 'react';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-    title: 'Terms and Conditions | Pratham Herbs',
+    title: 'Terms and Conditions',
     description: 'Terms and conditions for using Pratham Herbs platform and services.',
 };
 
