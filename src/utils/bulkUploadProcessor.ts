@@ -23,8 +23,8 @@ export const BULK_HEADER_MAP: Record<string, string> = {
     'Product Type': 'type',
     'Price': 'price',
     'Discount': 'discount',
+    'Description': 'description',
     'Overview': 'overview',
-    'Suggested Use': 'suggestedUse',
     'Key Ingredients': 'otherIngredients',
     'Direction of use/dosage': 'warnings',
     'Safety Information': 'disclaimer',
@@ -51,8 +51,8 @@ export const BULK_HEADER_MAP: Record<string, string> = {
 };
 
 export const STANDARD_FIELDS = [
-    'name', 'type', 'price', 'discount', 'overview',
-    'suggestedUse', 'otherIngredients', 'warnings', 'disclaimer',
+    'name', 'type', 'price', 'discount', 'description', 'overview',
+    'otherIngredients', 'warnings', 'disclaimer',
     'brand', 'manufacturer', 'inStock', 'bestSeller', 'categories',
     'hsn', 'batchNo', 'expiredOn', 'images', 'specifications'
 ];
@@ -107,6 +107,13 @@ export function normalizeCsvRow(rawRow: Record<string, any>): Record<string, any
         const mappedKey = BULK_HEADER_MAP[trimmedKey] || trimmedKey;
         row[mappedKey] = rawRow[key];
     });
+
+    // Ensure description and overview are synchronized
+    const descVal = row.description || row.overview || rawRow['Description'] || rawRow['Overview'] || '';
+    if (descVal) {
+        row.description = descVal;
+        row.overview = descVal;
+    }
     return row;
 }
 
@@ -251,13 +258,12 @@ export function compareAndUpdateProduct(csvRow: Record<string, any>, existingPro
     // 12. Expired On
     checkStringChange('Expired On', csvRow.expiredOn, existingProduct.expiredOn, 'expiredOn');
 
-    // 13. Overview
-    checkStringChange('Overview', csvRow.overview, existingProduct.overview, 'overview');
+    // 13. Description / Overview
+    const csvDesc = csvRow.description || csvRow.overview || '';
+    const existingDesc = existingProduct.description || existingProduct.overview || '';
+    checkStringChange('Description', csvDesc, existingDesc, 'overview');
 
-    // 14. Suggested Use
-    checkStringChange('Suggested Use', csvRow.suggestedUse, existingProduct.suggestedUse, 'suggestedUse');
-
-    // 15. Key Ingredients
+    // 14. Key Ingredients
     checkStringChange('Key Ingredients', csvRow.otherIngredients, existingProduct.otherIngredients, 'otherIngredients');
 
     // 16. Direction of use/dosage

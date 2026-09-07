@@ -170,14 +170,14 @@ export default function BulkUploadModal() {
                             skippedCount++;
                         } else {
                             // 3. New Product -> Create new product
+                            const descVal = row.description || row.overview || '';
                             const productData = {
                                 name: rowName,
                                 type: row.type || '',
-                                description: row.description || row.overview || '',
+                                description: descVal,
                                 price: Number(row.price) || 0,
                                 discount: Number(row.discount) || 0,
-                                overview: row.overview || '',
-                                suggestedUse: row.suggestedUse || '',
+                                overview: descVal,
                                 otherIngredients: row.otherIngredients || '',
                                 warnings: row.warnings || '',
                                 disclaimer: row.disclaimer || '',

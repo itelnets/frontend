@@ -40,7 +40,6 @@ export default function AddProductPage() {
         price: '',
         discount: '',
         overview: '',
-        suggestedUse: '',
         otherIngredients: '',
         warnings: '',
         disclaimer: '',
@@ -240,7 +239,6 @@ export default function AddProductPage() {
         const isBatchNoMissing = !formData.batchNo.trim();
         const isExpiredOnMissing = !formData.expiredOn.trim();
         const isOverviewMissing = !formData.overview.trim();
-        const isSuggestedUseMissing = !formData.suggestedUse.trim();
         const isOtherIngredientsMissing = !formData.otherIngredients.trim();
         const isWarningsMissing = !formData.warnings.trim();
         const isDisclaimerMissing = !formData.disclaimer.trim();
@@ -252,7 +250,7 @@ export default function AddProductPage() {
             }
         });
 
-        if (isImagesMissing || isNameMissing || isBrandMissing || isManufacturerMissing || isPriceMissing || isCategoriesMissing || isHsnMissing || isBatchNoMissing || isExpiredOnMissing || isOverviewMissing || isSuggestedUseMissing || isOtherIngredientsMissing || isWarningsMissing || isDisclaimerMissing || isAnySpecMissing) {
+        if (isImagesMissing || isNameMissing || isBrandMissing || isManufacturerMissing || isPriceMissing || isCategoriesMissing || isHsnMissing || isBatchNoMissing || isExpiredOnMissing || isOverviewMissing || isOtherIngredientsMissing || isWarningsMissing || isDisclaimerMissing || isAnySpecMissing) {
             setShowFormErrors(true);
             toast.error('Please add all required fields');
             return;
@@ -334,12 +332,12 @@ export default function AddProductPage() {
 
                     {/* Left Column - Images & Basic Info */}
                     <div className="w-full lg:w-5/12 space-y-4 lg:h-full lg:overflow-y-auto lg:pr-2 scrollbar-thin scrollbar-thumb-gray-200">
-                        {/* Mobile Only CSV Action Buttons Row - Justified Between */}
-                        <div className="sm:hidden flex items-center justify-between gap-1.5 mb-3 w-full flex-wrap">
+                        {/* Mobile/Tablet (< lg) CSV Action Buttons Row - Justified Right */}
+                        <div className="lg:hidden flex items-center justify-end gap-2 mb-3 w-full flex-wrap">
                             <button
                                 type="button"
                                 onClick={handleDownloadProductsCSV}
-                                className="bg-slate-700 text-white px-2 h-[32px] border border-transparent rounded-md hover:bg-slate-800 transition font-medium text-[11px] flex items-center gap-1 cursor-pointer shadow-sm"
+                                className="bg-slate-700 text-white px-2.5 sm:px-3 h-[29.5px] sm:h-[34px] border border-transparent rounded-md hover:bg-slate-800 transition font-medium text-[12px] sm:text-[13px] flex items-center gap-1.5 cursor-pointer shadow-sm"
                             >
                                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -349,16 +347,16 @@ export default function AddProductPage() {
                             <button
                                 type="button"
                                 onClick={handleDownloadSampleCSV}
-                                className="bg-emerald-700 text-white px-2 h-[32px] border border-transparent rounded-md hover:bg-emerald-800 transition font-medium text-[11px] flex items-center gap-1 cursor-pointer shadow-sm"
+                                className="bg-emerald-700 text-white px-2.5 sm:px-3 h-[29.5px] sm:h-[34px] border border-transparent rounded-md hover:bg-emerald-800 transition font-medium text-[12px] sm:text-[13px] flex items-center gap-1.5 cursor-pointer shadow-sm"
                             >
                                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                 </svg>
                                 <span>Sample CSV</span>
                             </button>
-                            <label htmlFor="bulk-upload-input" className="bg-[#0052A5] text-white px-2 h-[32px] border border-transparent rounded-md hover:bg-[#003d7a] transition font-medium text-[11px] flex items-center gap-1 cursor-pointer shadow-sm">
+                            <label htmlFor="bulk-upload-input" className="bg-[#0052A5] text-white px-2.5 sm:px-3 h-[29.5px] sm:h-[34px] border border-transparent rounded-md hover:bg-[#003d7a] transition font-medium text-[12px] sm:text-[13px] flex items-center gap-1.5 cursor-pointer shadow-sm">
                                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
-                                <span>Bulk Upload (.csv)</span>
+                                <span>Upload CSV</span>
                             </label>
                         </div>
 
@@ -601,11 +599,6 @@ export default function AddProductPage() {
                                 +
                             </button>
 
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-2">Suggested Use <span className="text-red-500">*</span></label>
-                            <textarea name="suggestedUse" value={formData.suggestedUse} rows={3} onChange={handleChange} className={`w-full px-3 py-2 text-sm bg-white/50 border ${showFormErrors && !formData.suggestedUse.trim() ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-green-600'} rounded-md focus:outline-none transition-all outline-none`} />
                         </div>
 
                         <div>

@@ -34,7 +34,6 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
         price: '',
         discount: '',
         overview: '',
-        suggestedUse: '',
         otherIngredients: '',
         warnings: '',
         disclaimer: '',
@@ -121,7 +120,6 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                 price: data.price?.toString() || '',
                 discount: data.discount?.toString() || '0',
                 overview: data.overview || data.description || '',
-                suggestedUse: data.suggestedUse || '',
                 otherIngredients: data.otherIngredients || '',
                 warnings: data.warnings || '',
                 disclaimer: data.disclaimer || '',
@@ -325,7 +323,6 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
         const isBatchNoMissing = !formData.batchNo.trim();
         const isExpiredOnMissing = !formData.expiredOn.trim();
         const isOverviewMissing = !formData.overview.trim();
-        const isSuggestedUseMissing = !formData.suggestedUse.trim();
         const isOtherIngredientsMissing = !formData.otherIngredients.trim();
         const isWarningsMissing = !formData.warnings.trim();
         const isDisclaimerMissing = !formData.disclaimer.trim();
@@ -337,7 +334,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
             }
         });
 
-        if (isImagesMissing || isNameMissing || isBrandMissing || isManufacturerMissing || isPriceMissing || isCategoriesMissing || isHsnMissing || isBatchNoMissing || isExpiredOnMissing || isOverviewMissing || isSuggestedUseMissing || isOtherIngredientsMissing || isWarningsMissing || isDisclaimerMissing || isAnySpecMissing) {
+        if (isImagesMissing || isNameMissing || isBrandMissing || isManufacturerMissing || isPriceMissing || isCategoriesMissing || isHsnMissing || isBatchNoMissing || isExpiredOnMissing || isOverviewMissing || isOtherIngredientsMissing || isWarningsMissing || isDisclaimerMissing || isAnySpecMissing) {
             setShowFormErrors(true);
             toast.error('Please add all required fields');
             return;
@@ -656,11 +653,6 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                                 +
                             </button>
 
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-2">Suggested Use <span className="text-red-500">*</span></label>
-                            <textarea name="suggestedUse" value={formData.suggestedUse} rows={3} onChange={handleChange} className={`w-full px-3 py-2 text-sm bg-white/50 border ${showFormErrors && !formData.suggestedUse.trim() ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-green-600'} rounded-md focus:outline-none transition-all outline-none`} />
                         </div>
 
                         <div>

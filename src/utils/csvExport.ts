@@ -21,8 +21,8 @@ function downloadCleanCsv(dataRows: Array<Record<string, any>>, filename: string
             if (val === undefined || val === null) return '""';
             if (typeof val === 'number') return String(val);
 
-            // Normalize CRLF to LF so Excel renders multiline text inside a single cell across multiple lines
-            const strVal = String(val).replace(/\r\n/g, '\n').trim();
+            // Replace any line breaks with single spaces so text renders cleanly on one line without cell gaps
+            const strVal = String(val).replace(/[\r\n]+/g, ' ').replace(/\s+/g, ' ').trim();
 
             // Pure numeric fields (price, discount) without quotes to avoid "number as text" green corner
             if (/^\d+(\.\d+)?$/.test(strVal) && h !== 'HSN Code' && h !== 'SKU' && h !== 'Batch No.') {
@@ -59,8 +59,7 @@ export const handleDownloadProductsCSV = async () => {
                 'Product Type': 'Supplements',
                 'Price': 499,
                 'Discount': 10,
-                'Description': 'Detailed product description...\nSupports digestive health\nMaintains normal bowel function',
-                'Suggested Use': 'Take 1 daily',
+                'Description': 'Detailed product description... Supports digestive health',
                 'Key Ingredients': 'Vitamin C, Zinc, Herbal Extracts',
                 'Direction of use/dosage': '1 capsule daily after meals',
                 'Safety Information': 'Store in a cool dry place',
@@ -112,7 +111,6 @@ export const handleDownloadProductsCSV = async () => {
                 'Price': Number(p.price) || 0,
                 'Discount': Number(p.discount) || 0,
                 'Description': p.description || p.overview || '',
-                'Suggested Use': p.suggestedUse || '',
                 'Key Ingredients': p.otherIngredients || '',
                 'Direction of use/dosage': p.warnings || '',
                 'Safety Information': p.disclaimer || '',
@@ -151,8 +149,7 @@ export const handleDownloadSampleCSV = () => {
         'Product Type': 'Supplements',
         'Price': 499,
         'Discount': 10,
-        'Description': 'Detailed product description...\nSupports digestive health',
-        'Suggested Use': 'Take 1 daily',
+        'Description': 'Detailed product description... Supports digestive health',
         'Key Ingredients': 'Vitamin C, Zinc, Herbal Extracts',
         'Direction of use/dosage': '1 capsule daily after meals',
         'Safety Information': 'Store in a cool dry place',

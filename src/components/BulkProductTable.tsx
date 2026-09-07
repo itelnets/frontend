@@ -16,7 +16,6 @@ export interface ProductItem {
     inStock?: string;
     bestSeller?: string;
     overview?: string;
-    suggestedUse?: string;
     otherIngredients?: string;
     warnings?: string;
     disclaimer?: string;

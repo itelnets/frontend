@@ -22,7 +22,6 @@ const BULK_FIELDS = [
     { id: 'batchNo', label: 'Batch No.', type: 'text', placeholder: 'e.g. BATCH-001' },
     { id: 'expiredOn', label: 'Expired On', type: 'text', placeholder: '08-2026' },
     { id: 'overview', label: 'Overview', type: 'textarea', placeholder: 'Extensive product overview...' },
-    { id: 'suggestedUse', label: 'Suggested Use', type: 'textarea', placeholder: 'Take 1 daily after meals...' },
     { id: 'otherIngredients', label: 'Key Ingredients', type: 'textarea', placeholder: 'Vitamin C, Zinc, Herbal Extracts...' },
     { id: 'warnings', label: 'Direction of use/dosage', type: 'textarea', placeholder: '1 capsule daily with water...' },
     { id: 'disclaimer', label: 'Safety Information', type: 'textarea', placeholder: 'Store in a cool dry place...' },

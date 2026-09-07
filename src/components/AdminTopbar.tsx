@@ -75,22 +75,22 @@ export default function AdminTopbar({ onMenuClick }: AdminTopbarProps) {
                     <div id="topbar-portal" className="contents"></div>
                 ) : (
                     <div className="flex items-center gap-2 sm:gap-4">
-                        <button onClick={handleCancel} className="bg-white text-gray-700 text-[13px] sm:text-sm font-medium px-2.5 sm:px-4 py-1 sm:py-1.5 border border-gray-200 rounded-md hover:bg-gray-50 transition-colors cursor-pointer shadow-sm shrink-0">
+                        <button onClick={handleCancel} className="bg-white text-gray-700 text-[13px] sm:text-sm font-medium px-2.5 sm:px-4 h-[29.5px] sm:h-[34px] border border-gray-200 rounded-md hover:bg-gray-50 transition-colors cursor-pointer shadow-sm shrink-0 flex items-center justify-center">
                             Cancel
                         </button>
                         <button
                             type="submit"
                             form="product-form"
-                            className="bg-green-600 hover:bg-green-700 text-white text-[13px] sm:text-sm font-medium px-2.5 sm:px-4 py-1 sm:py-1.5 border border-transparent rounded-md transition-colors cursor-pointer shadow-sm shrink-0"
+                            className="bg-green-600 hover:bg-green-700 text-white text-[13px] sm:text-sm font-medium px-2.5 sm:px-4 h-[29.5px] sm:h-[34px] border border-transparent rounded-md transition-colors cursor-pointer shadow-sm shrink-0 flex items-center justify-center"
                         >
                             {pathname.includes('/products/add') ? 'Create' : 'Save'}
                         </button>
                         {pathname.includes('/products/add') && (
-                            <div className="hidden sm:flex items-center gap-2">
+                            <div className="hidden lg:flex items-center gap-2">
                                 <button
                                     type="button"
                                     onClick={handleDownloadProductsCSV}
-                                    className="bg-slate-700 hover:bg-slate-800 text-white px-2.5 sm:px-3 h-[32px] border border-transparent rounded-md transition font-medium text-[13px] sm:text-sm flex items-center gap-1.5 cursor-pointer shadow-sm shrink-0"
+                                    className="bg-slate-700 hover:bg-slate-800 text-white px-2.5 sm:px-3 h-[34px] border border-transparent rounded-md transition font-medium text-[13px] sm:text-sm flex items-center gap-1.5 cursor-pointer shadow-sm shrink-0"
                                     title="Download CSV file of all products"
                                 >
                                     <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -101,7 +101,7 @@ export default function AdminTopbar({ onMenuClick }: AdminTopbarProps) {
                                 <button
                                     type="button"
                                     onClick={handleDownloadSampleCSV}
-                                    className="bg-emerald-700 hover:bg-emerald-800 text-white px-2.5 sm:px-3 h-[32px] border border-transparent rounded-md transition font-medium text-[13px] sm:text-sm flex items-center gap-1.5 cursor-pointer shadow-sm shrink-0"
+                                    className="bg-emerald-700 hover:bg-emerald-800 text-white px-2.5 sm:px-3 h-[34px] border border-transparent rounded-md transition font-medium text-[13px] sm:text-sm flex items-center gap-1.5 cursor-pointer shadow-sm shrink-0"
                                     title="Download sample CSV template for bulk upload"
                                 >
                                     <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -109,9 +109,9 @@ export default function AdminTopbar({ onMenuClick }: AdminTopbarProps) {
                                     </svg>
                                     <span>Sample CSV</span>
                                 </button>
-                                <label htmlFor="bulk-upload-input" className="bg-[#0052A5] text-white px-2.5 sm:px-3 h-[32px] border border-transparent rounded-md hover:bg-[#003d7a] transition font-medium text-[13px] sm:text-sm flex items-center gap-1.5 cursor-pointer shadow-sm shrink-0">
+                                <label htmlFor="bulk-upload-input" className="bg-[#0052A5] text-white px-2.5 sm:px-3 h-[34px] border border-transparent rounded-md hover:bg-[#003d7a] transition font-medium text-[13px] sm:text-sm flex items-center gap-1.5 cursor-pointer shadow-sm shrink-0">
                                     <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
-                                    <span>Bulk Upload (.csv)</span>
+                                    <span>Upload CSV</span>
                                 </label>
                             </div>
                         )}

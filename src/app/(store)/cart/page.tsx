@@ -12,6 +12,7 @@ import QuantityDropdown from '@/components/QuantityDropdown';
 import ProductCard from '@/components/ProductCard';
 import { getDoctorStatus } from '@/services/doctor';
 import PromoCodeSection from '@/components/PromoCodeSection';
+import AuthModal from '@/components/AuthModal';
 
 export default function CartPage() {
     const { cartItems, cartCount, removeFromCart, addToCart, updateQuantity, myLists, moveToCartFromList, moveToList, clearCart, removeFromList, savedForLater, saveForLater, moveToCartFromSaved, removeFromSaved, isCartLoading, appliedPromo, setAppliedPromo } = useCart();
@@ -26,6 +27,7 @@ export default function CartPage() {
     const [defaultAddress, setDefaultAddress] = useState<any>(null);
     const [savedAddresses, setSavedAddresses] = useState<any[]>([]);
     const [isAddressDropdownOpen, setIsAddressDropdownOpen] = useState(false);
+    const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
     const addressDropdownRef = useRef<HTMLDivElement>(null);
 
     // Promo Code States
@@ -467,6 +469,7 @@ export default function CartPage() {
                                             const userInfo = localStorage.getItem('userInfo');
                                             if (!userInfo) {
                                                 toast.error('Login required to checkout');
+                                                setIsAuthModalOpen(true);
                                             } else {
                                                 router.push('/checkout');
                                             }
@@ -628,6 +631,12 @@ export default function CartPage() {
                     </div>
                 </div>
             )}
+            {/* Auth Modal for Login Required Checkout */}
+            <AuthModal
+                isOpen={isAuthModalOpen}
+                onClose={() => setIsAuthModalOpen(false)}
+                onSuccess={() => router.push('/checkout')}
+            />
         </div>
     );
 }

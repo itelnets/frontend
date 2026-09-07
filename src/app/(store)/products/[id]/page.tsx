@@ -99,7 +99,6 @@ export default function ProductDetailsPage() {
         ],
         overview: product?.description || product?.overview || null,
         specifications: product?.specifications || [],
-        suggestedUse: product?.suggestedUse || null,
         otherIngredients: product?.otherIngredients || null,
         warnings: product?.warnings || null,
         disclaimer: product?.disclaimer || null,
@@ -496,16 +495,6 @@ export default function ProductDetailsPage() {
                         <>
                             <h3 className="font-bold text-gray-900 mb-3 lg:mb-4 text-sm lg:text-base">Description</h3>
                             <div className="text-xs lg:text-sm text-gray-700 leading-relaxed mb-4 lg:mb-6 whitespace-pre-wrap" dangerouslySetInnerHTML={{ __html: displayProduct.overview }} />
-                        </>
-                    )}
-
-
-                    {displayProduct.suggestedUse && (
-                        <>
-                            <h3 className="font-bold text-gray-900 mb-3 lg:mb-4 text-sm lg:text-base">Suggested use</h3>
-                            <div className="text-xs lg:text-sm text-gray-800 leading-relaxed mb-4 lg:mb-6">
-                                {renderBulletContent(displayProduct.suggestedUse)}
-                            </div>
                         </>
                     )}
 
