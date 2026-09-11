@@ -23,7 +23,7 @@ export function ProductPagination({
     className = '',
 }: ProductPaginationProps) {
     if (isLoading) {
-        return <ThreeDotsLoader className="my-4" />;
+        return <ThreeDotsLoader className="my-4 !min-h-0 !py-4" />;
     }
 
     if (totalPages <= 1) {

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import api from '@/services/api';
 import toast from 'react-hot-toast';
 import Spinner from '@/components/Spinner';
+import GoogleAuthButton from '@/components/GoogleAuthButton';
 
 interface AuthModalProps {
     isOpen: boolean;
@@ -289,7 +290,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess, initialTab = 'si
                 {/* Close Button */}
                 <button
                     onClick={onClose}
-                    className="absolute top-2.5 right-2.5 sm:top-3.5 sm:right-3.5 bg-[#458500] hover:bg-[#366800] text-white transition-colors p-1.5 rounded-full cursor-pointer z-10 shadow-sm flex items-center justify-center"
+                    className="absolute top-2.5 right-2.5 sm:top-3.5 sm:right-3.5 bg-[#458500] hover:bg-[#366800] text-white transition-colors p-[5px] sm:p-1.5 rounded-full cursor-pointer z-10 shadow-sm flex items-center justify-center"
                     aria-label="Close auth popup"
                 >
                     <svg className="w-4 h-4 sm:w-4.5 sm:h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -302,14 +303,14 @@ export default function AuthModal({ isOpen, onClose, onSuccess, initialTab = 'si
                     <button
                         type="button"
                         onClick={() => { setActiveTab('signin'); setIsForgotPassword(false); }}
-                        className={`flex-1 py-2.5 text-center text-[14px] sm:text-lg font-bold transition-all cursor-pointer ${activeTab === 'signin' ? 'text-[#458500] border-b-2 border-[#458500]' : 'text-gray-500 hover:text-gray-700'}`}
+                        className={`flex-1 pb-1.5 sm:pb-2 text-center text-[16px] sm:text-lg transition-colors cursor-pointer ${activeTab === 'signin' ? 'font-bold text-[#458500] border-b-2 border-[#458500]' : 'font-medium text-gray-500 hover:text-gray-700'}`}
                     >
                         Sign In
                     </button>
                     <button
                         type="button"
                         onClick={() => setActiveTab('register')}
-                        className={`flex-1 py-2.5 text-center text-[14px] sm:text-lg font-bold transition-all cursor-pointer ${activeTab === 'register' ? 'text-[#458500] border-b-2 border-[#458500]' : 'text-gray-500 hover:text-gray-700'}`}
+                        className={`flex-1 pb-1.5 sm:pb-2 text-center text-[16px] sm:text-lg transition-colors cursor-pointer ${activeTab === 'register' ? 'font-bold text-[#458500] border-b-2 border-[#458500]' : 'font-medium text-gray-500 hover:text-gray-700'}`}
                     >
                         Create Account
                     </button>
@@ -326,112 +327,119 @@ export default function AuthModal({ isOpen, onClose, onSuccess, initialTab = 'si
 
                 {/* SIGN IN TAB CONTENT */}
                 {activeTab === 'signin' && (
-                    <form className="mt-4 space-y-4" onSubmit={handleLoginSubmit} noValidate>
-                        <div className="space-y-3.5">
-                            <div>
-                                <label htmlFor="auth-email" className="block text-sm font-medium text-gray-700">
-                                    Email Address
-                                </label>
-                                <div className="mt-1 relative">
-                                    <input
-                                        id="auth-email"
-                                        name="email"
-                                        type="email"
-                                        autoComplete="email"
-                                        required
-                                        value={email}
-                                        onChange={(e) => setEmail(e.target.value)}
-                                        className="block w-full px-3 py-2 sm:px-4 sm:py-2.5 rounded-md border border-gray-300 placeholder-gray-400 focus:border-[#458500] focus:ring-[#458500] transition duration-200 outline-none text-sm"
-                                        placeholder="you@example.com"
-                                    />
-                                </div>
-                            </div>
-
-                            {!isForgotPassword && (
+                    <>
+                        <form className="mt-4 space-y-2" onSubmit={handleLoginSubmit} noValidate>
+                            <div className="space-y-3.5">
                                 <div>
-                                    <label htmlFor="auth-password" className="block text-sm font-medium text-gray-700">
-                                        Password
+                                    <label htmlFor="auth-email" className="block text-sm font-medium text-gray-700">
+                                        Email Address
                                     </label>
                                     <div className="mt-1 relative">
                                         <input
-                                            id="auth-password"
-                                            name="password"
-                                            type={showPassword ? "text" : "password"}
-                                            autoComplete="current-password"
+                                            id="auth-email"
+                                            name="email"
+                                            type="email"
+                                            autoComplete="email"
                                             required
-                                            value={password}
-                                            onChange={(e) => setPassword(e.target.value)}
-                                            className="block w-full px-3 py-2 sm:px-4 sm:py-2.5 rounded-md border border-gray-300 placeholder-gray-400 focus:border-[#458500] focus:ring-[#458500] transition duration-200 outline-none text-sm pr-10"
-                                            placeholder="••••••••"
+                                            value={email}
+                                            onChange={(e) => setEmail(e.target.value)}
+                                            className="block w-full px-3 py-2 sm:px-4 sm:py-[10px] rounded-md border border-gray-300 placeholder-gray-400 focus:border-[#458500] focus:ring-[#458500] transition duration-200 outline-none text-sm"
+                                            placeholder="you@example.com"
                                         />
-                                        <button
-                                            type="button"
-                                            className="absolute inset-y-0 right-0 pr-3 flex items-center text-[#458500] hover:text-[#386c00] cursor-pointer focus:outline-none"
-                                            onClick={() => setShowPassword(!showPassword)}
-                                        >
-                                            {showPassword ? (
-                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
-                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-                                                </svg>
-                                            ) : (
-                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88" />
-                                                </svg>
-                                            )}
-                                        </button>
-                                    </div>
-                                    <div className="mt-2 flex flex-wrap gap-1.5 text-xs">
-                                        <span className={`transition-all duration-300 px-2 py-0.5 rounded border ${/[A-Z]/.test(password) ? 'opacity-100 border-[#458500] text-[#458500] bg-[#eef3ea]' : (showPasswordErrors && !/[A-Z]/.test(password) ? 'opacity-100 border-red-500 text-red-700 bg-red-50' : 'opacity-40 border-gray-300 text-gray-500 bg-gray-50')}`}>Capital</span>
-                                        <span className={`transition-all duration-300 px-2 py-0.5 rounded border ${/[a-z]/.test(password) ? 'opacity-100 border-[#458500] text-[#458500] bg-[#eef3ea]' : (showPasswordErrors && !/[a-z]/.test(password) ? 'opacity-100 border-red-500 text-red-700 bg-red-50' : 'opacity-40 border-gray-300 text-gray-500 bg-gray-50')}`}>Lowercase</span>
-                                        <span className={`transition-all duration-300 px-2 py-0.5 rounded border ${/[0-9]/.test(password) ? 'opacity-100 border-[#458500] text-[#458500] bg-[#eef3ea]' : (showPasswordErrors && !/[0-9]/.test(password) ? 'opacity-100 border-red-500 text-red-700 bg-red-50' : 'opacity-40 border-gray-300 text-gray-500 bg-gray-50')}`}>Numeric</span>
-                                        <span className={`transition-all duration-300 px-2 py-0.5 rounded border ${/[^A-Za-z0-9]/.test(password) && password.length > 0 ? 'opacity-100 border-[#458500] text-[#458500] bg-[#eef3ea]' : (showPasswordErrors && (!/[^A-Za-z0-9]/.test(password) || password.length === 0) ? 'opacity-100 border-red-500 text-red-700 bg-red-50' : 'opacity-40 border-gray-300 text-gray-500 bg-gray-50')}`}>Special</span>
                                     </div>
                                 </div>
+
+                                {!isForgotPassword && (
+                                    <div>
+                                        <label htmlFor="auth-password" className="block text-sm font-medium text-gray-700">
+                                            Password
+                                        </label>
+                                        <div className="mt-1 relative">
+                                            <input
+                                                id="auth-password"
+                                                name="password"
+                                                type={showPassword ? "text" : "password"}
+                                                autoComplete="current-password"
+                                                required
+                                                value={password}
+                                                onChange={(e) => setPassword(e.target.value)}
+                                                className="block w-full px-3 py-2 sm:px-4 sm:py-[10px] rounded-md border border-gray-300 placeholder-gray-400 focus:border-[#458500] focus:ring-[#458500] transition duration-200 outline-none text-sm pr-10"
+                                                placeholder="••••••••"
+                                            />
+                                            <button
+                                                type="button"
+                                                className="absolute inset-y-0 right-0 pr-3 flex items-center text-[#458500] hover:text-[#386c00] cursor-pointer focus:outline-none"
+                                                onClick={() => setShowPassword(!showPassword)}
+                                            >
+                                                {showPassword ? (
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
+                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                                                    </svg>
+                                                ) : (
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88" />
+                                                    </svg>
+                                                )}
+                                            </button>
+                                        </div>
+                                        <div className="mt-2 flex flex-wrap gap-1.5 text-xs">
+                                            <span className={`transition-all duration-300 px-2 py-0.5 rounded border ${/[A-Z]/.test(password) ? 'opacity-100 border-[#458500] text-[#458500] bg-[#eef3ea]' : (showPasswordErrors && !/[A-Z]/.test(password) ? 'opacity-100 border-red-500 text-red-700 bg-red-50' : 'opacity-40 border-gray-300 text-gray-500 bg-gray-50')}`}>A-Z</span>
+                                            <span className={`transition-all duration-300 px-2 py-0.5 rounded border ${/[a-z]/.test(password) ? 'opacity-100 border-[#458500] text-[#458500] bg-[#eef3ea]' : (showPasswordErrors && !/[a-z]/.test(password) ? 'opacity-100 border-red-500 text-red-700 bg-red-50' : 'opacity-40 border-gray-300 text-gray-500 bg-gray-50')}`}>a-z</span>
+                                            <span className={`transition-all duration-300 px-2 py-0.5 rounded border ${/[0-9]/.test(password) ? 'opacity-100 border-[#458500] text-[#458500] bg-[#eef3ea]' : (showPasswordErrors && !/[0-9]/.test(password) ? 'opacity-100 border-red-500 text-red-700 bg-red-50' : 'opacity-40 border-gray-300 text-gray-500 bg-gray-50')}`}>0-9</span>
+                                            <span className={`transition-all duration-300 px-2 py-0.5 rounded border ${/[^A-Za-z0-9]/.test(password) && password.length > 0 ? 'opacity-100 border-[#458500] text-[#458500] bg-[#eef3ea]' : (showPasswordErrors && (!/[^A-Za-z0-9]/.test(password) || password.length === 0) ? 'opacity-100 border-red-500 text-red-700 bg-red-50' : 'opacity-40 border-gray-300 text-gray-500 bg-gray-50')}`}>@#$%</span>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            {!isForgotPassword && (
+                                <div className="flex items-center justify-end">
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsForgotPassword(true)}
+                                        className="text-xs sm:text-[14px] font-medium text-[#458500] hover:text-[#3b7100] cursor-pointer transition-colors"
+                                    >
+                                        Forgot password?
+                                    </button>
+                                </div>
                             )}
-                        </div>
 
+                            <div className="pt-1">
+                                <button
+                                    type="submit"
+                                    disabled={isLoading}
+                                    className="block text-center w-full bg-[#458500] hover:bg-[#366800] text-white py-2 sm:py-2.5 px-6 rounded-md transition-colors font-normal text-[15px] sm:text-[16px] cursor-pointer disabled:opacity-100 disabled:cursor-not-allowed"
+                                >
+                                    {isLoading ? <Spinner /> : (isForgotPassword ? 'Send Reset Link' : 'Sign In')}
+                                </button>
+                            </div>
+
+                            {isForgotPassword && (
+                                <div className="text-center text-xs text-gray-600 pt-1">
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsForgotPassword(false)}
+                                        className="font-medium text-[#458500] hover:text-[#3b7100] cursor-pointer transition-colors"
+                                    >
+                                        Back to Login
+                                    </button>
+                                </div>
+                            )}
+                        </form>
                         {!isForgotPassword && (
-                            <div className="flex items-center justify-end">
-                                <button
-                                    type="button"
-                                    onClick={() => setIsForgotPassword(true)}
-                                    className="text-xs font-medium text-[#458500] hover:text-[#3b7100] cursor-pointer transition-colors"
-                                >
-                                    Forgot password?
-                                </button>
+                            <div className="mt-3 [&_button]:py-1.5 sm:[&_button]:py-2.5">
+                                <GoogleAuthButton onSuccess={() => { onClose(); if (onSuccess) onSuccess(); }} />
                             </div>
                         )}
-
-                        <div className="pt-1">
-                            <button
-                                type="submit"
-                                disabled={isLoading}
-                                className="w-full flex justify-center items-center py-2.5 sm:py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-bold text-white bg-[#458500] hover:bg-[#3b7100] focus:outline-none cursor-pointer transition duration-300 disabled:opacity-70 disabled:cursor-not-allowed"
-                            >
-                                {isLoading ? <Spinner /> : (isForgotPassword ? 'Send Reset Link' : 'Sign In')}
-                            </button>
-                        </div>
-
-                        {isForgotPassword && (
-                            <div className="text-center text-xs text-gray-600 pt-1">
-                                <button
-                                    type="button"
-                                    onClick={() => setIsForgotPassword(false)}
-                                    className="font-medium text-[#458500] hover:text-[#3b7100] cursor-pointer transition-colors"
-                                >
-                                    Back to Login
-                                </button>
-                            </div>
-                        )}
-                    </form>
+                    </>
                 )}
 
                 {/* CREATE ACCOUNT TAB CONTENT */}
                 {activeTab === 'register' && (
-                    <form className="mt-4 space-y-3.5" onSubmit={regStep === 'register' ? handleRegisterSubmit : handleVerifyOtp} noValidate>
-                        {regStep === 'register' ? (
-                            <>
+                    regStep === 'register' ? (
+                        <>
+                            <form className="mt-4 space-y-3.5" onSubmit={handleRegisterSubmit} noValidate>
                                 <div>
                                     <label htmlFor="reg-name" className="block text-sm font-medium text-gray-700">Full Name</label>
                                     <input
@@ -497,58 +505,61 @@ export default function AuthModal({ isOpen, onClose, onSuccess, initialTab = 'si
                                         </button>
                                     </div>
                                     <div className="mt-2 flex flex-wrap gap-1.5 text-xs">
-                                        <span className={`px-2 py-0.5 rounded border ${/[A-Z]/.test(regPassword) ? 'border-[#458500] text-[#458500] bg-[#eef3ea]' : (showRegPasswordErrors && !/[A-Z]/.test(regPassword) ? 'border-red-500 text-red-700 bg-red-50' : 'opacity-40 border-gray-300 text-gray-500 bg-gray-50')}`}>Capital</span>
-                                        <span className={`px-2 py-0.5 rounded border ${/[a-z]/.test(regPassword) ? 'border-[#458500] text-[#458500] bg-[#eef3ea]' : (showRegPasswordErrors && !/[a-z]/.test(regPassword) ? 'border-red-500 text-red-700 bg-red-50' : 'opacity-40 border-gray-300 text-gray-500 bg-gray-50')}`}>Lowercase</span>
-                                        <span className={`px-2 py-0.5 rounded border ${/[0-9]/.test(regPassword) ? 'border-[#458500] text-[#458500] bg-[#eef3ea]' : (showRegPasswordErrors && !/[0-9]/.test(regPassword) ? 'border-red-500 text-red-700 bg-red-50' : 'opacity-40 border-gray-300 text-gray-500 bg-gray-50')}`}>Numeric</span>
-                                        <span className={`px-2 py-0.5 rounded border ${/[^A-Za-z0-9]/.test(regPassword) && regPassword.length > 0 ? 'border-[#458500] text-[#458500] bg-[#eef3ea]' : (showRegPasswordErrors && (!/[^A-Za-z0-9]/.test(regPassword) || regPassword.length === 0) ? 'border-red-500 text-red-700 bg-red-50' : 'opacity-40 border-gray-300 text-gray-500 bg-gray-50')}`}>Special</span>
+                                        <span className={`px-2 py-0.5 rounded border ${/[A-Z]/.test(regPassword) ? 'border-[#458500] text-[#458500] bg-[#eef3ea]' : (showRegPasswordErrors && !/[A-Z]/.test(regPassword) ? 'border-red-500 text-red-700 bg-red-50' : 'opacity-40 border-gray-300 text-gray-500 bg-gray-50')}`}>A-Z</span>
+                                        <span className={`px-2 py-0.5 rounded border ${/[a-z]/.test(regPassword) ? 'border-[#458500] text-[#458500] bg-[#eef3ea]' : (showRegPasswordErrors && !/[a-z]/.test(regPassword) ? 'border-red-500 text-red-700 bg-red-50' : 'opacity-40 border-gray-300 text-gray-500 bg-gray-50')}`}>a-z</span>
+                                        <span className={`px-2 py-0.5 rounded border ${/[0-9]/.test(regPassword) ? 'border-[#458500] text-[#458500] bg-[#eef3ea]' : (showRegPasswordErrors && !/[0-9]/.test(regPassword) ? 'border-red-500 text-red-700 bg-red-50' : 'opacity-40 border-gray-300 text-gray-500 bg-gray-50')}`}>0-9</span>
+                                        <span className={`px-2 py-0.5 rounded border ${/[^A-Za-z0-9]/.test(regPassword) && regPassword.length > 0 ? 'border-[#458500] text-[#458500] bg-[#eef3ea]' : (showRegPasswordErrors && (!/[^A-Za-z0-9]/.test(regPassword) || regPassword.length === 0) ? 'border-red-500 text-red-700 bg-red-50' : 'opacity-40 border-gray-300 text-gray-500 bg-gray-50')}`}>@#$%</span>
                                     </div>
                                 </div>
                                 <div className="pt-1">
                                     <button
                                         type="submit"
                                         disabled={isRegLoading}
-                                        className="w-full flex justify-center items-center py-2.5 sm:py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-bold text-white bg-[#458500] hover:bg-[#3b7100] cursor-pointer transition duration-300 disabled:opacity-70"
+                                        className="block text-center w-full bg-[#458500] hover:bg-[#366800] text-white py-2 sm:py-2.5 px-6 rounded-md transition-colors font-normal text-[15px] sm:text-[16px] cursor-pointer disabled:opacity-100 disabled:cursor-not-allowed"
                                     >
                                         {isRegLoading ? <Spinner /> : 'Create Account'}
                                     </button>
                                 </div>
-                            </>
-                        ) : (
-                            <>
-                                <div>
-                                    <label htmlFor="reg-otp" className="block text-sm font-medium text-gray-700">Enter OTP</label>
-                                    <input
-                                        id="reg-otp"
-                                        type="text"
-                                        required
-                                        maxLength={6}
-                                        value={otp}
-                                        onChange={(e) => setOtp(e.target.value)}
-                                        className="mt-1 block w-full px-3 py-2.5 rounded-md border border-gray-300 text-center font-bold tracking-widest text-lg outline-none focus:border-[#458500]"
-                                        placeholder="123456"
-                                    />
-                                </div>
-                                <div className="pt-2">
-                                    <button
-                                        type="submit"
-                                        disabled={isRegLoading}
-                                        className="w-full flex justify-center items-center py-2.5 sm:py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-bold text-white bg-[#458500] hover:bg-[#3b7100] cursor-pointer transition duration-300 disabled:opacity-70"
-                                    >
-                                        {isRegLoading ? <Spinner /> : 'Verify OTP'}
-                                    </button>
-                                </div>
-                                <div className="text-center text-xs text-gray-600 pt-1">
-                                    <button
-                                        type="button"
-                                        onClick={() => setRegStep('register')}
-                                        className="font-medium text-[#458500] hover:text-[#3b7100] cursor-pointer"
-                                    >
-                                        Back to registration
-                                    </button>
-                                </div>
-                            </>
-                        )}
-                    </form>
+                            </form>
+                            <div className="mt-3 [&_button]:py-1.5 sm:[&_button]:py-2.5">
+                                <GoogleAuthButton onSuccess={() => { onClose(); if (onSuccess) onSuccess(); }} />
+                            </div>
+                        </>
+                    ) : (
+                        <form className="mt-4 space-y-3.5" onSubmit={handleVerifyOtp} noValidate>
+                            <div>
+                                <label htmlFor="reg-otp" className="block text-sm font-medium text-gray-700">Enter OTP</label>
+                                <input
+                                    id="reg-otp"
+                                    type="text"
+                                    required
+                                    maxLength={6}
+                                    value={otp}
+                                    onChange={(e) => setOtp(e.target.value)}
+                                    className="mt-1 block w-full px-3 py-2.5 rounded-md border border-gray-300 text-center font-bold tracking-widest text-lg outline-none focus:border-[#458500]"
+                                    placeholder="123456"
+                                />
+                            </div>
+                            <div className="pt-2">
+                                <button
+                                    type="submit"
+                                    disabled={isRegLoading}
+                                    className="block text-center w-full bg-[#458500] hover:bg-[#366800] text-white py-2 sm:py-2.5 px-6 rounded-md transition-colors font-normal text-[15px] sm:text-[16px] cursor-pointer disabled:opacity-100 disabled:cursor-not-allowed"
+                                >
+                                    {isRegLoading ? <Spinner /> : 'Verify OTP'}
+                                </button>
+                            </div>
+                            <div className="text-center text-xs text-gray-600 pt-1">
+                                <button
+                                    type="button"
+                                    onClick={() => setRegStep('register')}
+                                    className="font-medium text-[#458500] hover:text-[#3b7100] cursor-pointer"
+                                >
+                                    Back to registration
+                                </button>
+                            </div>
+                        </form>
+                    )
                 )}
             </div>
 

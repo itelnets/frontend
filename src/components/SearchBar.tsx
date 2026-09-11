@@ -70,7 +70,7 @@ export default function SearchBar({ isMobile = false }: { isMobile?: boolean }) 
                 autoCapitalize="none"
                 onChange={(e) => setQuery(e.target.value)}
                 onFocus={() => { if (query.trim().length > 0 && filteredProducts.length > 0) setIsOpen(true); }}
-                className={`w-full rounded-full py-2 pl-11 pr-10 text-black outline-none shadow-inner bg-white ${isMobile ? 'h-[41px] text-sm' : 'h-12 text-sm py-2.5'}`}
+                className={`w-full rounded-full py-2 pl-11 pr-10 text-black outline-none shadow-inner bg-white ${isMobile ? 'h-[46px] text-sm' : 'h-12 text-sm py-2.5'}`}
             />
             {query.length > 0 && (
                 <button

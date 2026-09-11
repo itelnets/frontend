@@ -2,106 +2,46 @@
 
 import React from 'react';
 
-interface ThreeDotsLoaderProps {
+interface LoaderProps {
     className?: string;
+    size?: number | string;
 }
 
-export function ThreeDotsLoader({ className = '' }: ThreeDotsLoaderProps) {
+export function ThreeDotsLoader({ className = '' }: LoaderProps) {
     return (
-        <div className={`flex items-center justify-center py-6 w-full ${className}`}>
+        <div className={`flex flex-col items-center justify-center w-full min-h-[55vh] sm:min-h-[65vh] py-12 ${className}`}>
             <style jsx>{`
-                @keyframes dot1Travel {
+                @keyframes coinFlip {
                     0% {
-                        transform: translateX(-160px) scale(0.5);
-                        opacity: 0;
+                        transform: perspective(600px) rotateY(0deg);
                     }
-                    15% {
-                        opacity: 1;
-                    }
-                    40%, 70% {
-                        transform: translateX(48px) scale(1.25);
-                        opacity: 1;
-                    }
-                    85% {
-                        opacity: 1;
+                    50% {
+                        transform: perspective(600px) rotateY(180deg);
                     }
                     100% {
-                        transform: translateX(160px) scale(0.5);
-                        opacity: 0;
-                    }
-                }
-
-                @keyframes dot2Travel {
-                    0% {
-                        transform: translateX(-160px) scale(0.5);
-                        opacity: 0;
-                    }
-                    15% {
-                        opacity: 1;
-                    }
-                    40%, 70% {
-                        transform: translateX(0px) scale(1.25);
-                        opacity: 1;
-                    }
-                    85% {
-                        opacity: 1;
-                    }
-                    100% {
-                        transform: translateX(160px) scale(0.5);
-                        opacity: 0;
-                    }
-                }
-
-                @keyframes dot3Travel {
-                    0% {
-                        transform: translateX(-160px) scale(0.5);
-                        opacity: 0;
-                    }
-                    15% {
-                        opacity: 1;
-                    }
-                    40%, 70% {
-                        transform: translateX(-48px) scale(1.25);
-                        opacity: 1;
-                    }
-                    85% {
-                        opacity: 1;
-                    }
-                    100% {
-                        transform: translateX(160px) scale(0.5);
-                        opacity: 0;
+                        transform: perspective(600px) rotateY(360deg);
                     }
                 }
             `}</style>
-
-            <div className="relative h-8 w-72 flex items-center justify-center overflow-hidden">
-                {/* 1. Green Dot 1 */}
+            <div className="relative flex flex-col items-center justify-center">
                 <div
-                    className="absolute w-3.5 h-3.5 rounded-full bg-[#458500] shadow-2xs opacity-0"
+                    className="flex items-center justify-center"
                     style={{
-                        animation: 'dot1Travel 2.0s infinite cubic-bezier(0.4, 0, 0.2, 1) both',
-                        animationDelay: '0s',
+                        animation: 'coinFlip 2s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite',
+                        transformStyle: 'preserve-3d',
+                        willChange: 'transform',
                     }}
-                />
-                {/* 2. Green Dot 2 */}
-                <div
-                    className="absolute w-3.5 h-3.5 rounded-full bg-[#458500] shadow-2xs opacity-0"
-                    style={{
-                        animation: 'dot2Travel 2.0s infinite cubic-bezier(0.4, 0, 0.2, 1) both',
-                        animationDelay: '0.2s',
-                    }}
-                />
-                {/* 3. Green Dot 3 */}
-                <div
-                    className="absolute w-3.5 h-3.5 rounded-full bg-[#458500] shadow-2xs opacity-0"
-                    style={{
-                        animation: 'dot3Travel 2.0s infinite cubic-bezier(0.4, 0, 0.2, 1) both',
-                        animationDelay: '0.4s',
-                    }}
-                />
+                >
+                    <img
+                        src="/brand-logo.png"
+                        alt="Loading..."
+                        className="w-12 h-12 sm:w-16 sm:h-16 object-contain select-none pointer-events-none mix-blend-multiply"
+                    />
+                </div>
             </div>
         </div>
     );
 }
 
+export const BrandLogoLoader = ThreeDotsLoader;
 export default ThreeDotsLoader;

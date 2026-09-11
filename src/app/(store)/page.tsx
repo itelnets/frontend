@@ -1,9 +1,21 @@
+import type { Metadata } from 'next';
 import HeroCarousel from '@/components/HeroCarousel';
 import FeatureBar from '@/components/FeatureBar';
 import TriggerMaintenance from '@/components/TriggerMaintenance';
 import HomeProductSection from '@/components/HomeProductSection';
 
 export const dynamic = 'force-dynamic';
+
+export const metadata: Metadata = {
+  title: {
+    absolute: "Pratham Herbs | The Wellness store",
+  },
+  description: "Shop 100% pure Ayurvedic medicines, herbal powders, and holistic wellness supplements online. Consult certified Ayurvedic doctors for free and enjoy fast pan-India delivery.",
+  openGraph: {
+    title: "Pratham Herbs | The Wellness store",
+    description: "Shop 100% pure Ayurvedic medicines, herbal powders, and holistic wellness supplements online. Consult certified Ayurvedic doctors for free and enjoy fast pan-India delivery.",
+  },
+};
 
 async function getProducts() {
     try {

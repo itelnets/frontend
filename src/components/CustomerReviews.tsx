@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import api from '../services/api';
 import toast from 'react-hot-toast';
 import { formatDate } from '@/utils/formatDate';
+import AuthModal from '@/components/AuthModal';
 
 interface Review {
     _id: string;
@@ -46,19 +47,31 @@ const CustomerReviews = ({ productId, onReviewSubmitted }: Props) => {
     const [hasReviewed, setHasReviewed] = useState(false);
 
     const [currentUser, setCurrentUser] = useState<any>(null);
+    const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
     useEffect(() => {
-        // Get user from local storage
-        const userInfoStr = localStorage.getItem('userInfo');
-        if (userInfoStr) {
-            try {
-                const { user } = JSON.parse(userInfoStr);
-                setCurrentUser(user);
-            } catch (e) {
-                console.error('Error parsing user info', e);
+        const loadUser = () => {
+            const userInfoStr = localStorage.getItem('userInfo');
+            if (userInfoStr) {
+                try {
+                    const parsed = JSON.parse(userInfoStr);
+                    setCurrentUser(parsed.user || parsed);
+                } catch (e) {
+                    console.error('Error parsing user info', e);
+                }
+            } else {
+                setCurrentUser(null);
             }
-        }
+        };
+        loadUser();
+        window.addEventListener('userInfoUpdated', loadUser);
+        window.addEventListener('storage', loadUser);
         fetchReviews();
+
+        return () => {
+            window.removeEventListener('userInfoUpdated', loadUser);
+            window.removeEventListener('storage', loadUser);
+        };
     }, [productId]);
 
     const fetchReviews = async () => {
@@ -91,7 +104,7 @@ const CustomerReviews = ({ productId, onReviewSubmitted }: Props) => {
         e.preventDefault();
 
         if (!currentUser) {
-            toast.error("Please login to submit a review");
+            setIsAuthModalOpen(true);
             return;
         }
 
@@ -215,7 +228,7 @@ const CustomerReviews = ({ productId, onReviewSubmitted }: Props) => {
                         <button
                             onClick={() => {
                                 if (!currentUser) {
-                                    toast.error("Please login to write a review");
+                                    setIsAuthModalOpen(true);
                                     return;
                                 }
                                 setShowForm(true);
@@ -307,6 +320,16 @@ const CustomerReviews = ({ productId, onReviewSubmitted }: Props) => {
                     )}
                 </div>
             </div>
+
+            {/* Auth Modal for Login/Register */}
+            <AuthModal
+                isOpen={isAuthModalOpen}
+                onClose={() => setIsAuthModalOpen(false)}
+                onSuccess={() => {
+                    setIsAuthModalOpen(false);
+                    setShowForm(true);
+                }}
+            />
         </div>
     );
 };

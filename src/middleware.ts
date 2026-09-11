@@ -20,8 +20,9 @@ export function middleware(request: NextRequest) {
 
     const isLoggedIn = request.cookies.get('isLoggedIn')?.value === 'true';
 
-    // Protect /user routes from logged-out users
-    if (url.pathname.startsWith('/user') && !isLoggedIn) {
+    // Protect /user routes from logged-out users (except public policy/terms pages)
+    const publicUserRoutes = ['/user/terms-and-conditions', '/user/privacy-policy'];
+    if (url.pathname.startsWith('/user') && !publicUserRoutes.includes(url.pathname) && !isLoggedIn) {
         return NextResponse.redirect(new URL('/login', request.url));
     }
 

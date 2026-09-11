@@ -3,6 +3,10 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
+import AuthModal from '@/components/AuthModal';
+
+// Links that require authentication
+const protectedPaths = ['/user/myaccount', '/user/lists', '/user/address', '/user/orders'];
 
 export default function UserLayout({
     children,
@@ -12,12 +16,16 @@ export default function UserLayout({
     const pathname = usePathname();
     const router = useRouter();
     const [user, setUser] = useState<any>(undefined);
+    const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+    const [pendingHref, setPendingHref] = useState<string | null>(null);
 
     useEffect(() => {
         const checkAuth = () => {
             const userInfo = localStorage.getItem('userInfo');
             if (userInfo) {
                 setUser(JSON.parse(userInfo));
+            } else {
+                setUser(null);
             }
         };
 
@@ -28,6 +36,24 @@ export default function UserLayout({
             window.removeEventListener('userInfoUpdated', checkAuth);
         };
     }, [pathname]);
+
+    const handleProtectedClick = (e: React.MouseEvent, href: string) => {
+        if (!user) {
+            e.preventDefault();
+            setPendingHref(href);
+            setIsAuthModalOpen(true);
+        }
+    };
+
+    const handleAuthSuccess = () => {
+        setIsAuthModalOpen(false);
+        if (pendingHref) {
+            router.push(pendingHref);
+            setPendingHref(null);
+        } else {
+            router.refresh();
+        }
+    };
 
     const allLinks = [
         { name: 'Profile', href: '/user/myaccount', icon: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z' },
@@ -55,12 +81,14 @@ export default function UserLayout({
                             {allLinks.map((link, idx) => {
                                 const isActive = pathname === link.href;
                                 const isExternal = link.href.startsWith('http');
+                                const isProtected = protectedPaths.includes(link.href);
                                 return (
                                     <Link
                                         key={link.name}
                                         href={link.href}
                                         target={isExternal ? "_blank" : undefined}
                                         rel={isExternal ? "noopener noreferrer" : undefined}
+                                        onClick={isProtected ? (e) => handleProtectedClick(e, link.href) : undefined}
                                         className={`flex items-center justify-between px-4 sm:px-5 py-2.5 sm:py-2 border-b border-[#458500]/20 last:border-b-0 transition-colors ${isActive ? 'bg-[#458500] text-white hover:bg-[#366800]' : 'text-gray-700 hover:bg-[#eef6e6]'}`}
                                     >
                                         <div className="flex items-center gap-2  sm:gap-3 lg:gap-4">
@@ -85,6 +113,13 @@ export default function UserLayout({
                     </div>
                 </div>
             </div>
+
+            {/* Auth Modal for unauthenticated users */}
+            <AuthModal
+                isOpen={isAuthModalOpen}
+                onClose={() => { setIsAuthModalOpen(false); setPendingHref(null); }}
+                onSuccess={handleAuthSuccess}
+            />
         </div>
     );
 }

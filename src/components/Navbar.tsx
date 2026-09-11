@@ -6,6 +6,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import { useCart } from '@/context/CartContext';
 import Spinner from './Spinner';
 import SearchBar from './SearchBar';
+import GoogleAuthButton from './GoogleAuthButton';
 import toast from 'react-hot-toast';
 import api from '@/services/api';
 
@@ -96,12 +97,20 @@ const Navbar = () => {
         window.location.href = '/login';
     };
 
+    const handleGoogleAuthSuccess = () => {
+        setIsAuthOpen(false);
+        setIsMobileMenuOpen(false);
+        if (pathname === '/login' || pathname === '/register' || pathname === '/reset-password') {
+            router.push('/');
+        }
+    };
+
     return (
         <>
             <header ref={headerRef} className="sticky w-full left-0 top-0 z-[100]">
                 {/* Main Green Header */}
                 <div className={`bg-[#458500] text-white transition-all duration-200`}>
-                    <div className={`max-w-[1400px] mx-auto px-3 sm:px-4 h-[40px] sm:h-auto py-1 sm:py-3 flex items-center justify-between gap-2 sm:gap-3`}>
+                    <div className={`max-w-[1400px] mx-auto px-3 sm:px-4 h-[50px] sm:h-auto py-1 sm:py-3 flex items-center justify-between gap-2 sm:gap-3`}>
                         {/* Logo & Mobile Menu */}
                         <div className="flex items-center gap-2 sm:gap-3 shrink-0">
                             <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="md:hidden">
@@ -138,12 +147,12 @@ const Navbar = () => {
 
                                     {/* Unauthenticated Dropdown Wrapper with top padding for gap */}
                                     <div className={`absolute top-full right-[-10px] sm:right-0 pt-1 transition-all z-50 ${isAuthOpen ? 'opacity-100 visible' : 'opacity-0 invisible'}`}>
-                                        <div className="w-[200px] sm:w-[500px] bg-white text-gray-800 rounded-md shadow-[0_4px_20px_-4px_rgba(0,0,0,0.2)] border border-gray-100 flex flex-col sm:flex-row overflow-hidden" onClick={(e) => e.stopPropagation()}>
+                                        <div className="w-[200px] sm:w-[475px] bg-white text-gray-800 rounded-md shadow-[0_4px_20px_-4px_rgba(0,0,0,0.2)] border border-gray-100 flex flex-col sm:flex-row overflow-hidden" onClick={(e) => e.stopPropagation()}>
 
                                             {/* Left Side: Orders Info */}
-                                            <div className="hidden sm:flex w-[170px] bg-gray-50 p-3 sm:p-4 border-r border-gray-100 flex-col items-center text-center">
-                                                <div className="text-sm font-bold text-[#458500] mb-1 flex items-center gap-1">
-                                                    Pratham Herbs <span className="text-gray-400 font-normal text-xs">| ORDERS</span>
+                                            <div className="hidden sm:flex w-[185px] bg-gray-50 px-3 py-3 sm:py-4 border-r border-gray-100 flex-col items-center text-center">
+                                                <div className="text-xs sm:text-[13px] font-bold text-[#458500] mb-1 flex items-center justify-center gap-1 whitespace-nowrap">
+                                                    <span>Pratham Herbs</span> <span className="text-gray-400 font-normal text-[11px] sm:text-xs">| ORDERS</span>
                                                 </div>
                                                 <div className="text-[10px] text-gray-500 mt-2">Total Paid Orders</div>
                                                 <div className="text-lg font-extrabold text-[#458500] my-1">
@@ -154,44 +163,48 @@ const Navbar = () => {
 
                                             {/* Right Side: Navigation */}
                                             <div className="flex-1 p-3 sm:p-4 flex flex-col min-w-[200px]">
-                                                <div className="text-sm sm:text-[15px] font-bold text-[#458500] mb-3">Welcome!</div>
+                                                <div className="text-sm sm:text-[15px] font-bold text-[#458500] mb-2">Welcome!</div>
 
-                                                <div className="flex flex-col mb-4 sm:mb-6 flex-1">
-                                                    <Link href="/login" onClick={() => setIsAuthOpen(false)} className="flex items-center justify-between gap-2 sm:gap-3 text-sm sm:text-[15px] text-gray-800 hover:bg-[#eef6e6] px-3 py-1.5 sm:py-2.5 rounded-md transition-colors">
-                                                        <div className="flex items-center gap-2 sm:gap-3">
-                                                            <svg className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                                                <div className="flex flex-col mb-3 sm:mb-4 flex-1 space-y-0.5">
+                                                    <Link href="/login" onClick={() => setIsAuthOpen(false)} className="flex items-center justify-between gap-2 sm:gap-2.5 text-sm sm:text-[14px] text-gray-800 hover:bg-[#eef6e6] px-3 py-1 sm:py-1.5 rounded-md transition-colors">
+                                                        <div className="flex items-center gap-2 sm:gap-2.5">
+                                                            <svg className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
                                                             My Account
                                                         </div>
                                                     </Link>
-                                                    <Link href="/login" onClick={() => setIsAuthOpen(false)} className="flex items-center gap-2 sm:gap-3 text-sm sm:text-[15px] text-gray-800 hover:bg-[#eef6e6] px-3 py-1.5 sm:py-2.5 rounded-md transition-colors">
-                                                        <svg className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
+                                                    <Link href="/user/terms-and-conditions" onClick={() => setIsAuthOpen(false)} className="flex items-center gap-2 sm:gap-2.5 text-sm sm:text-[14px] text-gray-800 hover:bg-[#eef6e6] px-3 py-1 sm:py-1.5 rounded-md transition-colors">
+                                                        <svg className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
                                                         Orders
                                                     </Link>
-                                                    <Link href="/login" onClick={() => setIsAuthOpen(false)} className="flex items-center gap-2 sm:gap-3 text-sm sm:text-[15px] text-gray-800 hover:bg-[#eef6e6] px-3 py-1.5 sm:py-2.5 rounded-md transition-colors">
-                                                        <svg className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
+                                                    <Link href="/login" onClick={() => setIsAuthOpen(false)} className="flex items-center gap-2 sm:gap-2.5 text-sm sm:text-[14px] text-gray-800 hover:bg-[#eef6e6] px-3 py-1 sm:py-1.5 rounded-md transition-colors">
+                                                        <svg className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
                                                         My Lists
                                                     </Link>
-                                                    <Link href="/login" onClick={() => setIsAuthOpen(false)} className="flex items-center gap-2 sm:gap-3 text-sm sm:text-[15px] text-gray-800 hover:bg-[#eef6e6] px-3 py-1.5 sm:py-2.5 rounded-md transition-colors">
-                                                        <svg className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" /></svg>
+                                                    <Link href="https://wa.me/9558688770" target="_blank" rel="noopener noreferrer" onClick={() => setIsAuthOpen(false)} className="flex items-center gap-2 sm:gap-2.5 text-sm sm:text-[14px] text-gray-800 hover:bg-[#eef6e6] px-3 py-1 sm:py-1.5 rounded-md transition-colors">
+                                                        <svg className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" /></svg>
                                                         Messages
                                                     </Link>
-                                                    <Link href="/login" onClick={() => setIsAuthOpen(false)} className="flex items-center gap-2 sm:gap-3 text-sm sm:text-[15px] text-gray-800 hover:bg-[#eef6e6] px-3 py-1.5 sm:py-2.5 rounded-md transition-colors">
-                                                        <svg className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <Link href="/login" onClick={() => setIsAuthOpen(false)} className="flex items-center gap-2 sm:gap-2.5 text-sm sm:text-[14px] text-gray-800 hover:bg-[#eef6e6] px-3 py-1 sm:py-1.5 rounded-md transition-colors">
+                                                        <svg className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.242-4.243a8 8 0 1111.314 0z M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                                                         </svg>
                                                         My Address
                                                     </Link>
-                                                    <Link href="/login" onClick={() => setIsAuthOpen(false)} className="flex items-center gap-2 sm:gap-3 text-sm sm:text-[15px] text-gray-800 hover:bg-[#eef6e6] px-3 py-1.5 sm:py-2.5 rounded-md transition-colors">
-                                                        <svg className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <Link href="/user/terms-and-conditions" onClick={() => setIsAuthOpen(false)} className="flex items-center gap-2 sm:gap-2.5 text-sm sm:text-[14px] text-gray-800 hover:bg-[#eef6e6] px-3 py-1 sm:py-1.5 rounded-md transition-colors">
+                                                        <svg className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                                         </svg>
                                                         Terms & Conditions
                                                     </Link>
                                                 </div>
 
-                                                <Link href="/login" onClick={() => setIsAuthOpen(false)} className="block text-center w-full bg-[#458500] hover:bg-[#366800] text-white py-2 sm:py-2.5 px-6 rounded-md transition-colors font-bold text-[15px] sm:text-[16px] mt-auto">
-                                                    Sign in
+                                                <Link href="/login" onClick={() => setIsAuthOpen(false)} style={{ color: '#ffffff', WebkitFontSmoothing: 'subpixel-antialiased' }} className="flex items-center justify-center w-full bg-[#458500] hover:bg-[#366800] !text-[#ffffff] h-[38px] sm:h-[40px] px-6 rounded-md transition-colors font-medium text-[14px] sm:text-[15px] cursor-pointer subpixel-antialiased">
+                                                    <span style={{ color: '#ffffff' }} className="!text-[#ffffff] font-medium">Sign In</span>
                                                 </Link>
+
+                                                <div className="mt-2 [&_button]:h-[38px] sm:[&_button]:h-[40px] [&_button]:py-0">
+                                                    <GoogleAuthButton onSuccess={handleGoogleAuthSuccess} />
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -212,16 +225,14 @@ const Navbar = () => {
                                             </span>
                                         </div>
                                         <svg className={`w-3 h-3 ml-1 transition-transform duration-200 ${isAuthOpen ? '-rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-                                    </div>
-
-                                    {/* Authenticated Dropdown Wrapper */}
+                                    </div>                                    {/* Authenticated Dropdown Wrapper */}
                                     <div className={`absolute top-full right-[-10px] sm:right-0 pt-1 transition-all z-50 ${isAuthOpen ? 'opacity-100 visible' : 'opacity-0 invisible'}`}>
-                                        <div className="w-[200px] sm:w-[500px] bg-white text-gray-800 rounded-md shadow-[0_4px_20px_-4px_rgba(0,0,0,0.2)] border border-gray-100 flex flex-col sm:flex-row overflow-hidden" onClick={(e) => e.stopPropagation()}>
+                                        <div className="w-[200px] sm:w-[475px] bg-white text-gray-800 rounded-md shadow-[0_4px_20px_-4px_rgba(0,0,0,0.2)] border border-gray-100 flex flex-col sm:flex-row overflow-hidden" onClick={(e) => e.stopPropagation()}>
 
                                             {/* Left Side: Orders Info */}
-                                            <div className="hidden sm:flex w-[170px] bg-gray-50 p-3 sm:p-4 border-r border-gray-100 flex-col items-center text-center">
-                                                <div className="text-sm font-bold text-[#458500] mb-1 flex items-center gap-1">
-                                                    Pratham Herbs <span className="text-gray-400 font-normal text-xs">| ORDERS</span>
+                                            <div className="hidden sm:flex w-[185px] bg-gray-50 px-3 py-3 sm:py-4 border-r border-gray-100 flex-col items-center text-center">
+                                                <div className="text-xs sm:text-[13px] font-bold text-[#458500] mb-1 flex items-center justify-center gap-1 whitespace-nowrap">
+                                                    <span>Pratham Herbs</span> <span className="text-gray-400 font-normal text-[11px] sm:text-xs">| ORDERS</span>
                                                 </div>
                                                 <div className="text-[10px] text-gray-500 mt-2">Total Paid Orders</div>
                                                 <div className="text-lg font-extrabold text-[#458500] my-1">
@@ -233,43 +244,42 @@ const Navbar = () => {
                                             {/* Right Side: Navigation */}
                                             <div className="flex-1 p-3 sm:p-4 flex flex-col min-w-[200px]">
                                                 <div className="text-sm sm:text-[15px] font-bold text-[#458500]">Welcome!</div>
-                                                <div className="text-xs sm:text-sm font-bold text-[#458500] mb-3 truncate">{user.email}</div>
+                                                <div className="text-xs sm:text-[13px] font-bold text-[#458500] mb-2 truncate">{user.email}</div>
 
-                                                <div className="flex flex-col mb-4 sm:mb-6 flex-1">
-                                                    <Link href="/user/myaccount" className="flex items-center justify-between gap-2 sm:gap-3 text-sm sm:text-[15px] text-gray-800 hover:bg-[#eef6e6] px-3 py-1.5 sm:py-2.5 rounded-md transition-colors">
-                                                        <div className="flex items-center gap-2 sm:gap-3">
-                                                            <svg className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                                                <div className="flex flex-col mb-3 sm:mb-4 flex-1 space-y-0.5">
+                                                    <Link href="/user/myaccount" className="flex items-center justify-between gap-2 sm:gap-2.5 text-sm sm:text-[14px] text-gray-800 hover:bg-[#eef6e6] px-3 py-1 sm:py-1.5 rounded-md transition-colors">
+                                                        <div className="flex items-center gap-2 sm:gap-2.5">
+                                                            <svg className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
                                                             My Account
                                                         </div>
                                                     </Link>
-                                                    <Link href="/user/orders" className="flex items-center gap-2 sm:gap-3 text-sm sm:text-[15px] text-gray-800 hover:bg-[#eef6e6] px-3 py-1.5 sm:py-2.5 rounded-md transition-colors">
-                                                        <svg className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
+                                                    <Link href="/user/orders" className="flex items-center gap-2 sm:gap-2.5 text-sm sm:text-[14px] text-gray-800 hover:bg-[#eef6e6] px-3 py-1 sm:py-1.5 rounded-md transition-colors">
+                                                        <svg className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
                                                         Orders
                                                     </Link>
-                                                    <Link href="/user/lists" className="flex items-center gap-2 sm:gap-3 text-sm sm:text-[15px] text-gray-800 hover:bg-[#eef6e6] px-3 py-1.5 sm:py-2.5 rounded-md transition-colors">
-                                                        <svg className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
+                                                    <Link href="/user/lists" className="flex items-center gap-2 sm:gap-2.5 text-sm sm:text-[14px] text-gray-800 hover:bg-[#eef6e6] px-3 py-1 sm:py-1.5 rounded-md transition-colors">
+                                                        <svg className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
                                                         My Lists
                                                     </Link>
-                                                    <Link href="https://wa.me/9558688770" target="_blank" className="flex items-center gap-2 sm:gap-3 text-sm sm:text-[15px] text-gray-800 hover:bg-[#eef6e6] px-3 py-1.5 sm:py-2.5 rounded-md transition-colors">
-                                                        <svg className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" /></svg>
+                                                    <Link href="https://wa.me/9558688770" target="_blank" className="flex items-center gap-2 sm:gap-2.5 text-sm sm:text-[14px] text-gray-800 hover:bg-[#eef6e6] px-3 py-1 sm:py-1.5 rounded-md transition-colors">
+                                                        <svg className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" /></svg>
                                                         Messages
                                                     </Link>
-                                                    <Link href="/user/address" className="flex items-center gap-2 sm:gap-3 text-sm sm:text-[15px] text-gray-800 hover:bg-[#eef6e6] px-3 py-1.5 sm:py-2.5 rounded-md transition-colors">
-                                                        <svg className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <Link href="/user/address" className="flex items-center gap-2 sm:gap-2.5 text-sm sm:text-[14px] text-gray-800 hover:bg-[#eef6e6] px-3 py-1 sm:py-1.5 rounded-md transition-colors">
+                                                        <svg className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.242-4.243a8 8 0 1111.314 0z M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                                                         </svg>
                                                         My Address
                                                     </Link>
-                                                    <Link href="/user/terms-and-conditions" className="flex items-center gap-2 sm:gap-3 text-sm sm:text-[15px] text-gray-800 hover:bg-[#eef6e6] px-3 py-1.5 sm:py-2.5 rounded-md transition-colors">
-                                                        <svg className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <Link href="/user/terms-and-conditions" className="flex items-center gap-2 sm:gap-2.5 text-sm sm:text-[14px] text-gray-800 hover:bg-[#eef6e6] px-3 py-1 sm:py-1.5 rounded-md transition-colors">
+                                                        <svg className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                                         </svg>
                                                         Terms & Conditions
                                                     </Link>
-
                                                 </div>
 
-                                                <button onClick={handleLogout} className="w-full text-center py-2 sm:py-2.5 bg-white border border-[#458500] cursor-pointer text-[#458500] hover:bg-gray-50 font-bold rounded-md shadow-sm transition-colors text-sm mt-auto">
+                                                <button onClick={handleLogout} className="w-full text-center py-2 bg-white border border-[#458500] cursor-pointer text-[#458500] hover:bg-gray-50 font-bold rounded-md shadow-sm transition-colors text-sm mt-auto">
                                                     Sign out
                                                 </button>
                                             </div>
@@ -313,7 +323,7 @@ const Navbar = () => {
                 </div>
 
                 {/* Mobile Search (Shows only on mobile below header) */}
-                <div className="sm:hidden bg-[#458500] p-1.5 h-[55px] border-t border-[#3b7100]">
+                <div className="sm:hidden bg-[#458500] p-1.5 h-[60px] border-t border-[#3b7100]">
                     <SearchBar isMobile={true} />
                 </div>
 
@@ -436,9 +446,14 @@ const Navbar = () => {
                             {/* Fixed Footer */}
                             <div className="p-4 border-t border-gray-100 bg-white mt-auto shrink-0 shadow-[0_-4px_10px_-5px_rgba(0,0,0,0.1)]">
                                 {!user ? (
-                                    <Link href="/login" onClick={() => setIsMobileMenuOpen(false)} className="block text-center w-full bg-[#458500] hover:bg-[#366800] text-white py-2.5 rounded-md transition-colors font-bold text-[15px]">
-                                        Sign in
-                                    </Link>
+                                    <>
+                                        <Link href="/login" onClick={() => setIsMobileMenuOpen(false)} style={{ color: '#ffffff', WebkitFontSmoothing: 'subpixel-antialiased' }} className="flex items-center justify-center w-full bg-[#458500] hover:bg-[#366800] !text-[#ffffff] h-[38px] sm:h-[42px] px-6 rounded-md transition-colors font-medium text-[15px] sm:text-[16px] cursor-pointer subpixel-antialiased">
+                                            <span style={{ color: '#ffffff' }} className="!text-[#ffffff] font-medium">Sign In</span>
+                                        </Link>
+                                        <div className="mt-2 [&_button]:h-[38px] sm:[&_button]:h-[42px] [&_button]:py-0">
+                                            <GoogleAuthButton onSuccess={handleGoogleAuthSuccess} />
+                                        </div>
+                                    </>
                                 ) : (
                                     <button onClick={() => { handleLogout(); setIsMobileMenuOpen(false); }} className="w-full text-center py-2.5 bg-white border border-[#458500] text-[#458500] hover:bg-gray-50 font-bold rounded-md shadow-sm transition-colors text-[15px]">
                                         Sign out

@@ -6,6 +6,7 @@ import Link from 'next/link';
 import api from '@/services/api';
 import toast from 'react-hot-toast';
 import Spinner from '@/components/Spinner';
+import GoogleAuthButton from '@/components/GoogleAuthButton';
 
 export default function LoginPage() {
     const [email, setEmail] = useState('');
@@ -17,10 +18,19 @@ export default function LoginPage() {
     const router = useRouter();
 
     useEffect(() => {
-        const userInfo = localStorage.getItem('userInfo');
-        if (userInfo) {
-            router.push('/');
-        }
+        const checkAuth = () => {
+            const userInfo = localStorage.getItem('userInfo');
+            if (userInfo) {
+                router.push('/');
+            }
+        };
+        checkAuth();
+        window.addEventListener('userInfoUpdated', checkAuth);
+        window.addEventListener('storage', checkAuth);
+        return () => {
+            window.removeEventListener('userInfoUpdated', checkAuth);
+            window.removeEventListener('storage', checkAuth);
+        };
     }, [router]);
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -144,18 +154,18 @@ export default function LoginPage() {
     };
 
     return (
-        <div className="flex flex-1 bg-[#f4f5f6] items-center justify-center py-6 px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-1 bg-[#f4f5f6] items-center justify-center py-6 px-5 sm:px-6 lg:px-8">
             <div className="w-full max-w-md space-y-6 bg-white p-5 sm:p-8 rounded-xl shadow-md border border-gray-100">
                 <div className="flex border-b border-gray-200 mb-4">
                     <button
                         type="button"
-                        className="flex-1 py-2.5 text-center text-[16px] sm:text-lg font-bold text-[#458500] border-b-2 border-[#458500]"
+                        className="flex-1 pb-1.5 sm:pb-2 text-center text-[16px] sm:text-lg font-bold text-[#458500] border-b-2 border-[#458500]"
                     >
                         Sign In
                     </button>
                     <Link
                         href="/register"
-                        className="flex-1 py-2.5 text-center text-[16px] sm:text-lg font-medium text-gray-500 hover:text-gray-700 transition-colors"
+                        className="flex-1 pb-1.5 sm:pb-2 text-center text-[16px] sm:text-lg font-medium text-gray-500 hover:text-gray-700 transition-colors"
                     >
                         Create Account
                     </Link>
@@ -167,7 +177,7 @@ export default function LoginPage() {
                     </p>
                 </div>
 
-                <form className="mt-6 space-y-5" onSubmit={handleSubmit} noValidate>
+                <form className="mt-6 space-y-2" onSubmit={handleSubmit} noValidate>
                     <div className="space-y-4">
                         <div>
                             <label htmlFor="email" className="block text-sm font-medium text-gray-700">
@@ -182,7 +192,7 @@ export default function LoginPage() {
                                     required
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
-                                    className="block w-full px-3 py-2 sm:px-4 sm:py-3 rounded-md border border-gray-300 placeholder-gray-400 focus:border-[#458500] focus:ring-[#458500] transition duration-200 outline-none text-sm"
+                                    className="block w-full px-3 py-2 sm:px-4 sm:py-[10px] rounded-md border border-gray-300 placeholder-gray-400 focus:border-[#458500] focus:ring-[#458500] transition duration-200 outline-none text-sm"
                                     placeholder="you@example.com"
                                 />
                             </div>
@@ -202,7 +212,7 @@ export default function LoginPage() {
                                         required
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
-                                        className="block w-full px-3 py-2 sm:px-4 sm:py-3 rounded-md border border-gray-300 placeholder-gray-400 focus:border-[#458500] focus:ring-[#458500] transition duration-200 outline-none text-sm pr-10"
+                                        className="block w-full px-3 py-2 sm:px-4 sm:py-[10px] rounded-md border border-gray-300 placeholder-gray-400 focus:border-[#458500] focus:ring-[#458500] transition duration-200 outline-none text-sm pr-10"
                                         placeholder="••••••••"
                                     />
                                     <button
@@ -223,10 +233,10 @@ export default function LoginPage() {
                                     </button>
                                 </div>
                                 <div className="mt-2 flex flex-wrap gap-2 text-xs">
-                                    <span className={`transition-all duration-300 px-2 py-1 rounded-md border ${/[A-Z]/.test(password) ? 'opacity-100 border-[#458500] text-[#458500] bg-[#eef3ea]' : (showPasswordErrors && !/[A-Z]/.test(password) ? 'opacity-100 border-red-500 text-red-700 bg-red-50' : 'opacity-40 border-gray-300 text-gray-500 bg-gray-50')}`}>Capital</span>
-                                    <span className={`transition-all duration-300 px-2 py-1 rounded-md border ${/[a-z]/.test(password) ? 'opacity-100 border-[#458500] text-[#458500] bg-[#eef3ea]' : (showPasswordErrors && !/[a-z]/.test(password) ? 'opacity-100 border-red-500 text-red-700 bg-red-50' : 'opacity-40 border-gray-300 text-gray-500 bg-gray-50')}`}>Lowercase</span>
-                                    <span className={`transition-all duration-300 px-2 py-1 rounded-md border ${/[0-9]/.test(password) ? 'opacity-100 border-[#458500] text-[#458500] bg-[#eef3ea]' : (showPasswordErrors && !/[0-9]/.test(password) ? 'opacity-100 border-red-500 text-red-700 bg-red-50' : 'opacity-40 border-gray-300 text-gray-500 bg-gray-50')}`}>Numeric</span>
-                                    <span className={`transition-all duration-300 px-2 py-1 rounded-md border ${/[^A-Za-z0-9]/.test(password) && password.length > 0 ? 'opacity-100 border-[#458500] text-[#458500] bg-[#eef3ea]' : (showPasswordErrors && (!/[^A-Za-z0-9]/.test(password) || password.length === 0) ? 'opacity-100 border-red-500 text-red-700 bg-red-50' : 'opacity-40 border-gray-300 text-gray-500 bg-gray-50')}`}>Special</span>
+                                    <span className={`transition-all duration-300 px-2 py-1 rounded-md border ${/[A-Z]/.test(password) ? 'opacity-100 border-[#458500] text-[#458500] bg-[#eef3ea]' : (showPasswordErrors && !/[A-Z]/.test(password) ? 'opacity-100 border-red-500 text-red-700 bg-red-50' : 'opacity-40 border-gray-300 text-gray-500 bg-gray-50')}`}>A-Z</span>
+                                    <span className={`transition-all duration-300 px-2 py-1 rounded-md border ${/[a-z]/.test(password) ? 'opacity-100 border-[#458500] text-[#458500] bg-[#eef3ea]' : (showPasswordErrors && !/[a-z]/.test(password) ? 'opacity-100 border-red-500 text-red-700 bg-red-50' : 'opacity-40 border-gray-300 text-gray-500 bg-gray-50')}`}>a-z</span>
+                                    <span className={`transition-all duration-300 px-2 py-1 rounded-md border ${/[0-9]/.test(password) ? 'opacity-100 border-[#458500] text-[#458500] bg-[#eef3ea]' : (showPasswordErrors && !/[0-9]/.test(password) ? 'opacity-100 border-red-500 text-red-700 bg-red-50' : 'opacity-40 border-gray-300 text-gray-500 bg-gray-50')}`}>0-9</span>
+                                    <span className={`transition-all duration-300 px-2 py-1 rounded-md border ${/[^A-Za-z0-9]/.test(password) && password.length > 0 ? 'opacity-100 border-[#458500] text-[#458500] bg-[#eef3ea]' : (showPasswordErrors && (!/[^A-Za-z0-9]/.test(password) || password.length === 0) ? 'opacity-100 border-red-500 text-red-700 bg-red-50' : 'opacity-40 border-gray-300 text-gray-500 bg-gray-50')}`}>@#$%</span>
                                 </div>
                             </div>
                         )}
@@ -238,7 +248,7 @@ export default function LoginPage() {
                                 <button
                                     type="button"
                                     onClick={() => setIsForgotPassword(true)}
-                                    className="font-medium text-[#458500] hover:text-[#3b7100] cursor-pointer transition-colors"
+                                    className="font-medium text-[#458500] hover:text-[#3b7100] text-xs sm:text-[14px] cursor-pointer transition-colors"
                                 >
                                     Forgot password?
                                 </button>
@@ -250,7 +260,7 @@ export default function LoginPage() {
                         <button
                             type="submit"
                             disabled={isLoading}
-                            className="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-bold text-white bg-[#458500] hover:bg-[#3b7100] focus:outline-none cursor-pointer transition duration-300 disabled:opacity-70 disabled:cursor-not-allowed"
+                            className="block text-center w-full bg-[#458500] hover:bg-[#366800] text-white py-2 sm:py-2.5 px-6 rounded-md transition-colors font-normal text-[15px] sm:text-[16px] cursor-pointer disabled:opacity-100 disabled:cursor-not-allowed"
                         >
                             {isLoading ? <Spinner /> : (isForgotPassword ? 'Send Reset Link' : 'Sign In')}
                         </button>
@@ -269,6 +279,7 @@ export default function LoginPage() {
                     )}
 
                 </form>
+                {!isForgotPassword && <div className="-mt-3 [&_button]:py-[9px] sm:[&_button]:py-2.5"><GoogleAuthButton /></div>}
             </div>
 
             {isLoading && (

@@ -4,25 +4,22 @@ type Props = {
     params: Promise<{ id: string }>
 };
 
-const getSiteUrl = () => (process.env.NEXT_PUBLIC_FRONTEND_URL || 'https://prathamherbs.com').replace(/\/$/, '');
+const getSiteUrl = () => (process.env.NEXT_PUBLIC_FRONTEND_URL || '').replace(/\/$/, '');
+const getApiUrl = () => (process.env.NEXT_PUBLIC_API_URL || '').replace(/\/$/, '');
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
     try {
         const resolvedParams = await params;
         const id = resolvedParams.id;
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+        const apiUrl = getApiUrl();
         const siteUrl = getSiteUrl();
         const productUrl = `${siteUrl}/products/${id}`;
 
-        if (!apiUrl) {
-            return { title: 'Product Details' };
-        }
-
         // Fetch product from backend
-        const res = await fetch(`${apiUrl}/products/${id}`);
+        const res = await fetch(`${apiUrl}/products/${id}`, { next: { revalidate: 3600 } });
         if (!res.ok) {
             return {
-                title: 'Product Not Found',
+                title: 'Product Details',
             };
         }
 
@@ -34,25 +31,34 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
             return { title: 'Product Details' };
         }
 
-        const imageUrl = product.images?.[0]
-            ? (product.images[0].startsWith('http') ? product.images[0] : `${apiUrl}/upload/file/${product.images[0]}`)
-            : "https://via.placeholder.com/1200x630?text=No+Image+Available";
+        if (!product || !product.name) {
+            return { title: 'Product Details' };
+        }
 
-        const paddedImageUrl = `https://wsrv.nl/?url=${encodeURIComponent(imageUrl)}&w=1200&h=630&fit=contain&bg=white&filename=image.jpg`;
+        // Exact title from admin side
+        const productTitle = product.name.trim();
+
+        // Build list of all crawlable public images
+        const allImages: string[] = (product.images && product.images.length > 0)
+            ? product.images.map((img: string) => img.startsWith('http') ? img : `${apiUrl}/upload/file/${img}`)
+            : [`${siteUrl}/brand-logo.png`];
+
+        const primaryImage = allImages[0];
 
         const plainTextDescription = product.overview
-            ? product.overview.replace(/<[^>]*>?/gm, '').substring(0, 160)
-            : `Buy ${product.name} online at Pratham Herbs. 100% authentic Ayurvedic product.`;
+            ? product.overview.replace(/<[^>]*>?/gm, '').substring(0, 160).trim()
+            : (product.description ? product.description.replace(/<[^>]*>?/gm, '').substring(0, 160).trim() : `Buy ${productTitle} online at Pratham Herbs. 100% authentic Ayurvedic & herbal formulation.`);
 
         return {
-            title: product.name,
+            title: productTitle,
             description: plainTextDescription,
             keywords: [
-                product.name,
+                productTitle,
                 product.brand || 'Pratham Herbs',
                 product.type || 'Ayurvedic',
+                'Buy ' + productTitle,
                 'Ayurvedic Product',
-                'Buy ' + product.name,
+                'Herbal Health',
                 'Pratham Herbs',
             ],
             alternates: {
@@ -66,28 +72,25 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
                     follow: true,
                     'max-image-preview': 'large',
                     'max-snippet': -1,
+                    'max-video-preview': -1,
                 },
             },
             openGraph: {
-                type: 'article',
+                type: 'website',
                 url: productUrl,
-                title: product.name,
+                title: `${productTitle} | Pratham Herbs`,
                 description: plainTextDescription,
                 siteName: 'Pratham Herbs',
-                images: [
-                    {
-                        url: paddedImageUrl,
-                        width: 1200,
-                        height: 630,
-                        alt: product.name,
-                    },
-                ],
+                images: allImages.map((imgUrl) => ({
+                    url: imgUrl,
+                    alt: productTitle,
+                })),
             },
             twitter: {
                 card: 'summary_large_image',
-                title: product.name,
+                title: `${productTitle} | Pratham Herbs`,
                 description: plainTextDescription,
-                images: [paddedImageUrl],
+                images: [primaryImage],
             },
         };
     } catch (error) {
@@ -104,42 +107,49 @@ export default async function ProductLayout({
     children: React.ReactNode;
     params: Promise<{ id: string }>;
 }) {
-    let jsonLd = null;
+    let productSchema = null;
+    let breadcrumbSchema = null;
     try {
         const resolvedParams = await params;
         const id = resolvedParams.id;
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+        const apiUrl = getApiUrl();
         const siteUrl = getSiteUrl();
         const productUrl = `${siteUrl}/products/${id}`;
 
-        if (apiUrl) {
-            const res = await fetch(`${apiUrl}/products/${id}`);
-            if (res.ok) {
-                const product = await res.json();
-                const imageUrl = product.images?.[0]
-                    ? (product.images[0].startsWith('http') ? product.images[0] : `${apiUrl}/upload/file/${product.images[0]}`)
-                    : `${siteUrl}/logo.png`;
+        const res = await fetch(`${apiUrl}/products/${id}`, { next: { revalidate: 3600 } });
+        if (res.ok) {
+            const product = await res.json();
+            if (product && product.name) {
+                const productTitle = product.name.trim();
+                const allImages: string[] = (product.images && product.images.length > 0)
+                    ? product.images.map((img: string) => img.startsWith('http') ? img : `${apiUrl}/upload/file/${img}`)
+                    : [`${siteUrl}/brand-logo.png`];
 
                 const finalPrice = product.discount > 0
                     ? Math.round(product.price * (1 - product.discount / 100))
-                    : product.price;
+                    : (product.price || 0);
 
                 const plainTextDescription = product.overview
-                    ? product.overview.replace(/<[^>]*>?/gm, '').substring(0, 300)
-                    : `Buy ${product.name} at Pratham Herbs.`;
+                    ? product.overview.replace(/<[^>]*>?/gm, '').substring(0, 300).trim()
+                    : (product.description ? product.description.replace(/<[^>]*>?/gm, '').substring(0, 300).trim() : `Buy ${productTitle} at Pratham Herbs.`);
 
-                jsonLd = {
+                const inStockStatus = (product.inStock !== 'no' && product.inStock !== 'false')
+                    ? 'https://schema.org/InStock'
+                    : 'https://schema.org/OutOfStock';
+
+                productSchema = {
                     '@context': 'https://schema.org',
                     '@type': 'Product',
-                    name: product.name,
-                    image: product.images?.map((img: string) => img.startsWith('http') ? img : `${apiUrl}/upload/file/${img}`) || [imageUrl],
+                    name: productTitle,
+                    image: allImages,
                     description: plainTextDescription,
                     sku: product._id,
-                    mpn: product._id,
+                    mpn: product.batchNo || product._id,
                     brand: {
                         '@type': 'Brand',
                         name: product.brand || 'Pratham Herbs',
                     },
+                    category: product.type || 'Ayurvedic',
                     offers: {
                         '@type': 'Offer',
                         url: productUrl,
@@ -147,19 +157,47 @@ export default async function ProductLayout({
                         price: finalPrice,
                         priceValidUntil: '2030-12-31',
                         itemCondition: 'https://schema.org/NewCondition',
-                        availability: product.inStock !== false ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+                        availability: inStockStatus,
                         seller: {
                             '@type': 'Organization',
                             name: 'Pratham Herbs',
+                            url: siteUrl,
                         },
                     },
-                    ...(product.numReviews > 0 && product.rating ? {
+                    ...((product.numReviews > 0 && product.rating) ? {
                         aggregateRating: {
                             '@type': 'AggregateRating',
                             ratingValue: product.rating,
                             reviewCount: product.numReviews,
+                            bestRating: '5',
+                            worstRating: '1',
                         }
                     } : {})
+                };
+
+                breadcrumbSchema = {
+                    '@context': 'https://schema.org',
+                    '@type': 'BreadcrumbList',
+                    itemListElement: [
+                        {
+                            '@type': 'ListItem',
+                            position: 1,
+                            name: 'Home',
+                            item: siteUrl,
+                        },
+                        {
+                            '@type': 'ListItem',
+                            position: 2,
+                            name: product.type || 'Products',
+                            item: `${siteUrl}/type/${encodeURIComponent((product.type || 'ayurvedic').toLowerCase())}`,
+                        },
+                        {
+                            '@type': 'ListItem',
+                            position: 3,
+                            name: productTitle,
+                            item: productUrl,
+                        },
+                    ],
                 };
             }
         }
@@ -169,10 +207,16 @@ export default async function ProductLayout({
 
     return (
         <>
-            {jsonLd && (
+            {productSchema && (
                 <script
                     type="application/ld+json"
-                    dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+                    dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }}
+                />
+            )}
+            {breadcrumbSchema && (
+                <script
+                    type="application/ld+json"
+                    dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
                 />
             )}
             {children}

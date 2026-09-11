@@ -248,7 +248,7 @@ export default function CartPage() {
                                         <Link href="/" className="px-4 py-2 text-sm sm:text-base sm:px-6 sm:py-2.5 rounded-md border border-[#458500] text-[#458500] font-bold hover:bg-[#eef6e6] transition-colors">
                                             Start shopping
                                         </Link>
-                                        <Link href="/login" className="px-4 py-2 text-sm sm:text-base sm:px-6 sm:py-2.5 rounded-md bg-[#458500] hover:bg-[#366800] text-white font-bold transition-colors">
+                                        <Link href="/register" className="px-4 py-2 text-sm sm:text-base sm:px-6 sm:py-2.5 rounded-md bg-[#458500] hover:bg-[#366800] text-white font-bold transition-colors">
                                             Create Account
                                         </Link>
                                     </div>
