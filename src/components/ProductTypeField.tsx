@@ -9,13 +9,15 @@ interface ProductTypeFieldProps {
     onChange: (value: string) => void;
     className?: string;
     labelClassName?: string;
+    hasError?: boolean;
 }
 
 export default function ProductTypeField({
     value,
     onChange,
     className = '',
-    labelClassName = 'block text-sm font-semibold text-gray-700 mb-2'
+    labelClassName = 'block text-sm font-semibold text-gray-700 mb-2',
+    hasError = false,
 }: ProductTypeFieldProps) {
     const defaultPresets = ['Supplements', 'Sports', 'Bath', 'Beauty', 'Grocery', 'Home', 'Baby', 'Pets'];
 
@@ -151,7 +153,9 @@ export default function ProductTypeField({
     return (
         <>
             <div className={`relative select-none ${className}`} ref={dropdownRef}>
-                <label className={labelClassName}>Product Type</label>
+                <label className={labelClassName}>
+                    Product Type <span className="text-red-500">*</span>
+                </label>
 
                 {/* Dropdown Display Box */}
                 <button
@@ -161,7 +165,7 @@ export default function ProductTypeField({
                         setIsAddingNew(false);
                         setEditingType(null);
                     }}
-                    className="flex cursor-pointer items-center justify-between w-full border border-gray-300 text-gray-700 rounded-md px-3 py-2 text-sm bg-white focus:outline-none focus:border-green-600 transition-colors h-[38px]"
+                    className={`flex cursor-pointer items-center justify-between w-full border ${hasError ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-green-600'} text-gray-700 rounded-md px-3 py-2 text-sm bg-white focus:outline-none transition-colors h-[38px]`}
                 >
                     <span className="truncate">{value || 'Select Product Type'}</span>
                     <svg className={`flex-shrink-0 w-4 h-4 ml-2 text-green-600 transition-transform ${isOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">

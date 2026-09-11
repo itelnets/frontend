@@ -315,6 +315,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
 
         const isImagesMissing = images.length === 0;
         const isNameMissing = !formData.name.trim();
+        const isTypeMissing = !formData.type || !formData.type.trim();
         const isBrandMissing = !formData.brand.trim();
         const isManufacturerMissing = !formData.manufacturer.trim();
         const isPriceMissing = !formData.price || Number(formData.price) <= 0;
@@ -334,7 +335,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
             }
         });
 
-        if (isImagesMissing || isNameMissing || isBrandMissing || isManufacturerMissing || isPriceMissing || isCategoriesMissing || isHsnMissing || isBatchNoMissing || isExpiredOnMissing || isOverviewMissing || isOtherIngredientsMissing || isWarningsMissing || isDisclaimerMissing || isAnySpecMissing) {
+        if (isImagesMissing || isNameMissing || isTypeMissing || isBrandMissing || isManufacturerMissing || isPriceMissing || isCategoriesMissing || isHsnMissing || isBatchNoMissing || isExpiredOnMissing || isOverviewMissing || isOtherIngredientsMissing || isWarningsMissing || isDisclaimerMissing || isAnySpecMissing) {
             setShowFormErrors(true);
             toast.error('Please add all required fields');
             return;
@@ -562,6 +563,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                                 <ProductTypeField
                                     value={formData.type || ''}
                                     onChange={(val) => setFormData({ ...formData, type: val })}
+                                    hasError={showFormErrors && (!formData.type || !formData.type.trim())}
                                 />
                             </div>
                             <div>
