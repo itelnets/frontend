@@ -14,7 +14,10 @@ const poppins = Poppins({
   weight: ["300", "400", "500", "600", "700", "800", "900"],
 });
 
-const siteUrl = (process.env.NEXT_PUBLIC_FRONTEND_URL || 'https://prathamherbs.com').replace(/\/$/, '');
+const rawSiteUrl = process.env.NEXT_PUBLIC_FRONTEND_URL || 'https://prathamherbs.com';
+const siteUrl = (rawSiteUrl.includes('localhost') || rawSiteUrl.includes('127.0.0.1') || /192\.168\.\d+\.\d+/.test(rawSiteUrl))
+    ? 'https://prathamherbs.com'
+    : rawSiteUrl.replace(/\/$/, '');
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),

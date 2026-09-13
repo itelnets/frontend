@@ -156,6 +156,7 @@ function LoginFormContent() {
 
     return (
         <div className="flex flex-1 bg-[#f4f5f6] items-center justify-center py-6 px-5 sm:px-6 lg:px-8">
+            <meta name="robots" content="noindex, nofollow" />
             <div className="w-full max-w-md space-y-6 bg-white p-5 sm:p-8 rounded-xl shadow-md border border-gray-100">
                 <div className="flex border-b border-gray-200 mb-4">
                     <button

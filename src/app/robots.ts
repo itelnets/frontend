@@ -1,7 +1,10 @@
 import { MetadataRoute } from 'next';
 
 export default function robots(): MetadataRoute.Robots {
-    const baseUrl = process.env.NEXT_PUBLIC_FRONTEND_URL || 'https://prathamherbs.com';
+    const rawUrl = process.env.NEXT_PUBLIC_FRONTEND_URL || 'https://prathamherbs.com';
+    const baseUrl = (rawUrl.includes('localhost') || rawUrl.includes('127.0.0.1') || /192\.168\.\d+\.\d+/.test(rawUrl))
+        ? 'https://prathamherbs.com'
+        : rawUrl.replace(/\/$/, '');
 
     return {
         rules: {
@@ -9,12 +12,16 @@ export default function robots(): MetadataRoute.Robots {
             allow: '/',
             disallow: [
                 '/admin',
-                '/admin/',
                 '/admin/*',
+                '/login',
+                '/register',
+                '/reset-password',
                 '/checkout',
                 '/cart',
-                '/user/',
-                '/user/*',
+                '/user/myaccount',
+                '/user/lists',
+                '/user/address',
+                '/user/orders',
             ],
         },
         sitemap: `${baseUrl.replace(/\/$/, '')}/sitemap.xml`,

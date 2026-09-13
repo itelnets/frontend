@@ -1,0 +1,590 @@
+"use client";
+
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { useCart } from '@/context/CartContext';
+import ImageZoom from '@/components/ImageZoom';
+import CustomerReviews from '@/components/CustomerReviews';
+import { getProductById } from '@/services/product';
+import AddToListsModal from '@/components/AddToListsModal';
+import { formatExpiryDate } from '@/utils/formatDate';
+
+const renderBulletContent = (text: any) => {
+    if (!text || (typeof text !== 'string' && typeof text !== 'number')) return null;
+    const str = String(text).trim();
+    if (!str) return null;
+
+    if (str.includes('<') && str.includes('>')) {
+        return <div dangerouslySetInnerHTML={{ __html: str }} />;
+    }
+
+    const rawItems = str.split(/,(?!\d)|\n/);
+    const items = rawItems
+        .map(s => s.trim())
+        .filter(s => s.length > 0);
+
+    if (items.length <= 1) {
+        return <span>{str}</span>;
+    }
+
+    return (
+        <ul className="list-disc list-outside pl-4 space-y-1 my-0.5">
+            {items.map((item, i) => (
+                <li key={i} className="text-gray-900 leading-snug">
+                    {item}
+                </li>
+            ))}
+        </ul>
+    );
+};
+
+interface ProductDetailsClientProps {
+    initialProduct?: any;
+    productId: string;
+}
+
+export default function ProductDetailsClient({ initialProduct, productId }: ProductDetailsClientProps) {
+    const router = useRouter();
+    const { addToCart, myLists } = useCart();
+    const [isLoading, setIsLoading] = useState(!initialProduct);
+    const [product, setProduct] = useState<any>(initialProduct || null);
+    const [recommendedProducts, setRecommendedProducts] = useState<any[]>([]);
+    const [quantity, setQuantity] = useState(1);
+    const [selectedImageIdx, setSelectedImageIdx] = useState(0);
+    const [showReviewsPopover, setShowReviewsPopover] = useState(false);
+    const [showListsModal, setShowListsModal] = useState(false);
+
+    const addedToList = myLists.some((p: any) => p._id === product?._id);
+
+    const fetchProduct = async () => {
+        try {
+            if (productId) {
+                const { data } = await getProductById(productId);
+                setProduct(data);
+            }
+        } catch (error) {
+            console.error("Failed to fetch product data:", error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        window.scrollTo(0, 0);
+        if (!initialProduct) {
+            fetchProduct();
+        } else {
+            setProduct(initialProduct);
+            setIsLoading(false);
+        }
+    }, [productId, initialProduct]);
+
+    const getImageUrl = (img: string | undefined, fallback: string = "https://via.placeholder.com/600x600?text=No+Image+Available") => {
+        if (!img) return fallback;
+        if (img.startsWith('http')) return img;
+        return `${process.env.NEXT_PUBLIC_API_URL}/upload/file/${img}`;
+    };
+
+    const displayProduct = {
+        name: product?.name,
+        brand: product?.brand,
+        type: product?.type,
+        manufacturer: product?.manufacturer,
+        rating: product?.rating || 0,
+        numReviews: product?.numReviews || 0,
+        price: product?.price,
+        discount: product?.discount,
+        inStock: product?.inStock,
+        bestSeller: product?.bestSeller,
+        soldRecently: product?.salesCount || 0,
+        images: product?.images?.length ? product.images.map((img: string) => getImageUrl(img)) : [
+            "https://via.placeholder.com/600x600?text=No+Image+Available"
+        ],
+        overview: product?.description || product?.overview || null,
+        specifications: product?.specifications || [],
+        otherIngredients: product?.otherIngredients || null,
+        warnings: product?.warnings || null,
+        disclaimer: product?.disclaimer || null,
+        expiredOn: formatExpiryDate(product?.expiredOn),
+        _id: product?._id,
+        weight: product?.weight,
+        weightUnit: product?.weightUnit,
+    };
+
+    const originalPrice = displayProduct.price;
+    const currentPrice = displayProduct.discount > 0 ? Math.round(originalPrice * (1 - displayProduct.discount / 100)) : originalPrice;
+
+    const renderReviewsPopover = () => {
+        const reviews = product?.reviews || [];
+        const totalReviews = displayProduct.numReviews || reviews.length || 0;
+
+        const counts = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+        if (reviews.length > 0) {
+            reviews.forEach((r: any) => {
+                const ratingFloor = Math.floor(r.rating);
+                if (counts[ratingFloor as keyof typeof counts] !== undefined) {
+                    counts[ratingFloor as keyof typeof counts]++;
+                }
+            });
+        }
+
+        const ratingData = [5, 4, 3, 2, 1].map(star => {
+            let pct = 0;
+            if (reviews.length > 0) {
+                pct = Math.round((counts[star as keyof typeof counts] / reviews.length) * 100) || 0;
+            } else if (totalReviews > 0) {
+                if (Math.round(displayProduct.rating || 0) === star) {
+                    pct = 100;
+                }
+            }
+
+            let color = 'bg-gray-200';
+            if (pct > 0) {
+                color = 'bg-green-700';
+            }
+
+            return { star, pct, color };
+        });
+
+        return (
+            <div className="absolute top-full left-0 pt-2 z-50 cursor-default" onClick={e => e.stopPropagation()}>
+                <div className="w-[290px] sm:w-[350px] bg-white border border-gray-200 rounded-xl shadow-xl p-4 sm:p-5">
+                    <div className="flex items-center gap-4 mb-4">
+                        <div className="text-3xl sm:text-4xl font-extrabold text-gray-900">{displayProduct.rating || 0}</div>
+                        <div className="flex flex-col">
+                            <div className="flex text-yellow-400 mb-1">
+                                {[...Array(5)].map((_, i) => {
+                                    const rating = displayProduct.rating || 0;
+                                    if (rating >= i + 1) {
+                                        return (
+                                            <svg key={i} className="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                            </svg>
+                                        );
+                                    } else if (rating > i) {
+                                        return (
+                                            <div key={i} className="relative w-4 h-4">
+                                                <svg className="absolute top-0 left-0 w-4 h-4 text-gray-200" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                                </svg>
+                                                <svg className="absolute top-0 left-0 w-4 h-4 text-yellow-400" style={{ clipPath: 'inset(0 50% 0 0)' }} fill="currentColor" viewBox="0 0 20 20">
+                                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                                </svg>
+                                            </div>
+                                        );
+                                    } else {
+                                        return (
+                                            <svg key={i} className="w-4 h-4 text-gray-200" fill="currentColor" viewBox="0 0 20 20">
+                                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                            </svg>
+                                        );
+                                    }
+                                })}
+                            </div>
+                            <span className="text-[10px] text-gray-500">Based on {displayProduct.numReviews} ratings</span>
+                        </div>
+                    </div>
+
+                    <div className="space-y-1 sm:space-y-2 mb-4 sm:mb-6">
+                        {ratingData.map((row) => (
+                            <div key={row.star} className="flex items-center gap-3 text-xs text-gray-600">
+                                <div className="flex text-yellow-400 w-16">
+                                    {[...Array(5)].map((_, i) => (
+                                        <svg key={i} className={`w-3 h-3 ${i < row.star ? 'text-yellow-400' : 'text-gray-200'}`} fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
+                                    ))}
+                                </div>
+                                <div className="flex-1 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                                    <div className={`h-full ${row.color}`} style={{ width: `${row.pct}%` }}></div>
+                                </div>
+                                <div className="w-6 text-right text-[10px]">{row.pct}%</div>
+                            </div>
+                        ))}
+                    </div>
+                    <div className="text-center">
+                        <a href="#customer-reviews" onClick={() => setShowReviewsPopover(false)} className="text-green-700 text-[12.5px] sm:text-[14px] font-bold flex items-center justify-center gap-1">
+                            See customer reviews
+                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
+    const renderTitleAndRating = () => (
+        <div className="mb-2">
+            <div className="flex items-center gap-2 mb-2">
+                <span
+                    className={`text-black text-[13px] font-bold px-2 py-1 rounded ${displayProduct.brand ? "bg-[#B7E6FF]" : ""
+                        }`}
+                >
+                    {displayProduct.brand}
+                </span>
+                {displayProduct.bestSeller?.toLowerCase() === 'yes' && <span className="bg-orange-100 text-orange-800 text-[10px] font-bold px-2 py-0.5 rounded">Best seller</span>}
+            </div>
+
+            <h1 className="text-[14px] sm:text-xl font-bold text-gray-900 leading-snug">
+                {displayProduct.name}
+            </h1>
+
+            {(displayProduct.manufacturer || displayProduct.brand) && (
+                <div className="text-[12px] sm:text-sm text-gray-600 mb-1">
+                    By <Link href={`/products?brand=${encodeURIComponent(displayProduct.manufacturer || displayProduct.brand || '')}`} className="text-[#0052A5] hover:underline">{displayProduct.manufacturer || displayProduct.brand}</Link>
+                </div>
+            )}
+
+            <div className="flex flex-wrap items-center gap-2 lg:gap-4 text-xs lg:text-sm lg:border-b lg:border-gray-100 lg:pb-4">
+
+                <div
+                    className="flex items-center gap-1 relative cursor-pointer"
+                    onMouseEnter={() => setShowReviewsPopover(true)}
+                    onMouseLeave={() => setShowReviewsPopover(false)}
+                    onClick={() => setShowReviewsPopover(!showReviewsPopover)}
+                >
+                    <div className="flex lg:hidden items-center gap-1 cursor-pointer">
+                        <span className="font-bold text-gray-700">{displayProduct.rating || 0}</span>
+                        <svg className="w-3.5 h-3.5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
+                        <span className="text-[#0052A5]">{displayProduct.numReviews || 0}</span>
+                    </div>
+
+                    <div className="hidden lg:flex items-center gap-1 cursor-pointer">
+                        <span className="font-bold text-gray-700">{displayProduct.rating || 0}</span>
+                        <div className="flex text-yellow-400">
+                            {[...Array(5)].map((_, i) => {
+                                const rating = displayProduct.rating || 0;
+                                if (rating >= i + 1) {
+                                    return (
+                                        <svg key={i} className="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                        </svg>
+                                    );
+                                } else if (rating > i) {
+                                    return (
+                                        <div key={i} className="relative w-4 h-4">
+                                            <svg className="absolute top-0 left-0 w-4 h-4 text-gray-200" fill="currentColor" viewBox="0 0 20 20">
+                                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                            </svg>
+                                            <svg className="absolute top-0 left-0 w-4 h-4 text-yellow-400" style={{ clipPath: 'inset(0 50% 0 0)' }} fill="currentColor" viewBox="0 0 20 20">
+                                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                            </svg>
+                                        </div>
+                                    );
+                                } else {
+                                    return (
+                                        <svg key={i} className="w-4 h-4 text-gray-200" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                        </svg>
+                                    );
+                                }
+                            })}
+                        </div>
+                        <span className="text-[#0052A5]">{displayProduct.numReviews || 0}</span>
+                    </div>
+
+                    {showReviewsPopover && renderReviewsPopover()}
+                </div>
+            </div>
+        </div>
+    );
+
+    const renderImageGallery = () => (
+        <div className="w-full flex flex-col">
+            <div className="mb-2 lg:mb-4">
+                <ImageZoom src={displayProduct.images[selectedImageIdx]} alt={displayProduct.name} onHeartClick={() => setShowListsModal(true)} isHeartFilled={addedToList} />
+            </div>
+            <div className="flex flex-wrap gap-1.5 lg:gap-2">
+                {displayProduct.images.map((img: string, idx: number) => (
+                    <div key={idx} onClick={() => setSelectedImageIdx(idx)} className={`w-[72px] h-[72px] flex-shrink-0 bg-white rounded-md border-2 p-1 cursor-pointer transition-colors ${idx === selectedImageIdx ? 'border-green-600' : 'border-transparent hover:border-gray-300'}`}>
+                        <img src={img} alt="Thumbnail" className="w-full h-full object-contain" />
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+
+    const renderCartBox = () => (
+        <div className="w-full space-y-4">
+            <div className="border border-gray-200 rounded-lg p-3 lg:p-5 bg-white">
+                <div className="flex flex-row items-center gap-1 lg:gap-2 mb-4 lg:mb-6">
+                    <span className="text-[18px] sm:text-[20px] lg:text-[22px] font-extrabold text-gray-900">₹{(currentPrice * quantity).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                    {displayProduct.discount > 0 && (
+                        <>
+                            <span className="text-[12px] sm:text-[14px] lg:text-[15px] text-gray-500 line-through">₹{(originalPrice * quantity).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                            <span className="bg-[#ff3344] text-white text-[10px] lg:text-xs font-bold px-1.5 py-[3px] sm:py-1 rounded h-fit shadow-sm">{displayProduct.discount}% OFF</span>
+                        </>
+                    )}
+                </div>
+
+                <div className="flex items-center justify-between border border-gray-300 rounded-md p-1.5 mb-3 lg:mb-4">
+                    <button onClick={() => setQuantity(Math.max(1, quantity - 1))} className="w-6 h-6 lg:w-8 lg:h-8 flex items-center justify-center text-gray-500 hover:bg-gray-100 rounded cursor-pointer">
+                        <svg className="w-3 h-3 lg:w-4 lg:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" /></svg>
+                    </button>
+                    <span className="font-bold text-gray-900 text-sm lg:text-base">{quantity}</span>
+                    <button onClick={() => setQuantity(quantity + 1)} className="w-6 h-6 lg:w-8 lg:h-8 flex items-center justify-center text-gray-500 hover:bg-gray-100 rounded cursor-pointer">
+                        <svg className="w-3 h-3 lg:w-4 lg:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
+                    </button>
+                </div>
+
+                <button
+                    onClick={() => { if (displayProduct.inStock?.toLowerCase() === 'yes') addToCart(displayProduct, quantity); }}
+                    disabled={displayProduct.inStock?.toLowerCase() !== 'yes'}
+                    className={`w-full ${displayProduct.inStock?.toLowerCase() === 'yes' ? 'bg-[#f38700] hover:bg-[#e07b00] cursor-pointer text-white' : 'bg-gray-300 text-gray-500 cursor-not-allowed'} font-bold py-[9px] lg:py-[11px] rounded-md transition-colors shadow-sm mb-3 lg:mb-4 text-sm lg:text-base`}
+                >
+                    {displayProduct.inStock?.toLowerCase() === 'yes' ? 'Add to Cart' : 'Out of Stock'}
+                </button>
+
+                <button
+                    onClick={() => setShowListsModal(true)}
+                    className={`w-full flex items-center justify-center gap-2 border ${addedToList ? 'border-green-600 bg-[#f0f7f4] text-green-700' : 'border-gray-300 hover:bg-gray-50 text-gray-700'} font-bold py-2 lg:py-2.5 rounded-md transition-colors text-[13px] lg:text-sm cursor-pointer`}
+                >
+                    <svg className="w-5 h-5 lg:w-6 lg:h-6 text-green-600" fill={addedToList ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
+                    {addedToList ? 'Added to Lists' : 'Add to Lists'}
+                </button>
+            </div>
+
+            <AddToListsModal
+                product={displayProduct}
+                isOpen={showListsModal}
+                isAlreadyAdded={addedToList}
+                onClose={() => setShowListsModal(false)}
+                onAdded={() => { }}
+                onRemoved={() => { }}
+            />
+
+            <div className="bg-[#f0f7f4] border border-[#e2efe9] rounded-lg p-3 lg:p-5">
+                <div className="flex items-center gap-1.5 lg:gap-2 mb-1 lg:mb-2 font-bold text-green-800 text-xs lg:text-sm">
+                    <svg className="w-4 h-4 lg:w-5 lg:h-5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" /></svg>
+                    Quality Promise
+                </div>
+                <p className="text-[12px] lg:text-xs text-gray-700 mb-1 leading-tight">
+                    This product is guaranteed authentic and backed by our easy returns & refunds policy.
+                </p>
+            </div>
+
+            <div className="border border-gray-200 rounded-lg p-3 lg:p-5 bg-white">
+                {recommendedProducts.length > 0 ? (
+                    <>
+                        <div className="flex justify-center gap-2 mb-2">
+                            <div className="w-12 h-16 border rounded p-1">
+                                <img src={displayProduct.images[0]} className="w-full h-full object-contain" />
+                            </div>
+                            <div className="flex items-center text-gray-400 text-xs">+</div>
+                            <div className="w-12 h-16 border rounded p-1">
+                                <img src={getImageUrl(recommendedProducts[0]?.images?.[0], 'https://via.placeholder.com/100x100?text=No+Image')} className="w-full h-full object-contain" />
+                            </div>
+                        </div>
+                        <div className="text-[10px] text-gray-800 font-bold mb-1">Combo with:</div>
+                        <a href={`/products/${recommendedProducts[0]?._id}`} className="text-[10px] text-blue-600 hover:underline leading-tight block mb-2 line-clamp-2">{recommendedProducts[0]?.name}</a>
+                        <p className="text-[9px] text-gray-500 mb-3 bg-gray-50 p-1.5 rounded line-clamp-2">{recommendedProducts[0]?.description || 'A great addition to your health routine.'}</p>
+
+                        <div className="text-center font-bold text-sm text-gray-900 mb-2">Combo price: ₹{(currentPrice + (recommendedProducts[0]?.discount > 0 ? Math.round(recommendedProducts[0]?.price * (1 - recommendedProducts[0]?.discount / 100)) : recommendedProducts[0]?.price || 0)).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+                        <button className="w-full bg-[#f38700] hover:bg-[#e07b00] text-white font-bold py-2 lg:py-2.5 rounded-md transition-colors text-sm">
+                            Add Both to Cart
+                        </button>
+                    </>
+                ) : (
+                    <div className="text-center text-sm text-gray-500">No combo deals currently available.</div>
+                )}
+            </div>
+        </div>
+    );
+
+    const renderProductDetailsBottom = () => (
+        <div className="w-full flex flex-col pt-4 lg:pt-0">
+            <div className="flex items-center justify-between mb-2">
+                <span className={`text-xs lg:text-sm font-bold ${displayProduct.inStock?.toLowerCase() === 'yes' ? 'text-green-700' : 'text-red-600'}`}>
+                    {displayProduct.inStock?.toLowerCase() === 'yes' ? 'In Stock' : 'Out of Stock'}
+                </span>
+                <span className="text-[12px] lg:text-[14px] font-medium text-green-800 flex items-center gap-1">
+                    {displayProduct.soldRecently} sold in 30 days
+                </span>
+            </div>
+
+            <div className="space-y-6 lg:space-y-8 text-sm lg:text-base">
+                {displayProduct.specifications?.length > 0 && (
+                    <div className='mt-2 sm:mt-4 mb-2 sm:mb-0'>
+                        <h3 className="font-bold text-gray-900 mb-3 lg:mb-4 text-base lg:text-lg">Specifications</h3>
+                        <div className="flex flex-col gap-1.5 sm:gap-2.5">
+                            {displayProduct.specifications.map((spec: any, idx: number) => {
+                                const isDimension = spec.key?.toLowerCase().includes('dimension');
+                                if (isDimension) return null;
+
+                                const isPackSize = spec.key === 'Pack of' || spec.key === 'Pack size' || spec.key === 'Pack Size';
+                                const isQty = spec.key === 'QTY' || spec.key === 'Units in Pack';
+                                const label = isPackSize ? 'Pack Size' : isQty ? 'Units in Pack' : spec.key;
+                                let formattedVal = spec.value;
+                                if (isPackSize && formattedVal && !/\b(gm|g|kg|ml|l|pack|capsules|tablets)\b/i.test(String(formattedVal))) {
+                                    formattedVal = `${formattedVal} gm`;
+                                }
+                                return (
+                                    <div key={idx} className="flex text-[13px] lg:text-sm items-start">
+                                        <span className="text-[#458500] w-[140px] lg:w-[160px] shrink-0 font-bold">{label}</span>
+                                        <span className="text-[#458500] mr-3">:</span>
+                                        <div className="text-gray-900 flex-1">{renderBulletContent(formattedVal)}</div>
+                                    </div>
+                                );
+                            })}
+                            {displayProduct.expiredOn && !displayProduct.specifications.some((s: any) => s.key?.toLowerCase().includes('expiry')) && (
+                                <div className="flex text-[13px] lg:text-sm">
+                                    <span className="text-[#458500] w-[140px] lg:w-[160px] shrink-0 font-bold">Product Expiry</span>
+                                    <span className="text-[#458500] mr-3">:</span>
+                                    <span className="text-gray-900">
+                                        {displayProduct.expiredOn}
+                                    </span>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+
+    const renderFrequentlyPurchased = () => {
+        if (!recommendedProducts || recommendedProducts.length === 0) return null;
+        return (
+            <div className="w-full pt-6 lg:pt-8">
+                <h2 className="text-lg lg:text-xl font-bold text-gray-900 mb-1 px-2 lg:px-0">Frequently purchased together</h2>
+                <div className="flex gap-4 overflow-x-auto pb-4 px-2 lg:px-0 hide-scrollbar" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+                    {recommendedProducts.map((prod, i) => (
+                        <div key={i} onClick={() => router.push(`/products/${prod._id}`)} className="min-w-[140px] max-w-[140px] lg:min-w-[160px] lg:max-w-[160px] flex flex-col cursor-pointer group">
+                            <div className="aspect-square bg-white p-2 mb-2 lg:mb-3 flex items-center justify-center relative overflow-hidden transition-colors border border-gray-100 rounded">
+                                <img src={getImageUrl(prod.images?.[0], 'https://via.placeholder.com/150x150?text=No+Image')} className="h-[80%] object-contain transform duration-300 group-hover:scale-105" />
+                            </div>
+                            <div className="text-[10px] lg:text-[11px] text-gray-800 hover:underline mb-1 line-clamp-3 leading-snug">
+                                {prod.name}
+                            </div>
+                            <div className="flex items-center gap-1 mb-1">
+                                <div className="flex text-yellow-400">
+                                    {[...Array(5)].map((_, j) => (
+                                        <svg key={j} className="w-2.5 h-2.5 lg:w-3 lg:h-3" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
+                                    ))}
+                                </div>
+                                <span className="text-[9px] lg:text-[10px] text-gray-500">10k+</span>
+                            </div>
+                            <div className="flex items-center gap-2 mt-auto">
+                                <div className="font-bold text-gray-900 text-xs lg:text-sm">
+                                    ₹{prod.discount > 0 ? Math.round(prod.price * (1 - prod.discount / 100)) : prod.price}
+                                </div>
+                                {prod.discount > 0 && (
+                                    <>
+                                        <div className="text-[10px] text-[#0052A5] line-through">
+                                            ₹{prod.price}
+                                        </div>
+                                        <div className="bg-[#ff3344] text-white text-[9px] font-bold px-1 py-0.5 rounded shadow-sm">
+                                            {prod.discount}% OFF
+                                        </div>
+                                    </>
+                                )}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        );
+    };
+
+    const renderProductInformation = () => (
+        <div className="w-full mb-4">
+            <h2 className="text-lg lg:text-xl font-bold text-gray-900 mb-4 bg-gray-50 py-3 lg:py-4 px-0 sm:px-1 rounded-md">Product information</h2>
+
+            <div className="flex flex-col lg:flex-row gap-8 lg:gap-16 px-0 sm:px-2 lg:px-4">
+                <div className="w-full">
+                    {displayProduct.overview && (
+                        <>
+                            <h3 className="font-bold text-gray-900 mb-3 lg:mb-4 text-sm lg:text-base">Description</h3>
+                            <div className="text-xs lg:text-sm text-gray-700 leading-relaxed mb-4 lg:mb-6 whitespace-pre-wrap" dangerouslySetInnerHTML={{ __html: displayProduct.overview }} />
+                        </>
+                    )}
+
+                    {displayProduct.otherIngredients && (
+                        <>
+                            <h3 className="font-bold text-gray-900 mb-3 lg:mb-4 text-sm lg:text-base">Key ingredients</h3>
+                            <div className="text-xs lg:text-sm text-gray-800 mb-4 lg:mb-6">
+                                {renderBulletContent(displayProduct.otherIngredients)}
+                            </div>
+                        </>
+                    )}
+
+                    {displayProduct.warnings && (
+                        <>
+                            <h3 className="font-bold text-gray-900 mb-3 lg:mb-4 text-sm lg:text-base">Direction of use/dosage</h3>
+                            <div className="text-xs lg:text-sm text-gray-800 mb-4 lg:mb-6 leading-relaxed">
+                                {renderBulletContent(displayProduct.warnings)}
+                            </div>
+                        </>
+                    )}
+
+                    {displayProduct.disclaimer && (
+                        <>
+                            <h3 className="font-bold text-gray-900 mb-3 lg:mb-4 text-sm lg:text-base">Safety Information</h3>
+                            <div className="text-xs lg:text-sm text-gray-800 mb-4 lg:mb-6 leading-relaxed">
+                                {renderBulletContent(displayProduct.disclaimer)}
+                            </div>
+                        </>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+
+    return (
+        <div className="min-h-screen bg-white">
+            <div className="border-b border-gray-200">
+                <div className="max-w-[1400px] mx-auto px-4 py-2 lg:py-3 text-[10px] lg:text-xs text-gray-500 flex flex-col gap-0.5 lg:gap-1">
+                    <div className="flex flex-wrap items-center gap-1">
+                        <Link href="/brands" className="hover:underline whitespace-nowrap">Brands A-Z</Link>
+                        <span>&gt;</span>
+                        <Link href="/brands" className="hover:underline text-gray-800 whitespace-nowrap">{displayProduct.brand || 'Brands'}</Link>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-1">
+                        <Link href="/" className="hover:underline whitespace-nowrap">Categories</Link>
+                        <span>&gt;</span>
+                        <Link href={`/type/${displayProduct.type || 'supplements'}`} className="hover:underline whitespace-nowrap">
+                            {displayProduct.type ? (String(displayProduct.type).charAt(0).toUpperCase() + String(displayProduct.type).slice(1)) : 'Supplements'}
+                        </Link>
+                        <span>&gt;</span>
+                        <span className="text-gray-800 font-medium truncate max-w-[200px] sm:max-w-xs md:max-w-md lg:max-w-xl">
+                            {displayProduct.name}
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div className="max-w-[1400px] mx-auto p-3 sm:p-4">
+
+                <div className="flex flex-col lg:hidden gap-2 sm:gap-6">
+                    {renderTitleAndRating()}
+                    {renderImageGallery()}
+                    {renderProductDetailsBottom()}
+                    {renderCartBox()}
+                </div>
+
+                <div className="hidden lg:flex flex-row gap-10">
+                    <div className="w-[35%] relative z-[40]">
+                        <div className="lg:sticky lg:top-[145px] z-[40]">
+                            {renderImageGallery()}
+                        </div>
+                    </div>
+                    <div className="w-[40%] flex flex-col relative z-10">
+                        {renderTitleAndRating()}
+                        {renderProductDetailsBottom()}
+                    </div>
+                    <div className="w-[25%] relative z-10">
+                        <div className="lg:sticky lg:top-[145px] space-y-4 z-10">
+                            {renderCartBox()}
+                        </div>
+                    </div>
+                </div>
+
+                {renderFrequentlyPurchased()}
+                {renderProductInformation()}
+                <div id="customer-reviews">
+                    <CustomerReviews productId={productId} onReviewSubmitted={fetchProduct} />
+                </div>
+
+            </div>
+        </div>
+    );
+}

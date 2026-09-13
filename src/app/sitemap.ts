@@ -3,7 +3,10 @@ import { MetadataRoute } from 'next';
 export const revalidate = 3600;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-    const baseUrl = (process.env.NEXT_PUBLIC_FRONTEND_URL || '').replace(/\/$/, '');
+    const rawUrl = process.env.NEXT_PUBLIC_FRONTEND_URL || '';
+    const baseUrl = (rawUrl.includes('localhost') || rawUrl.includes('127.0.0.1') || /192\.168\.\d+\.\d+/.test(rawUrl))
+        ? 'https://prathamherbs.com'
+        : rawUrl.replace(/\/$/, '');
     const apiUrl = (process.env.NEXT_PUBLIC_API_URL || '').replace(/\/$/, '');
 
     // Dynamically fetch product types / categories from backend API
@@ -58,18 +61,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         },
         ...typeRoutes,
         ...categoryRoutes,
-        {
-            url: `${baseUrl}/login`,
-            lastModified: new Date(),
-            changeFrequency: 'monthly',
-            priority: 0.6,
-        },
-        {
-            url: `${baseUrl}/register`,
-            lastModified: new Date(),
-            changeFrequency: 'monthly',
-            priority: 0.6,
-        },
         {
             url: `${baseUrl}/user/terms-and-conditions`,
             lastModified: new Date(),
