@@ -1,14 +1,14 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import api from '@/services/api';
 import toast from 'react-hot-toast';
 import Spinner from '@/components/Spinner';
 import GoogleAuthButton from '@/components/GoogleAuthButton';
 
-export default function LoginPage() {
+function LoginFormContent() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
@@ -16,12 +16,14 @@ export default function LoginPage() {
     const [isLoading, setIsLoading] = useState(false);
     const [showPasswordErrors, setShowPasswordErrors] = useState(false);
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const redirectParam = searchParams.get('redirect');
 
     useEffect(() => {
         const checkAuth = () => {
             const userInfo = localStorage.getItem('userInfo');
             if (userInfo) {
-                router.push('/');
+                router.push(redirectParam || '/');
             }
         };
         checkAuth();
@@ -31,7 +33,7 @@ export default function LoginPage() {
             window.removeEventListener('userInfoUpdated', checkAuth);
             window.removeEventListener('storage', checkAuth);
         };
-    }, [router]);
+    }, [router, redirectParam]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -134,7 +136,7 @@ export default function LoginPage() {
             document.cookie = "isLoggedIn=true; path=/; max-age=2592000"; // 30 days
             window.dispatchEvent(new Event('userInfoUpdated'));
             toast.success(data.message);
-            router.push(data.role === 'admin' ? '/admin/users' : '/');
+            router.push(redirectParam || (data.role === 'admin' ? '/admin/users' : '/'));
         } catch (err: any) {
             const errorMessage = err.response?.data?.message || 'Login failed';
 
@@ -292,5 +294,17 @@ export default function LoginPage() {
                 </div>
             )}
         </div>
+    );
+}
+
+export default function LoginPage() {
+    return (
+        <Suspense fallback={
+            <div className="flex flex-1 items-center justify-center py-12">
+                <Spinner className="w-10 h-10 text-[#458500] animate-spin" />
+            </div>
+        }>
+            <LoginFormContent />
+        </Suspense>
     );
 }

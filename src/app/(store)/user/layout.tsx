@@ -48,8 +48,10 @@ export default function UserLayout({
     const handleAuthSuccess = () => {
         setIsAuthModalOpen(false);
         if (pendingHref) {
-            router.push(pendingHref);
+            const target = pendingHref;
             setPendingHref(null);
+            document.cookie = "isLoggedIn=true; path=/; max-age=2592000; SameSite=Lax";
+            window.location.href = target;
         } else {
             router.refresh();
         }

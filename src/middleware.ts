@@ -23,7 +23,9 @@ export function middleware(request: NextRequest) {
     // Protect /user routes from logged-out users (except public policy/terms pages)
     const publicUserRoutes = ['/user/terms-and-conditions', '/user/privacy-policy'];
     if (url.pathname.startsWith('/user') && !publicUserRoutes.includes(url.pathname) && !isLoggedIn) {
-        return NextResponse.redirect(new URL('/login', request.url));
+        const loginUrl = new URL('/login', request.url);
+        loginUrl.searchParams.set('redirect', url.pathname);
+        return NextResponse.redirect(loginUrl);
     }
 
     return NextResponse.next();
