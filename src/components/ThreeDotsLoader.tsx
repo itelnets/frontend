@@ -9,7 +9,7 @@ interface LoaderProps {
 
 export function ThreeDotsLoader({ className = '' }: LoaderProps) {
     return (
-        <div className={`flex flex-col items-center justify-center w-full min-h-[55vh] sm:min-h-[65vh] py-12 ${className}`}>
+        <div className={`flex flex-col items-center justify-center w-full min-h-[calc(100vh-220px)] sm:min-h-[480px] py-8 ${className}`}>
             <style jsx>{`
                 @keyframes coinFlip {
                     0% {

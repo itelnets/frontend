@@ -245,10 +245,10 @@ export default function CartPage() {
                                 <>
                                     <p className="text-sm text-gray-600 mb-6">Sign in to enjoy exclusive discounts and deals</p>
                                     <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-4">
-                                        <Link href="/" className="px-4 py-2 text-sm sm:text-base sm:px-6 sm:py-2.5 rounded-md border border-[#458500] text-[#458500] font-bold hover:bg-[#eef6e6] transition-colors">
+                                        <Link href="/" className="h-[34px] sm:h-auto py-0 sm:py-2 flex items-center justify-center px-4 sm:px-6 text-sm sm:text-base rounded-md border border-[#458500] text-[#458500] font-normal hover:bg-[#eef6e6] transition-colors">
                                             Start shopping
                                         </Link>
-                                        <Link href="/register" className="px-4 py-2 text-sm sm:text-base sm:px-6 sm:py-2.5 rounded-md bg-[#458500] hover:bg-[#366800] text-white font-bold transition-colors">
+                                        <Link href="/register" className="h-[34px] sm:h-auto py-0 sm:py-2 flex items-center justify-center px-4 sm:px-6 text-sm sm:text-base rounded-md bg-[#458500] hover:bg-[#366800] text-white font-normal transition-colors">
                                             Create Account
                                         </Link>
                                     </div>
@@ -256,7 +256,7 @@ export default function CartPage() {
                             )}
                             {isLoggedIn && (
                                 <div className="mb-8 mt-4">
-                                    <Link href="/" className="px-4 py-2 text-sm sm:text-base sm:px-6 sm:py-2.5 rounded-md border border-[#458500] text-[#458500] font-bold hover:bg-[#eef6e6] transition-colors">
+                                    <Link href="/" className="h-[34px] sm:h-auto py-0 sm:py-2 flex items-center justify-center px-4 sm:px-6 text-sm sm:text-base rounded-md border border-[#458500] text-[#458500] font-bold hover:bg-[#eef6e6] transition-colors">
                                         Start shopping
                                     </Link>
                                 </div>

@@ -181,7 +181,7 @@ export default function DoctorCornerPage() {
 
     if (loading) {
         return (
-            <div className="max-w-4xl mx-auto px-4 py-12 flex justify-center items-center min-h-[350px] sm:min-h-[400px]">
+            <div className="max-w-4xl mx-auto px-4 py-8 sm:py-12 flex justify-center items-center min-h-[300px] sm:min-h-[400px]">
                 <div className="flex flex-col items-center gap-3">
                     <div className="w-9 h-9 sm:w-10 sm:h-10 border-4 border-[#458500] border-t-transparent rounded-full animate-spin"></div>
                     <p className="text-xs sm:text-sm font-medium text-gray-600">Loading Doctor Corner...</p>

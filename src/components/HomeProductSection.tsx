@@ -22,7 +22,15 @@ export default function HomeProductSection({ initialProducts, initialTotal }: Ho
         const startTime = Date.now();
         setIsLoading(true);
         setCurrentPage(page);
-        window.scrollTo({ top: 400, behavior: 'smooth' });
+
+        const sectionEl = document.getElementById('recommended-section');
+        if (sectionEl) {
+            const offset = window.innerWidth >= 640 ? 145 : 115;
+            const y = sectionEl.getBoundingClientRect().top + window.pageYOffset - offset;
+            window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+        } else {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
         try {
             const { data } = await getProducts({ page, limit: itemsPerPage });
             const rawProducts = Array.isArray(data) ? data : (data.products || []);
@@ -58,7 +66,7 @@ export default function HomeProductSection({ initialProducts, initialTotal }: Ho
     return (
         <div className="relative">
             {isLoading ? (
-                <ThreeDotsLoader className="py-16" />
+                <ThreeDotsLoader className="py-8 sm:py-12" />
             ) : (
                 <>
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 sm:gap-4">

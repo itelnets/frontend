@@ -159,7 +159,7 @@ export default function TypeProductsPage() {
 
 
     return (
-        <div className="flex-1 bg-gray-50 py-2.5 sm:py-5 px-2.5 sm:px-4 lg:px-5 flex flex-col min-h-[calc(100vh-145px)]">
+        <div className="flex-1 bg-gray-50 py-1 sm:py-3 px-2.5 sm:px-4 lg:px-5 flex flex-col min-h-[calc(100vh-145px)]">
             <div className="flex-1 w-full max-w-[1400px] mx-auto flex flex-col lg:flex-row gap-4 relative min-h-[600px]">
                 {/* Left Sidebar (Filters - Desktop) */}
                 <div className="hidden lg:block w-56 shrink-0 bg-white p-4 sm:p-5 rounded-xl border border-gray-200 h-fit self-start sticky top-[141px] shadow-sm max-h-[calc(100vh-160px)] min-h-[480px] overflow-y-auto scrollbar-thin">
@@ -265,7 +265,7 @@ export default function TypeProductsPage() {
                 </div>
 
                 {/* Main Content Area */}
-                <div className="flex-1 w-full min-w-0 min-h-[600px]">
+                <div id="products-section" className="flex-1 w-full min-w-0 min-h-[calc(100vh-160px)] sm:min-h-[500px]">
 
                     {/* Mobile Quick Filters Bar */}
                     <div className="lg:hidden flex items-center gap-2 overflow-x-auto hide-scrollbar pb-1 sm:pb-4 sm:mb-2">
@@ -348,7 +348,7 @@ export default function TypeProductsPage() {
                     </div>
 
                     {isLoading ? (
-                        <ThreeDotsLoader className="py-16" />
+                        <ThreeDotsLoader className="py-8 sm:py-0 sm:min-h-[calc(100vh-220px)] sm:flex sm:flex-col sm:justify-center sm:items-center" />
                     ) : (
                         <div>
                             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-5 gap-2 sm:gap-3">
@@ -365,7 +365,14 @@ export default function TypeProductsPage() {
                                     totalPages={Math.ceil(totalProducts / itemsPerPage)}
                                     onPageChange={(p) => {
                                         setCurrentPage(p);
-                                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                                        const el = document.getElementById('products-section');
+                                        if (el) {
+                                            const offset = window.innerWidth >= 640 ? 145 : 115;
+                                            const y = el.getBoundingClientRect().top + window.pageYOffset - offset;
+                                            window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+                                        } else {
+                                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                                        }
                                     }}
                                     totalItems={totalProducts}
                                     itemsPerPage={itemsPerPage}
@@ -386,7 +393,7 @@ export default function TypeProductsPage() {
                                     </p>
                                     <button
                                         onClick={() => setFilters({ inStock: false, brands: [], price: [], rating: [] })}
-                                        className="mt-6 px-6 py-2.5 bg-[#458500] text-white font-medium rounded-lg hover:bg-[#366800] transition-colors shadow-sm text-sm"
+                                        className="mt-6 px-6 py-2 sm:py-2.5 bg-[#458500] text-white font-medium rounded-lg hover:bg-[#366800] transition-colors shadow-sm text-sm"
                                     >
                                         Clear all filters
                                     </button>

@@ -10,6 +10,8 @@ interface Product {
     price: number;
     discount: number;
     images: string[];
+    rating?: number;
+    numReviews?: number;
 }
 
 export default function SearchBar({ isMobile = false }: { isMobile?: boolean }) {
@@ -98,7 +100,7 @@ export default function SearchBar({ isMobile = false }: { isMobile?: boolean }) 
                                         setIsOpen(false);
                                         setQuery('');
                                     }}
-                                    className="block hover:bg-gray-50 transition-colors"
+                                    className="block bg-white transition-colors"
                                 >
                                     <div className={`flex items-start gap-4 py-2 mx-2.5 sm:mx-4 ${index !== filteredProducts.length - 1 ? 'border-b border-gray-200' : ''}`}>
                                         <div className="w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0 bg-white flex items-center justify-center relative">
@@ -111,17 +113,42 @@ export default function SearchBar({ isMobile = false }: { isMobile?: boolean }) 
                                             )}
                                         </div>
                                         <div className="flex-1 flex flex-col min-w-0">
-                                            <div className="text-[12px] sm:text-[14px] font-normal text-[#0066c0] hover:text-[#c45500] hover:underline line-clamp-2 leading-snug">
+                                            <div className="text-[12px] sm:text-[14px] font-normal text-[#0066c0] hover:underline line-clamp-2 leading-snug">
                                                 {product.name}
                                             </div>
                                             <div className="flex items-center gap-1 mt-1 mb-1">
-                                                <div className="flex text-[#ffa41c]">
-                                                    {[...Array(5)].map((_, i) => (
-                                                        <svg key={i} className="w-[14px] h-[14px] sm:w-4 sm:h-4" fill="currentColor" viewBox="0 0 20 20">
-                                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                                        </svg>
-                                                    ))}
+                                                <div className="flex text-yellow-400">
+                                                    {[...Array(5)].map((_, i) => {
+                                                        const rating = product.rating || 0;
+                                                        if (rating >= i + 1) {
+                                                            return (
+                                                                <svg key={i} className="w-[14px] h-[14px] sm:w-4 sm:h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                                                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                                                </svg>
+                                                            );
+                                                        } else if (rating > i) {
+                                                            return (
+                                                                <div key={i} className="relative w-[14px] h-[14px] sm:w-4 sm:h-4">
+                                                                    <svg className="absolute top-0 left-0 w-[14px] h-[14px] sm:w-4 sm:h-4 text-gray-200" fill="currentColor" viewBox="0 0 20 20">
+                                                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                                                    </svg>
+                                                                    <svg className="absolute top-0 left-0 w-[14px] h-[14px] sm:w-4 sm:h-4 text-yellow-400" style={{ clipPath: 'inset(0 50% 0 0)' }} fill="currentColor" viewBox="0 0 20 20">
+                                                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                                                    </svg>
+                                                                </div>
+                                                            );
+                                                        } else {
+                                                            return (
+                                                                <svg key={i} className="w-[14px] h-[14px] sm:w-4 sm:h-4 text-gray-200" fill="currentColor" viewBox="0 0 20 20">
+                                                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                                                </svg>
+                                                            );
+                                                        }
+                                                    })}
                                                 </div>
+                                                <span className="text-[11px] text-gray-500 font-medium ml-1">
+                                                    {product.rating || 0}
+                                                </span>
                                             </div>
                                             <div className="text-[15px] sm:text-[18px] font-medium text-[#0f1111]">
                                                 <span className="text-[12px] relative -top-1 pr-[1px]">₹</span>{finalPrice.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
