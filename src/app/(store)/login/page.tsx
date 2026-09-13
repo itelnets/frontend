@@ -23,7 +23,7 @@ function LoginFormContent() {
         const checkAuth = () => {
             const userInfo = localStorage.getItem('userInfo');
             if (userInfo) {
-                router.push(redirectParam || '/');
+                window.location.href = redirectParam || '/';
             }
         };
         checkAuth();
@@ -128,15 +128,14 @@ function LoginFormContent() {
                 api.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
             }
 
-            await new Promise(resolve => setTimeout(resolve, 800));
-            setIsLoading(false);
-
             sessionStorage.clear();
             localStorage.setItem('userInfo', JSON.stringify(data));
-            document.cookie = "isLoggedIn=true; path=/; max-age=2592000"; // 30 days
+            document.cookie = "isLoggedIn=true; path=/; max-age=2592000; SameSite=Lax";
             window.dispatchEvent(new Event('userInfoUpdated'));
             toast.success(data.message);
-            router.push(redirectParam || (data.role === 'admin' ? '/admin/users' : '/'));
+
+            const target = redirectParam || (data.role === 'admin' ? '/admin/users' : '/');
+            window.location.href = target;
         } catch (err: any) {
             const errorMessage = err.response?.data?.message || 'Login failed';
 
