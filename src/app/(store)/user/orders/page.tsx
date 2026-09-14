@@ -208,8 +208,8 @@ export default function OrdersPage() {
                     <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6" onClick={(e) => e.stopPropagation()}>
                         <div className="flex justify-between items-center mb-4">
                             <h3 className="text-[17px] font-bold text-gray-900">Request return</h3>
-                            <button onClick={() => !isRefunding && setShowRefundConfirm(null)} className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer">
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                            <button onClick={() => !isRefunding && setShowRefundConfirm(null)} className="p-1 sm:p-1.5 text-white bg-[#458500] hover:bg-[#386b00] rounded-full cursor-pointer transition-colors flex items-center justify-center shadow-xs" title="Close">
+                                <svg className="w-3.5 h-3.5 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" /></svg>
                             </button>
                         </div>
                         <p className="text-gray-600 text-[14.5px] mb-8">Are you sure you want to request a return for this order?</p>

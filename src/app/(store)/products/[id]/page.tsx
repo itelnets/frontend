@@ -10,7 +10,7 @@ const apiUrl = (process.env.NEXT_PUBLIC_API_URL || '').replace(/\/$/, '');
 async function fetchProduct(id: string) {
     if (!id || !apiUrl) return null;
     try {
-        const res = await fetch(`${apiUrl}/products/${id}`, { next: { revalidate: 3600 } });
+        const res = await fetch(`${apiUrl}/products/${id}`, { cache: 'no-store' });
         if (!res.ok) return null;
         const data = await res.json();
         return data;

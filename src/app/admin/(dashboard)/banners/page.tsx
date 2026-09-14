@@ -390,7 +390,7 @@ export default function BannersPage() {
                                                 <div className="flex justify-between items-start">
                                                     <div
                                                         onClick={() => setActiveModalImage(banner.imageUrl)}
-                                                        className="w-36 aspect-[1368/260] bg-gray-150 rounded-lg border border-gray-200 overflow-hidden cursor-pointer hover:opacity-90 active:scale-[0.98] transition-all relative group"
+                                                        className={`w-36 ${banner.deviceType === 'mobile' ? 'aspect-[400/150]' : 'aspect-[1368/260]'} bg-gray-150 rounded-lg border border-gray-200 overflow-hidden cursor-pointer hover:opacity-90 active:scale-[0.98] transition-all relative group`}
                                                         title="Click to view full banner"
                                                     >
                                                         <img

@@ -55,8 +55,8 @@ export default function OrderDetailsModal({
                             Payment Details
                         </h2>
                     </div>
-                    <button onClick={() => setSelectedOrder(null)} className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full cursor-pointer transition-colors flex items-center justify-center">
-                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                    <button onClick={() => setSelectedOrder(null)} className="p-1 sm:p-1.5 text-white bg-[#458500] hover:bg-[#386b00] rounded-full cursor-pointer transition-colors flex items-center justify-center shadow-xs" title="Close">
+                        <svg className="w-3.5 h-3.5 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" /></svg>
                     </button>
                 </div>
 

@@ -249,7 +249,7 @@ export default function EditBannerPage({ params }: { params: Promise<{ id: strin
 
                             {previewUrl ? (
                                 <div className="w-full relative rounded-lg overflow-hidden border border-gray-200 bg-gray-50">
-                                    <div className="aspect-[1368/260] w-full relative group/preview">
+                                    <div className={`w-full relative group/preview ${deviceType === 'mobile' ? 'aspect-[400/150]' : 'aspect-[1368/260]'}`}>
                                         <img src={previewUrl} alt="Preview" className="w-full h-full object-cover" />
                                         <div className="absolute inset-0 opacity-0 group-hover/preview:opacity-100 transition-opacity flex items-center justify-center">
                                             <span className="text-white font-medium bg-black/50 px-4 py-2 rounded-lg backdrop-blur-sm shadow-md">Click or Drag to Replace</span>
@@ -264,7 +264,7 @@ export default function EditBannerPage({ params }: { params: Promise<{ id: strin
                                         </svg>
                                     </div>
                                     <p className="text-gray-700 font-medium text-sm mb-0.5 group-hover:text-green-700 transition-colors">Click to upload or drag and drop</p>
-                                    <p className="text-xs text-gray-500">JPG or PNG only. (1368 x 260)</p>
+                                    <p className="text-xs text-gray-500">JPG or PNG only. ({deviceType === 'mobile' ? '400 x 150' : '1368 x 260'})</p>
                                 </div>
                             )}
                         </div>
