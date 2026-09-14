@@ -7,6 +7,7 @@ import { getBanners, createBanner, deleteBanner, updateBanner, BannerItem, reord
 import toast from 'react-hot-toast';
 import ConfirmModal from '@/components/ConfirmModal';
 import Spinner from '@/components/Spinner';
+import SortDropdown from '@/components/SortDropdown';
 import { formatDate } from '@/utils/formatDate';
 
 export default function BannersPage() {
@@ -19,6 +20,7 @@ export default function BannersPage() {
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [previewUrl, setPreviewUrl] = useState<string>('');
     const [imageDimensions, setImageDimensions] = useState({ width: 0, height: 0 });
+    const [deviceType, setDeviceType] = useState<'desktop' | 'mobile'>('desktop');
     const [isDragging, setIsDragging] = useState(false);
     const [dragIndex, setDragIndex] = useState<number | null>(null);
     const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
@@ -164,7 +166,8 @@ export default function BannersPage() {
                 imageKey,
                 selectedFile.size,
                 imageDimensions.width,
-                imageDimensions.height
+                imageDimensions.height,
+                deviceType
             );
 
             await loadBanners();
@@ -266,10 +269,23 @@ export default function BannersPage() {
         <div className="px-2 py-2.5 sm:p-6 max-w-6xl mx-auto select-none w-full">
             {/* Compact, Space-Optimized Banner upload form */}
             <form onSubmit={handleSubmit} className="bg-white border border-gray-200 rounded-lg p-3 sm:p-5 mb-3 sm:mb-8 shadow-xs space-y-2.5 sm:space-y-3">
-                {/* Info Badge Row (above drag & drop and upload button row, right-aligned) */}
-                <div className="flex justify-center sm:justify-end">
+                {/* Info Badge Row with Target Size Selector */}
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-2 border-b border-gray-100 pb-2.5">
+                    <div className="flex items-center gap-2 w-full sm:w-auto">
+                        <label className="text-xs sm:text-sm font-semibold text-gray-700 whitespace-nowrap">Banner Target Size:</label>
+                        <SortDropdown
+                            isAdmin={true}
+                            options={['Desktop (1368 x 260 px)', 'Mobile (400 x 150 px)']}
+                            value={deviceType === 'mobile' ? 'Mobile (400 x 150 px)' : 'Desktop (1368 x 260 px)'}
+                            onChange={(val) => setDeviceType(val.includes('Mobile') ? 'mobile' : 'desktop')}
+                            buttonClassName="h-[28px] sm:h-[36px] text-[11px] sm:text-sm bg-white border border-gray-300 rounded-md !py-0.5 !px-2.5 sm:!py-1.5 sm:!px-3 font-semibold text-gray-800 min-w-[185px] sm:min-w-[210px] gap-2"
+                            menuClassName="w-[190px] sm:w-[210px] !py-0.5 border-gray-200 shadow-lg text-[11px] sm:text-sm"
+                            listClassName="max-h-[160px] !px-0.5"
+                        />
+                    </div>
+
                     <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full text-[10px] sm:text-xs font-semibold bg-green-50 text-green-700 border border-green-200/50">
-                        Required Size: 1368 x 260 px | JPG, JPEG, PNG
+                        {deviceType === 'mobile' ? 'Required Size: 400 x 150 px | Mobile' : 'Required Size: 1368 x 260 px | Desktop'}
                     </span>
                 </div>
 
@@ -282,7 +298,7 @@ export default function BannersPage() {
                         onDragLeave={handleDragLeave}
                         onDrop={handleDrop}
                         onClick={() => !previewUrl && document.getElementById('banner-file-input')?.click()}
-                        className={`border-2 border-dashed rounded-lg text-center cursor-pointer transition-all flex items-center justify-center flex-1 w-full aspect-[1368/260] min-h-[56px] sm:min-h-[64px] relative ${previewUrl ? 'p-0 border-gray-300' : 'p-2 border-gray-300 hover:border-green-500 bg-gray-50/40 hover:bg-gray-50/80'} ${isDragging ? 'border-green-600 bg-green-50/20' : ''}`}
+                        className={`border-2 border-dashed rounded-lg text-center cursor-pointer transition-all flex items-center justify-center flex-1 w-full ${deviceType === 'mobile' ? 'aspect-[400/150]' : 'aspect-[1368/260]'} min-h-[56px] sm:min-h-[64px] relative ${previewUrl ? 'p-0 border-gray-300' : 'p-2 border-gray-300 hover:border-green-500 bg-gray-50/40 hover:bg-gray-50/80'} ${isDragging ? 'border-green-600 bg-green-50/20' : ''}`}
                     >
                         <input
                             id="banner-file-input"
@@ -318,7 +334,7 @@ export default function BannersPage() {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
                                 </svg>
                                 <span className="text-xs sm:text-[16px] text-gray-700 font-semibold truncate">
-                                    Upload an image or drag & drop
+                                    Upload Banner
                                 </span>
                             </div>
                         )}
@@ -359,6 +375,7 @@ export default function BannersPage() {
                                 <thead className="bg-gray-50 hidden sm:table-header-group">
                                     <tr className="border-b border-gray-200 text-xs font-bold text-gray-500 uppercase tracking-wider text-left">
                                         <th className="p-4">Preview</th>
+                                        <th className="p-4">Screen</th>
                                         <th className="p-4">File Size</th>
                                         <th className="p-4 hidden sm:table-cell">Created</th>
                                         <th className="p-4 hidden sm:table-cell">Updated</th>
@@ -414,9 +431,16 @@ export default function BannersPage() {
                                                 </div>
                                             </td>
 
+                                            {/* Target Screen Cell */}
+                                            <td className="p-4 text-xs sm:text-[14px] font-semibold whitespace-nowrap hidden sm:table-cell">
+                                                <span className={banner.deviceType === 'mobile' ? 'text-amber-700' : 'text-blue-700'}>
+                                                    {banner.deviceType === 'mobile' ? 'Mobile' : 'Desktop'}
+                                                </span>
+                                            </td>
+
                                             {/* Mobile Compact Data Row */}
                                             <td className="px-3 pb-3 pt-0 sm:hidden block border-b sm:border-0 border-gray-100">
-                                                <div className="flex items-center justify-between gap-2 mt-1.5 pt-1.5 border-t border-gray-100">
+                                                <div className="flex items-center justify-between gap-2 pt-1.5 border-t border-gray-100">
                                                     <div className="flex flex-col">
                                                         <div>
                                                             <span className="text-[11px] font-semibold text-gray-400 uppercase">Created: </span>
@@ -428,9 +452,19 @@ export default function BannersPage() {
                                                         </div>
                                                     </div>
 
-                                                    <div className="flex flex-col items-end gap-0.5 text-right">
-                                                        <span className="text-[10px] font-semibold text-gray-400 uppercase">File Size</span>
-                                                        <span className="text-[11px] font-bold text-green-700">{formatBytes(banner.fileSize || 0)}</span>
+                                                    <div className="flex items-center gap-2.5">
+                                                        <div className="flex flex-col items-end gap-0.5 text-right">
+                                                            <span className="text-[10px] font-semibold text-gray-400 uppercase">File Size</span>
+                                                            <span className="text-[11px] font-bold text-green-700">{formatBytes(banner.fileSize || 0)}</span>
+                                                        </div>
+
+                                                        {/* Screen Indicator: M for Mobile, D for Desktop */}
+                                                        <span
+                                                            title={banner.deviceType === 'mobile' ? 'Mobile Banner' : 'Desktop Banner'}
+                                                            className={`w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-semibold shrink-0 border ${banner.deviceType === 'mobile' ? 'text-amber-700 border-amber-200' : 'text-blue-700 border-blue-200'}`}
+                                                        >
+                                                            {banner.deviceType === 'mobile' ? 'M' : 'D'}
+                                                        </span>
                                                     </div>
                                                 </div>
                                             </td>

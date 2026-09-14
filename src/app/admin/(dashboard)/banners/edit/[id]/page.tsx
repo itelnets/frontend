@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { updateBanner, BannerItem } from '../../../../../../services/banner';
 import toast from 'react-hot-toast';
 import Spinner from '@/components/Spinner';
+import SortDropdown from '@/components/SortDropdown';
 
 export default function EditBannerPage({ params }: { params: Promise<{ id: string }> }) {
     const router = useRouter();
@@ -14,6 +15,7 @@ export default function EditBannerPage({ params }: { params: Promise<{ id: strin
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
     const [banner, setBanner] = useState<BannerItem | null>(null);
+    const [deviceType, setDeviceType] = useState<'desktop' | 'mobile'>('desktop');
 
 
 
@@ -47,6 +49,7 @@ export default function EditBannerPage({ params }: { params: Promise<{ id: strin
             } else {
                 setBanner(found);
                 setPreviewUrl(found.imageUrl);
+                setDeviceType(found.deviceType || (found.width && found.width <= 600 ? 'mobile' : 'desktop'));
             }
         } catch (error) {
             console.error('Error fetching banner:', error);
@@ -182,7 +185,8 @@ export default function EditBannerPage({ params }: { params: Promise<{ id: strin
                 imageKey: newImageKey,
                 fileSize: newFileSize,
                 width: newWidth,
-                height: newHeight
+                height: newHeight,
+                deviceType
             });
 
             toast.success('Banner updated successfully');
@@ -203,7 +207,7 @@ export default function EditBannerPage({ params }: { params: Promise<{ id: strin
                     <h1 className="text-[20px] sm:text-xl font-extrabold text-gray-900 tracking-tight flex items-center gap-3">
                         Edit Banner
                     </h1>
-                    <p className="text-xs sm:text-sm text-gray-500 mt-1 font-medium">Update the banner image and text to be displayed on the homepage slider.</p>
+                    <p className="text-xs sm:text-sm text-gray-500 mt-1 font-medium">Update the banner image and target screen size for the homepage slider.</p>
                 </div>
             </div>
 
@@ -211,7 +215,22 @@ export default function EditBannerPage({ params }: { params: Promise<{ id: strin
                 <div className="p-4 sm:p-6 space-y-4">
                     <div>
                         <label className="block text-xs font-semibold text-gray-700 mb-1.5">
-                            Banner Image <span className="text-gray-400 font-normal text-xs ml-2">(Size must be 1368 x 260)</span>
+                            Banner Target Size
+                        </label>
+                        <SortDropdown
+                            isAdmin={true}
+                            options={['Desktop (1368 x 260 px)', 'Mobile (400 x 150 px)']}
+                            value={deviceType === 'mobile' ? 'Mobile (400 x 150 px)' : 'Desktop (1368 x 260 px)'}
+                            onChange={(val) => setDeviceType(val.includes('Mobile') ? 'mobile' : 'desktop')}
+                            buttonClassName="h-[28px] sm:h-[38px] text-[11px] sm:text-sm bg-white border border-gray-300 rounded-md !py-0.5 !px-2.5 sm:!py-2 sm:!px-3 font-semibold text-gray-800 w-full gap-2"
+                            menuClassName="w-full !py-0.5 border-gray-200 shadow-lg text-[11px] sm:text-sm"
+                            listClassName="max-h-[160px] !px-0.5"
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-xs font-semibold text-gray-700 mb-1.5">
+                            Banner Image <span className="text-gray-400 font-normal text-xs ml-2">({deviceType === 'mobile' ? 'Size 400 x 150 px' : 'Size 1368 x 260 px'})</span>
                         </label>
                         <div
                             className={`border-2 border-dashed rounded-lg p-4 text-center transition-all duration-200 ease-in-out cursor-pointer group flex flex-col items-center justify-center relative overflow-hidden ${isDragging ? 'border-green-500 bg-green-50' : 'border-gray-300 hover:border-green-400 hover:bg-gray-50'}`}

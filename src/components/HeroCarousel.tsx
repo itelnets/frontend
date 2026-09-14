@@ -13,6 +13,18 @@ export default function HeroCarousel() {
     const touchStartX = useRef<number>(0);
     const touchEndX = useRef<number>(0);
 
+    const [isMobileScreen, setIsMobileScreen] = useState(false);
+
+    // Track responsive window screen width (< 400px vs >= 400px)
+    useEffect(() => {
+        const checkMobileScreen = () => {
+            setIsMobileScreen(window.innerWidth < 400);
+        };
+        checkMobileScreen();
+        window.addEventListener('resize', checkMobileScreen);
+        return () => window.removeEventListener('resize', checkMobileScreen);
+    }, []);
+
     // Fetch uploaded banners from database
     useEffect(() => {
         const fetchBanners = async () => {
@@ -27,18 +39,27 @@ export default function HeroCarousel() {
         fetchBanners();
     }, []);
 
-    const activeSlides = (Array.isArray(banners) && banners.length > 0)
+    const allActiveBanners = (Array.isArray(banners) && banners.length > 0)
         ? banners.filter(b => b.imageUrl)
         : [];
 
+    // Filter banners based on screen width: < 400px -> mobile banners (400x150), >= 400px -> desktop banners (1368x260)
+    const targetType = isMobileScreen ? 'mobile' : 'desktop';
+    const filteredBanners = allActiveBanners.filter(b => {
+        const widthVal = b.width || 0;
+        const bannerDevice = b.deviceType || (widthVal > 0 && widthVal <= 600 ? 'mobile' : 'desktop');
+        return bannerDevice === targetType;
+    });
+
+    // Fallback gracefully to all active banners if specific size banner isn't uploaded yet
+    const activeSlides = filteredBanners.length > 0 ? filteredBanners : allActiveBanners;
+
     const totalSlides = activeSlides.length;
 
-    // Ensure currentSlide is within bounds
+    // Reset slide index when activeSlides list changes
     useEffect(() => {
-        if (totalSlides > 0 && currentSlide >= totalSlides) {
-            setCurrentSlide(0);
-        }
-    }, [totalSlides, currentSlide]);
+        setCurrentSlide(0);
+    }, [isMobileScreen, totalSlides]);
 
     // Start auto scroll
     const startAutoPlay = () => {
@@ -95,13 +116,13 @@ export default function HeroCarousel() {
     const firstSlide = activeSlides[0];
     const bannerAspect = (firstSlide && firstSlide.width && firstSlide.height && firstSlide.width > 0 && firstSlide.height > 0)
         ? `${firstSlide.width} / ${firstSlide.height}`
-        : '1368 / 260';
+        : (isMobileScreen ? '400 / 150' : '1368 / 260');
 
     const isBannerLoading = banners === null;
     if (isBannerLoading) {
         return (
             <div
-                className="w-full h-[180px] sm:h-auto bg-gray-100 animate-pulse relative overflow-hidden"
+                className="w-full overflow-hidden bg-gray-100 animate-pulse relative min-h-[120px]"
                 style={{ aspectRatio: bannerAspect }}
             />
         );
@@ -117,9 +138,9 @@ export default function HeroCarousel() {
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
         >
-            {/* Banner Main Body - Taller in Mobile View (h-[180px]), Desktop View Unchanged (aspectRatio) */}
+            {/* Banner Main Body - 400x150 aspect ratio on mobile (<400px), 1368x260 on desktop (>400px) */}
             <div
-                className="w-full h-[180px] sm:h-auto overflow-hidden relative bg-gray-100"
+                className="w-full overflow-hidden relative bg-gray-100 min-h-[120px]"
                 style={{ aspectRatio: bannerAspect }}
                 onTouchStart={handleTouchStart}
                 onTouchEnd={handleTouchEnd}
@@ -127,7 +148,7 @@ export default function HeroCarousel() {
                 {activeSlides.map((slide, idx) => (
                     <div
                         key={slide._id}
-                        className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${idx === currentSlide ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}`}
+                        className={`absolute inset-0 transition-opacity duration-[3000ms] ease-in-out ${idx === currentSlide ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}`}
                     >
                         <Image
                             src={slide.imageUrl}
@@ -139,32 +160,6 @@ export default function HeroCarousel() {
                         />
                     </div>
                 ))}
-
-                {/* Left and Right Navigation Buttons */}
-                {totalSlides > 1 && (
-                    <>
-                        <button
-                            type="button"
-                            onClick={(e) => { e.stopPropagation(); prevSlide(); }}
-                            aria-label="Previous slide"
-                            className="absolute left-2 sm:left-4 cursor-pointer top-1/2 -translate-y-1/2 z-20 bg-white/75 hover:bg-white text-gray-800 p-1.5 sm:p-2.5 rounded-full shadow-md backdrop-blur-sm transition-all flex items-center justify-center hover:scale-110 active:scale-95 focus:outline-none"
-                        >
-                            <svg className="w-4 h-4 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
-                            </svg>
-                        </button>
-                        <button
-                            type="button"
-                            onClick={(e) => { e.stopPropagation(); nextSlide(); }}
-                            aria-label="Next slide"
-                            className="absolute right-2 sm:left-auto cursor-pointer right-2 sm:right-4 top-1/2 -translate-y-1/2 z-20 bg-white/75 hover:bg-white text-gray-800 p-1.5 sm:p-2.5 rounded-full shadow-md backdrop-blur-sm transition-all flex items-center justify-center hover:scale-110 active:scale-95 focus:outline-none"
-                        >
-                            <svg className="w-4 h-4 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
-                            </svg>
-                        </button>
-                    </>
-                )}
             </div>
         </div>
     );

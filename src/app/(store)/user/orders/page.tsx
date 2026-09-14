@@ -102,8 +102,9 @@ export default function OrdersPage() {
                                 value={queryParams.status === 'All' ? 'All Orders' : queryParams.status}
                                 onChange={(val) => setQueryParams({ page: 1, status: val === 'All Orders' ? 'All' : val })}
                                 className="z-[90]"
-                                buttonClassName="min-w-[100px] sm:min-w-[150px] text-[11px] sm:text-[14px] py-1 px-1.5 sm:py-[7px] sm:px-3"
-                                menuClassName="w-[100px] sm:w-full"
+                                buttonClassName="min-w-[85px] sm:min-w-[150px] text-[10px] sm:text-[14px] !py-0.5 !px-1.5 sm:!py-[7px] sm:!px-3 h-[25px] sm:h-auto font-semibold"
+                                menuClassName="w-[95px] sm:w-full !py-0.5 text-[10px] sm:text-sm"
+                                listClassName="max-h-[160px] !px-0.5"
                             />
                         </div>
                     </div>

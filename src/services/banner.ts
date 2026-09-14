@@ -9,6 +9,7 @@ export interface BannerItem {
     height?: number;
     order?: number;
     isActive: boolean;
+    deviceType?: 'desktop' | 'mobile';
     createdAt: string;
     updatedAt: string;
 }
@@ -26,13 +27,15 @@ export const createBanner = async (
     imageUrl: string,
     fileSize: number,
     width: number,
-    height: number
+    height: number,
+    deviceType: 'desktop' | 'mobile' = 'desktop'
 ): Promise<BannerItem> => {
     const { data } = await api.post<{ message: string, banner: BannerItem }>('/banners', {
         imageKey: imageUrl,
         fileSize,
         width,
-        height
+        height,
+        deviceType
     });
     return data.banner;
 };
