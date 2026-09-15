@@ -57,7 +57,7 @@ export default function ImageZoom({ src, alt, onHeartClick, isHeartFilled }: Ima
         <div className="relative aspect-square w-full sm:aspect-auto w-[340px] h-[340px] lg:w-[380px] lg:h-[380px] xl:w-[400px] xl:h-[400px] bg-white rounded-xl p-2 group mx-auto">
             {/* Main Image */}
             <div
-                className="w-full h-full cursor-pointer relative"
+                className="w-full h-full cursor-pointer relative select-none"
                 onMouseEnter={() => setIsZoomed(true)}
                 onMouseLeave={() => setIsZoomed(false)}
                 onMouseMove={handleMouseMove}
@@ -68,6 +68,13 @@ export default function ImageZoom({ src, alt, onHeartClick, isHeartFilled }: Ima
                     alt={alt}
                     className="w-full h-full object-contain"
                 />
+
+                {/* Watermark Overlay */}
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none z-[5] overflow-hidden">
+                    <span className="text-gray-800/25 font-extrabold text-2xl sm:text-3xl lg:text-4xl tracking-widest uppercase transform -rotate-12 whitespace-nowrap">
+                        Pratham Herbs
+                    </span>
+                </div>
             </div>
 
             {/* Zoomed Portal Box (Appears on the right) */}
@@ -79,7 +86,14 @@ export default function ImageZoom({ src, alt, onHeartClick, isHeartFilled }: Ima
                         backgroundPosition: `${position.x * 100}% ${position.y * 100}%`,
                         backgroundSize: '250%',
                     }}
-                />
+                >
+                    {/* Watermark Overlay inside Zoomed Portal */}
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none z-10">
+                        <span className="text-gray-800/20 font-extrabold text-5xl xl:text-6xl tracking-widest uppercase transform -rotate-12 whitespace-nowrap">
+                            Pratham Herbs
+                        </span>
+                    </div>
+                </div>
             )}
 
             {/* Action Buttons Overlay (Share & Heart) */}
